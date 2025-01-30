@@ -478,11 +478,17 @@ end
 statusline.attach = function (buffer)
 	---|fS
 
+	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+
 	if type(buffer) ~= "number" then
 		return;
 	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
 		return;
 	elseif vim.api.nvim_buf_is_valid(buffer) == false then
+		return;
+	elseif vim.list_contains(statusline.config.ignore_filetypes, ft) then
+		return;
+	elseif vim.list_contains(statusline.config.ignore_buftypes, bt) then
 		return;
 	end
 
