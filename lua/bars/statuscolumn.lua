@@ -4,7 +4,7 @@ local components = require("bars.components.statuscolumn");
 ---@type statuscolumn.config
 statuscolumn.config = {
 	ignore_filetypes = {},
-	ignore_buftypes = { "nofile" },
+	ignore_buftypes = { "nofile", "help" },
 
 	default = {
 		parts = {
@@ -201,6 +201,34 @@ statuscolumn.render = function (buffer, window)
 	---|fE
 end
 
+--- Detaches from {buffer}.
+---@param buffer integer
+statuscolumn.detach = function (buffer)
+	---|fS
+
+	if type(buffer) ~= "number" then
+		return;
+	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
+		return;
+	elseif vim.api.nvim_buf_is_valid(buffer) == false then
+		return;
+	end
+
+	for w, win in ipairs(statuscolumn.state.attached_windows) do
+		if vim.api.nvim_win_get_buf(win) ~= buffer then
+			goto continue;
+		end
+
+		vim.w[win].__scID = nil;
+		vim.wo[win].statuscolumn = "";
+		table.remove(statuscolumn.state.attached_windows, w);
+
+	    ::continue::
+	end
+
+	---|fE
+end
+
 --- Attaches the statuscolumn module to the windows
 --- of a buffer.
 ---@param buffer integer
@@ -210,14 +238,19 @@ statuscolumn.attach = function (buffer)
 	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
 
 	if type(buffer) ~= "number" then
+		statuscolumn.detach(buffer);
 		return;
 	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
+		statuscolumn.detach(buffer);
 		return;
 	elseif vim.api.nvim_buf_is_valid(buffer) == false then
+		statuscolumn.detach(buffer);
 		return;
 	elseif vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+		statuscolumn.detach(buffer);
 		return;
 	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
+		statuscolumn.detach(buffer);
 		return;
 	end
 

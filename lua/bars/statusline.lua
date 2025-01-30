@@ -472,6 +472,34 @@ statusline.render = function (buffer, window)
 	---|fE
 end
 
+--- Detaches from {buffer}.
+---@param buffer integer
+statusline.detach = function (buffer)
+	---|fS
+
+	if type(buffer) ~= "number" then
+		return;
+	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
+		return;
+	elseif vim.api.nvim_buf_is_valid(buffer) == false then
+		return;
+	end
+
+	for w, win in ipairs(statusline.state.attached_windows) do
+		if vim.api.nvim_win_get_buf(win) ~= buffer then
+			goto continue;
+		end
+
+		vim.w[win].__slID = nil;
+		vim.wo[win].statusline = "";
+		table.remove(statusline.state.attached_windows, w);
+
+	    ::continue::
+	end
+
+	---|fE
+end
+
 --- Attaches the statusline module to the windows
 --- of a buffer.
 ---@param buffer integer
@@ -481,14 +509,19 @@ statusline.attach = function (buffer)
 	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
 
 	if type(buffer) ~= "number" then
+		statusline.detach(buffer);
 		return;
 	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
+		statusline.detach(buffer);
 		return;
 	elseif vim.api.nvim_buf_is_valid(buffer) == false then
+		statusline.detach(buffer);
 		return;
 	elseif vim.list_contains(statusline.config.ignore_filetypes, ft) then
+		statusline.detach(buffer);
 		return;
 	elseif vim.list_contains(statusline.config.ignore_buftypes, bt) then
+		statusline.detach(buffer);
 		return;
 	end
 
