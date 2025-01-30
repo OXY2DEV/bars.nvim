@@ -178,16 +178,12 @@ slC.diagnostics = function (buffer, window, config)
 
 	config = config or {};
 
-	local diagnostics_count;
+	local diagnostics_count = vim.diagnostic.count(buffer);
 	local clients = vim.lsp.buf_get_clients(buffer);
 
 	if #clients == 0 and config.auto_hide == true then
 		return "";
 	end
-
-	vim.api.nvim_buf_call(buffer, function ()
-		diagnostics_count = vim.diagnostic.count();
-	end);
 
 	if not diagnostics_count then
 		return "";
