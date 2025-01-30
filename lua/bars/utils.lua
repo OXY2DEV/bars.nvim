@@ -1,5 +1,50 @@
 local utils = {};
 
+utils.clamp = function (value, min, max)
+	return math.min(math.max(value, min), max);
+end
+
+utils.lerp = function (f, t, y)
+	return f + ((t - f) * y);
+end
+
+--- Aligns text.
+---@param alignment "left" | "center" | "right"
+---@param text string
+---@param width integer
+---@return string
+utils.align = function (alignment, text, width)
+	text = tostring(text);
+	width = width or vim.o.columns or 10;
+	alignment = alignment or "left";
+
+	local tW = vim.fn.strdisplaywidth(text);
+
+	if alignment == "right" then
+		return string.format(
+			"%s%s",
+
+			string.rep(" ", width - tW),
+			text
+		);
+	elseif alignment == "center" then
+		return string.format(
+			"%s%s%s",
+
+			string.rep(" ", math.ceil(width - tW) / 2),
+			text,
+			string.rep(" ", math.floor(width - tW) / 2)
+		);
+	else
+		return string.format(
+			"%s%s",
+
+			text,
+			string.rep(" ", width - tW)
+		);
+	end
+end
+
 --- Matches a configuration from the
 --- {source}.
 ---@param source { [string]: any }

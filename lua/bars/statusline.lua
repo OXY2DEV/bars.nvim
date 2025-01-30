@@ -17,126 +17,99 @@ statusline.config = {
 				default = {
 					padding_left = " ",
 					padding_right = " ",
-					-- corner_right = "",
 
 					icon = " ",
 
-					hl = "Palette2",
-					-- corner_right_hl = "Palette3R"
+					hl = "Color8R",
 				},
 
-				["^n"]    = { text = "Normal" },
+				["^n"] = { text = "Normal" },
 
-				["^t"]    = { text = "Terminal" },
+				["^t"] = { text = "Terminal" },
 
-				["^v$"]    = {
+				["^v$"] = {
 					icon = "󰸿 ",
 					text = "Visual",
 
-					hl = "Palette3",
-					corner_right_hl = "Palette3R"
+					hl = "Color9R",
 				},
 				["^V$"]    = {
 					icon = "󰹀 ",
 					text = "Visual",
 
-					hl = "Palette4",
-					corner_right_hl = "Palette4R"
+					hl = "Color7R",
 				},
 				["^$"]   = {
 					icon = "󰸽 ",
 					text = "Visual",
 
-					hl = "Palette5",
-					corner_right_hl = "Palette5R"
+					hl = "Color2R",
 				},
-
-				-- ["vs"]   = { text = "Select" },
-				-- ["Vs"]   = { text = "Select" },
-				-- ["s"]  = { text = "Select" },
 
 				["^s$"]    = {
 					icon = "󰕠 ",
 					text = "Select",
 
-					hl = "Palette3",
-					corner_right_hl = "Palette3R"
+					hl = "Color9R",
 				},
 				["^S$"]    = {
 					icon = "󰕞 ",
 					text = "Select",
 
-					hl = "Palette4",
-					corner_right_hl = "Palette4R"
+					hl = "Color7R",
 				},
 				["^$"]   = {
 					icon = " ",
 					text = "Select",
 
-					hl = "Palette5",
-					corner_right_hl = "Palette5R"
+					hl = "Color2R",
 				},
 
 				["^i$"]    = {
 					icon = " ",
 					text = "Insert",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 				["^ic$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 				["^ix$"]   = {
 					text = "Inser8",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 
 				["^R$"]    = {
 					icon = " ",
 					text = "Replace",
 
-					hl = "Palette2",
-					corner_right_hl = "Palette2R"
+					hl = "Color8R",
 				},
 				["^Rc$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Palette2",
-					corner_right_hl = "Palette2R"
-
+					hl = "Color8R",
 				},
 
 				["^c"]    = {
 					icon = " ",
 					text = "Command",
 
-					hl = "Palette1",
-					corner_right_hl = "Palette1R"
+					hl = "Color4R",
 				},
 
-				["^r"]    = {
-					text = "Prompt"
-				},
-				-- ["rm"]   = {
-				-- 	text = "Prompt"
-				-- },
-				-- ["r?"]   = {
-				-- 	text = "Prompt"
-				-- },
+				["^r"] = { text = "Prompt" },
 
 				["^%!"] = {
 					icon = " ",
 					text = "Shell",
 
-					hl = "Palette1I"
+					hl = "Color4R"
 				},
 
 				---|fE
@@ -147,6 +120,8 @@ statusline.config = {
 				condition = function (_, win)
 					return vim.api.nvim_win_get_width(win) >= 42;
 				end,
+
+				max_len = 25,
 
 				default = {
 					padding_left = " ",
@@ -254,126 +229,99 @@ statusline.config = {
 				default = {
 					padding_left = " ",
 					padding_right = " ",
-					-- corner_right = "",
 
 					icon = " ",
 
-					hl = "Palette2",
-					-- corner_right_hl = "Palette3R"
+					hl = "Color8R",
 				},
 
-				["^n"]    = { text = "Normal" },
+				["^n"] = { text = "Normal" },
 
-				["^t"]    = { text = "Terminal" },
+				["^t"] = { text = "Terminal" },
 
-				["^v$"]    = {
+				["^v$"] = {
 					icon = "󰸿 ",
 					text = "Visual",
 
-					hl = "Palette3",
-					corner_right_hl = "Palette3R"
+					hl = "Color9R",
 				},
 				["^V$"]    = {
 					icon = "󰹀 ",
 					text = "Visual",
 
-					hl = "Palette4",
-					corner_right_hl = "Palette4R"
+					hl = "Color7R",
 				},
 				["^$"]   = {
 					icon = "󰸽 ",
 					text = "Visual",
 
-					hl = "Palette5",
-					corner_right_hl = "Palette5R"
+					hl = "Color2R",
 				},
-
-				-- ["vs"]   = { text = "Select" },
-				-- ["Vs"]   = { text = "Select" },
-				-- ["s"]  = { text = "Select" },
 
 				["^s$"]    = {
 					icon = "󰕠 ",
 					text = "Select",
 
-					hl = "Palette3",
-					corner_right_hl = "Palette3R"
+					hl = "Color9R",
 				},
 				["^S$"]    = {
 					icon = "󰕞 ",
 					text = "Select",
 
-					hl = "Palette4",
-					corner_right_hl = "Palette4R"
+					hl = "Color4R",
 				},
 				["^$"]   = {
 					icon = " ",
 					text = "Select",
 
-					hl = "Palette5",
-					corner_right_hl = "Palette5R"
+					hl = "Color9R",
 				},
 
 				["^i$"]    = {
 					icon = " ",
 					text = "Insert",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 				["^ic$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 				["^ix$"]   = {
 					text = "Inser8",
 
-					hl = "Palette0",
-					corner_right_hl = "Palette0R"
+					hl = "Color10R",
 				},
 
 				["^R$"]    = {
 					icon = " ",
 					text = "Replace",
 
-					hl = "Palette2",
-					corner_right_hl = "Palette2R"
+					hl = "Color8R",
 				},
 				["^Rc$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Palette2",
-					corner_right_hl = "Palette2R"
-
+					hl = "Color8R",
 				},
 
 				["^c"]    = {
 					icon = " ",
 					text = "Command",
 
-					hl = "Palette1",
-					corner_right_hl = "Palette1R"
+					hl = "Color4R",
 				},
 
-				["^r"]    = {
-					text = "Prompt"
-				},
-				-- ["rm"]   = {
-				-- 	text = "Prompt"
-				-- },
-				-- ["r?"]   = {
-				-- 	text = "Prompt"
-				-- },
+				["^r"] = { text = "Prompt" },
 
 				["^%!"] = {
 					icon = " ",
 					text = "Shell",
 
-					hl = "Palette1I"
+					hl = "Color4R"
 				},
 
 				---|fE
@@ -476,7 +424,7 @@ statusline.update_id = function (window)
 
 		if tmp.condition == true then
 			return key;
-		elseif pcall(tmp.condition, buffer, window) and tmp.condition(buffer, window) == true  then
+		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
 			return key;
 		end
 

@@ -450,7 +450,7 @@ slC.get = function (name, buffer, window, part_config, statusline)
 				goto continue;
 			end
 
-			local s_success, s_val = pcall(buffer, window, statusline);
+			local s_success, s_val = pcall(value, buffer, window, statusline);
 
 			if s_success == false then
 				static_config[key] = nil;
