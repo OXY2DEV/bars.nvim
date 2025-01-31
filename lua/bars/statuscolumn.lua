@@ -359,7 +359,7 @@ statuscolumn.setup = function (config)
 	end
 
 	for _, window in ipairs(statuscolumn.state.attached_windows) do
-		statuscolumn.update_id(window);
+		vim.w[window].__scID = statuscolumn.update_id(window);
 	end
 end
 

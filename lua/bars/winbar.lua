@@ -712,7 +712,7 @@ winbar.setup = function (config)
 	end
 
 	for window, _ in pairs(winbar.state.attached_windows) do
-		winbar.update_id(window);
+		vim.w[window].__swID = winbar.update_id(window);
 	end
 end
 

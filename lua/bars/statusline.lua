@@ -600,7 +600,7 @@ statusline.setup = function (config)
 	end
 
 	for window, _ in pairs(statusline.state.attached_windows) do
-		statusline.update_id(window);
+		vim.w[window].__slID = statusline.update_id(window);
 	end
 end
 
