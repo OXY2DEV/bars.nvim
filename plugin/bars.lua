@@ -1,11 +1,16 @@
--- local bars = require("bars");
 require("bars.global");
 
-vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter", "WinEnter" }, {
+vim.api.nvim_create_autocmd({
+	"VimEnter",
+
+	"BufEnter",
+	"WinEnter"
+}, {
 	callback = function (ev)
 		require("bars.statusline").attach(ev.buf);
 		require("bars.statuscolumn").attach(ev.buf);
 		require("bars.winbar").attach(ev.buf);
+		require("bars.tabline").attach();
 	end
 });
 
@@ -25,9 +30,6 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 		require("bars.statusline").clean();
 		require("bars.statuscolumn").clean();
 		require("bars.winbar").clean();
-
-		-- require("bars.statusline").attach(ev.buf);
-		-- require("bars.statuscolumn").attach(ev.buf);
-		-- require("bars.winbar").attach(ev.buf);
+		require("bars.tabline").clean();
 	end
 });
