@@ -185,9 +185,9 @@ end
 ---@param buffer integer
 ---@param window integer
 ---@param part_config table
----@param statuscolumn string
+---@param winbar string
 ---@return string
-wbC.get = function (name, buffer, window, part_config, statuscolumn)
+wbC.get = function (name, buffer, window, part_config, winbar)
 	---|fS
 
 	if type(name) ~= "string" then
@@ -202,7 +202,7 @@ wbC.get = function (name, buffer, window, part_config, statuscolumn)
 				--- Part is disabled.
 				return "";
 			else
-				local sucess, val = pcall(part_config.condition, buffer, window, statuscolumn);
+				local sucess, val = pcall(part_config.condition, buffer, window, winbar);
 
 				if sucess == false then
 					return "";
@@ -219,7 +219,7 @@ wbC.get = function (name, buffer, window, part_config, statuscolumn)
 				goto continue;
 			end
 
-			local s_success, s_val = pcall(value, buffer, window, statuscolumn);
+			local s_success, s_val = pcall(value, buffer, window, winbar);
 
 			if s_success == false then
 				static_config[key] = nil;
@@ -231,7 +231,7 @@ wbC.get = function (name, buffer, window, part_config, statuscolumn)
 		end
 
 		--- Return component value.
-		return wbC[name](buffer, window, static_config, statuscolumn) or "";
+		return wbC[name](buffer, window, static_config, winbar) or "";
 	end
 
 	---|fE
