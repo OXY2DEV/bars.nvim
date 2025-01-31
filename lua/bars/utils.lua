@@ -91,4 +91,15 @@ utils.set_hl = function (hl)
 	end
 end
 
+utils.to_constant = function (val)
+	return setmetatable({}, {
+		__index = function ()
+			return val;
+		end,
+		__newindex = function ()
+		end,
+		__metatable = false
+	});
+end
+
 return utils;
