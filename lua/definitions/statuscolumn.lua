@@ -4,13 +4,15 @@
 ---@class statuscolumn.state
 ---
 ---@field enable boolean
----@field attached_windows integer[]
+---@field attached_windows { [integer]: boolean }
 
 
 ---@class statuscolumn.config
 ---
 ---@field ignore_filetypes string[]
 ---@field ignore_buftypes string[]
+---
+---@field condition? fun(buffer: integer): boolean | nil
 ---
 ---@field default table
 ---@field [string] table

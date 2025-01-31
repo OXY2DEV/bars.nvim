@@ -1,9 +1,10 @@
 local statuscolumn = {};
+local utils = require("bars.utils");
 local components = require("bars.components.statuscolumn");
 
 ---@type statuscolumn.config
 statuscolumn.config = {
-	ignore_filetypes = {},
+	ignore_filetypes = { "query" },
 	ignore_buftypes = { "nofile", "help" },
 
 	default = {
@@ -115,6 +116,19 @@ statuscolumn.config = {
 				end
 			},
 		}
+	},
+
+	query = {
+		condition = function (buffer)
+			return vim.bo[buffer].ft == "query";
+		end,
+		parts = {
+			{
+				kind = "empty",
+				len = 1,
+				hl = "Normal"
+			},
+		}
 	}
 };
 
@@ -174,7 +188,7 @@ statuscolumn.render = function (buffer, window)
 
 	if window ~= vim.g.statusline_winid then
 		return "";
-	elseif vim.list_contains(statuscolumn.state.attached_windows, window) == false then
+	elseif statuscolumn.state.attached_windows[window] ~= true then
 		return "";
 	end
 
@@ -214,16 +228,21 @@ statuscolumn.detach = function (buffer)
 		return;
 	end
 
-	for w, win in ipairs(statuscolumn.state.attached_windows) do
-		if vim.api.nvim_win_get_buf(win) ~= buffer then
-			goto continue;
-		end
+	local windows = vim.fn.win_findbuf(buffer)
 
-		vim.w[win].__scID = nil;
-		vim.wo[win].statuscolumn = "";
-		table.remove(statuscolumn.state.attached_windows, w);
+	for _, win in ipairs(windows) do
+		statuscolumn.state.attached_windows[win] = false;
 
-	    ::continue::
+		vim.defer_fn(function ()
+			if vim.w[win].__statuscolumn then
+				vim.wo[win].statuscolumn = vim.w[win].__statuscolumn[1];
+				vim.w[win].__statuscolumn = nil;
+			else
+					vim.wo[win].statuscolumn = "";
+			end
+
+			vim.w[win].__scID = nil;
+		end, 1)
 	end
 
 	---|fE
@@ -252,19 +271,32 @@ statuscolumn.attach = function (buffer)
 	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
 		statuscolumn.detach(buffer);
 		return;
+	elseif statuscolumn.config.condition then
+		local checked_condition, result = pcall(statuscolumn.config.condition, buffer);
+
+		if checked_condition == false then
+			statuscolumn.detach(buffer);
+			return;
+		elseif result == false then
+			statuscolumn.detach(buffer);
+			return;
+		end
 	end
 
 	local windows = vim.fn.win_findbuf(buffer);
 
 	for _, win in ipairs(windows) do
-		if vim.list_contains(statuscolumn.state.attached_windows) == true then
+		if statuscolumn.state.attached_windows[win] == true then
 			goto continue;
 		end
 
 		local scID = statuscolumn.update_id(win);
-		table.insert(statuscolumn.state.attached_windows, win);
+		statuscolumn.state.attached_windows[win] = true;
 
 		vim.w[win].__scID = scID;
+
+		vim.w[win].__numberwidth = utils.to_constant(vim.wo[win].numberwidth);
+		vim.w[win].__statuscolumn = utils.to_constant(vim.wo[win].statuscolumn);
 
 		vim.wo[win].numberwidth = 1;
 		vim.wo[win].statuscolumn = "%!v:lua.require('bars.statuscolumn').render(" .. buffer .."," .. win ..")";
@@ -273,6 +305,50 @@ statuscolumn.attach = function (buffer)
 	end
 
 	---|fE
+end
+
+--- Cleans up invalid buffers and recalculates
+--- valid buffers config ID.
+statuscolumn.clean = function ()
+	for window, _ in pairs(statuscolumn.state.attached_windows) do
+		if vim.api.nvim_win_is_valid(window) == false then
+			statuscolumn.state.attached_windows[window] = false;
+			goto continue;
+		end
+
+		local buffer = vim.api.nvim_win_get_buf(window);
+
+		local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+
+		if type(buffer) ~= "number" then
+			statuscolumn.detach(buffer);
+			return;
+		elseif vim.api.nvim_buf_is_loaded(buffer) == false then
+			statuscolumn.detach(buffer);
+			return;
+		elseif vim.api.nvim_buf_is_valid(buffer) == false then
+			statuscolumn.detach(buffer);
+			return;
+		elseif vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+			statuscolumn.detach(buffer);
+			return;
+		elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
+			statuscolumn.detach(buffer);
+			return;
+		elseif statuscolumn.config.condition then
+			local checked_condition, result = pcall(statuscolumn.config.condition, buffer);
+
+			if checked_condition == false then
+				statuscolumn.detach(buffer);
+				return;
+			elseif result == false then
+				statuscolumn.detach(buffer);
+				return;
+			end
+		end
+
+		::continue::
+	end
 end
 
 --- Sets up the statuscolumn module.

@@ -10,7 +10,7 @@ local M = {};
 --- When `true`, attach to new windows.
 ---@field enable boolean
 --- List of attached windows.
----@field attached_windows integer[]
+---@field attached_windows { [integer]: boolean }
 
 -----------------------------------------------------------------------------
 
@@ -21,6 +21,8 @@ local M = {};
 ---@field ignore_filetypes? string[]
 --- Buftypes to ignore.
 ---@field ignore_buftypes? string[]
+---
+---@field condition? fun(buffer: integer): boolean | nil
 ---
 --- Default configuration.
 ---@field default statusline.group
