@@ -557,13 +557,13 @@ winbar.render = function (buffer, window)
 		return "";
 	end
 
-	local swID = vim.w[window].__scID;
+	local wbID = vim.w[window].__scID;
 
-	if not swID then
+	if not wbID then
 		return "";
 	end
 
-	local config = winbar.config[swID];
+	local config = winbar.config[wbID];
 
 	if type(config) ~= "table" then
 		return "";
@@ -594,11 +594,13 @@ winbar.detach = function (buffer)
 	local windows = vim.fn.win_findbuf(buffer)
 
 	for _, win in ipairs(windows) do
-		winbar.state.attached_windows[win] = false;
-		vim.wo[win].winbar = vim.w[win].__winbar and vim.w[win].__winbar[1] or "";
+		vim.defer_fn(function ()
+			winbar.state.attached_windows[win] = false;
+			vim.wo[win].winbar = vim.w[win].__winbar and vim.w[win].__winbar[1] or "";
 
-		vim.w[win].__swID = nil;
-		vim.w[win].__winbar = nil;
+			vim.w[win].__wbID = nil;
+			vim.w[win].__winbar = nil;
+		end, 0);
 	end
 
 	---|fE
@@ -646,13 +648,15 @@ winbar.attach = function (buffer)
 			goto continue;
 		end
 
-		local swID = winbar.update_id(win);
-		winbar.state.attached_windows[win] = true;
+		vim.defer_fn(function ()
+			local wbID = winbar.update_id(win);
+			winbar.state.attached_windows[win] = true;
 
-		vim.w[win].__swID = swID;
+			vim.w[win].__wbID = wbID;
 
-		vim.w[win].__winbar = utils.to_constant(vim.wo[win].winbar);
-		vim.wo[win].winbar = "%!v:lua.require('bars.winbar').render(" .. buffer .."," .. win ..")";
+			vim.w[win].__winbar = utils.to_constant(vim.wo[win].winbar);
+			vim.wo[win].winbar = "%!v:lua.require('bars.winbar').render(" .. buffer .."," .. win ..")";
+		end, 0);
 
 		::continue::
 	end
@@ -712,7 +716,7 @@ winbar.setup = function (config)
 	end
 
 	for window, _ in pairs(winbar.state.attached_windows) do
-		vim.w[window].__swID = winbar.update_id(window);
+		vim.w[window].__wbID = winbar.update_id(window);
 	end
 end
 

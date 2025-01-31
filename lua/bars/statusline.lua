@@ -490,10 +490,12 @@ statusline.detach = function (buffer)
 			goto continue;
 		end
 
-		vim.w[win].__slID = nil;
-		vim.wo[win].statusline = "";
+		vim.defer_fn(function ()
+			vim.w[win].__slID = nil;
+			vim.wo[win].statusline = "";
 
-		statusline.state.attached_windows[win] = false;
+			statusline.state.attached_windows[win] = false;
+		end, 0);
 	    ::continue::
 	end
 
@@ -532,11 +534,13 @@ statusline.attach = function (buffer)
 			goto continue;
 		end
 
-		local slID = statusline.update_id(win);
-		statusline.state.attached_windows[win] = true;
+		vim.defer_fn(function ()
+			local slID = statusline.update_id(win);
+			statusline.state.attached_windows[win] = true;
 
-		vim.w[win].__slID = slID;
-		vim.wo[win].statusline = "%!v:lua.require('bars.statusline').render(" .. buffer .."," .. win ..")";
+			vim.w[win].__slID = slID;
+			vim.wo[win].statusline = "%!v:lua.require('bars.statusline').render(" .. buffer .."," .. win ..")";
+		end, 0);
 
 		::continue::
 	end
