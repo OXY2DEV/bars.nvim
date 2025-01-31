@@ -29,7 +29,9 @@ scC.lnum = function (buffer, window, config)
 
 	local _o = "";
 
-	local max_width = #tostring(vim.api.nvim_buf_line_count(buffer));
+	local max_width = vim.fn.strdisplaywidth(
+		tostring(vim.api.nvim_buf_line_count(buffer))
+	);
 
 	local function get (entry, index, ignore)
 		if vim.islist(entry) then
