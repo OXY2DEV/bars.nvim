@@ -28,7 +28,206 @@ winbar.config = {
 				separator = " → ",
 				separator_hl = "Comment",
 
-				lua = {
+				default = {
+					__lookup = {
+						padding_left = " ",
+						padding_right = " ",
+
+						icon = "",
+
+						hl = "Color4R"
+					},
+
+				},
+
+				["^luadoc$"] = {
+					---|fS
+
+					__lookup = {
+						padding_left = " ",
+						padding_right = " ",
+
+						icon = "",
+
+						hl = "Color4R"
+					},
+
+					documentation = {
+						icon = "󱪙 ",
+						hl = "Title"
+					},
+
+					class_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					type_annotation = {
+						icon = "󰐫 ",
+						hl = "@keyword.luadoc"
+					},
+
+					param_annotation = {
+						icon = "󰡱 ",
+						hl = "@keyword.luadoc"
+					},
+
+					alias_annotation = {
+						icon = "󰔌 ",
+						hl = "@keyword.luadoc"
+					},
+
+					continuation = {
+						icon = "󰌑 ",
+						hl = "@keyword.luadoc"
+					},
+
+					return_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					field_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					qualifier_annotation = {
+						icon = "󰙴 ",
+						hl = "@keyword.luadoc"
+					},
+
+					generic_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					vararg_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					diagnostic_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					deprecated_annotation = {
+						icon = " ",
+						hl = "@error"
+					},
+
+					meta_annotation = {
+						icon = "󰐱 ",
+						hl = "@keyword.luadoc"
+					},
+
+					module_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					source_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					version_annotation = {
+						icon = "󰯏 ",
+						hl = "@keyword.luadoc"
+					},
+
+					package_annotation = {
+						icon = "󰏖 ",
+						hl = "@keyword.luadoc"
+					},
+
+					operator_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					nodiscard_annotation = {
+						icon = "󰌾 ",
+						hl = "@keyword.luadoc"
+					},
+
+					cast_annotation = {
+						icon = "󱦈 ",
+						hl = "@keyword.luadoc"
+					},
+
+					async_annotation = {
+						icon = "󰦖 ",
+						hl = "@keyword.luadoc"
+					},
+
+					overload_annotation = {
+						icon = "󱐋 ",
+						hl = "@keyword.luadoc"
+					},
+
+					enum_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					language_injection = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					see_reference = {
+						icon = "󰈈 ",
+						hl = "@keyword.luadoc"
+					},
+
+					link_reference = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+
+					since_annotation = {
+						icon = "󰔚 ",
+						hl = "@keyword.luadoc"
+					},
+
+					as_annotation = {
+						icon = "󰤖 ",
+						hl = "@keyword.luadoc"
+					},
+
+					[".+%_type"] = {
+						icon = " ",
+						hl = "@type.luadoc"
+					},
+
+					identifier = {
+						icon = "󰮄 ",
+						hl = "Special"
+					},
+
+					["^comment$"] = {
+						icon = "󱀡 ",
+						hl = "@comment.lua"
+					},
+
+					comment_content = {
+						icon = "󱀢 ",
+						hl = "@comment.lua"
+					},
+
+					parameter = {
+						icon = " ",
+						hl = "@variable.parameter.luadoc"
+					},
+
+					---|fE
+				},
+
+				["^lua$"] = {
+					---|fS
+
 					__lookup = {
 						padding_left = " ",
 						padding_right = " ",
@@ -250,7 +449,7 @@ winbar.config = {
 					},
 
 
-					comment = {
+					["^comment$"] = {
 						icon = "󱀡 ",
 						hl = "@comment.lua"
 					},
@@ -282,6 +481,14 @@ winbar.config = {
 						icon = " ",
 						hl = "@method.lua"
 					},
+
+
+					parameters = {
+						icon = " ",
+						hl = "@variable.parameter.luadoc"
+					},
+
+					---|fE
 				}
 			}
 		}

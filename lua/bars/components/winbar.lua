@@ -1,4 +1,4 @@
-local swC = {};
+local wbC = {};
 local utils = require("bars.utils");
 
 --- Node under cursor
@@ -6,16 +6,17 @@ local utils = require("bars.utils");
 ---@param window integer
 ---@param main_config winbar.node
 ---@return string
-swC.node = function (buffer, window, main_config)
-	local check_parsers, parsers = pcall(vim.treesitter.get_parser, buffer);
+wbC.node = function (buffer, window, main_config)
+	---|fS
+
+	local check_parsers, parser = pcall(vim.treesitter.get_parser, buffer);
 
 	if check_parsers == false then
 		return "";
-	elseif parsers == nil then
+	elseif parser == nil then
 		return "";
 	end
 
-	local ft = vim.bo[buffer].ft;
 	local throttle = main_config.throttle or 50;
 
 	local before = vim.w[window].__node_time or 0;
@@ -26,6 +27,32 @@ swC.node = function (buffer, window, main_config)
 		return old;
 	end
 
+    local lang_trees = parser:children();
+
+	--- Gets the language of a Node
+	---@param TSNode table
+	---@return string
+	local function get_language (TSNode)
+		---|fS
+
+		local row_start, _, row_end, _ = TSNode:range();
+
+		for lang, lang_tree in pairs(lang_trees) do
+			for _, tree in ipairs(lang_tree:trees()) do
+				local root = tree:root()
+				local root_start, _, root_end, _ = root:range();
+
+				if row_start >= root_start and row_end <= root_end then
+					return lang;
+				end
+			end
+		end
+
+		return parser:lang();
+
+		---|fE
+	end
+
 	local cursor = vim.api.nvim_win_get_cursor(window);
 	local node = vim.treesitter.get_node({
 		buffer = buffer,
@@ -33,8 +60,6 @@ swC.node = function (buffer, window, main_config)
 
 		ignore_injections = false;
 	});
-
-	local lang_config = utils.match(main_config, ft, {});
 
 	local lookup = main_config.lookup or 9;
 	local _o = "";
@@ -44,6 +69,9 @@ swC.node = function (buffer, window, main_config)
 			break;
 		end
 
+		local lanuage = get_language(node);
+		local lang_config = utils.match(main_config, lanuage or "default", {});
+
 		local item_config = utils.match(lang_config, node:type(), {});
 		local has_sep = true;
 
@@ -51,6 +79,14 @@ swC.node = function (buffer, window, main_config)
 			has_sep = false;
 		elseif not node:parent() then
 			has_sep = false;
+		end
+
+		local text = node:type()
+
+		if item_config.text == "raw" then
+			text = vim.treesitter.get_node_text(node, buffer);
+		elseif type(item_config.text) == "string" then
+			text = item_config.text;
 		end
 
 		if item_config.ignore == true then
@@ -71,7 +107,7 @@ swC.node = function (buffer, window, main_config)
 			item_config.icon or "",
 
 			utils.set_hl(item_config.hl),
-			item_config.text or node:type() or "",
+			text,
 
 			utils.set_hl(item_config.padding_right_hl or item_config.hl),
 			item_config.padding_right or "",
@@ -89,6 +125,9 @@ swC.node = function (buffer, window, main_config)
 	end
 
 	if lookup <= 0 and node then
+		local lanuage = get_language(node);
+		local lang_config = utils.match(main_config, lanuage or "default", {});
+
 		local item_config = utils.match(lang_config, "__lookup", {});
 
 		_o = table.concat({
@@ -137,6 +176,8 @@ swC.node = function (buffer, window, main_config)
 	vim.w[window].__node_time = now;
 
 	return _o;
+
+	---|fE
 end
 
 --- Returns the output of the section {name}.
@@ -146,13 +187,13 @@ end
 ---@param part_config table
 ---@param statuscolumn string
 ---@return string
-swC.get = function (name, buffer, window, part_config, statuscolumn)
+wbC.get = function (name, buffer, window, part_config, statuscolumn)
 	---|fS
 
 	if type(name) ~= "string" then
 		--- Component doesn't exist.
 		return "";
-	elseif type(swC[name]) ~= "function" then
+	elseif type(wbC[name]) ~= "function" then
 		--- Attempting to get internal property.
 		return "";
 	else
@@ -190,10 +231,10 @@ swC.get = function (name, buffer, window, part_config, statuscolumn)
 		end
 
 		--- Return component value.
-		return swC[name](buffer, window, static_config, statuscolumn) or "";
+		return wbC[name](buffer, window, static_config, statuscolumn) or "";
 	end
 
 	---|fE
 end
 
-return swC
+return wbC
