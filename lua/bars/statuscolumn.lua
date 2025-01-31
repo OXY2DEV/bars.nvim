@@ -238,7 +238,7 @@ statuscolumn.detach = function (buffer)
 				vim.wo[win].statuscolumn = vim.w[win].__statuscolumn[1];
 				vim.w[win].__statuscolumn = nil;
 			else
-					vim.wo[win].statuscolumn = "";
+				vim.wo[win].statuscolumn = "";
 			end
 
 			vim.w[win].__scID = nil;
@@ -290,16 +290,18 @@ statuscolumn.attach = function (buffer)
 			goto continue;
 		end
 
-		local scID = statuscolumn.update_id(win);
-		statuscolumn.state.attached_windows[win] = true;
+		vim.defer_fn(function ()
+			local scID = statuscolumn.update_id(win);
+			statuscolumn.state.attached_windows[win] = true;
 
-		vim.w[win].__scID = scID;
+			vim.w[win].__scID = scID;
 
-		vim.w[win].__numberwidth = utils.to_constant(vim.wo[win].numberwidth);
-		vim.w[win].__statuscolumn = utils.to_constant(vim.wo[win].statuscolumn);
+			vim.w[win].__numberwidth = utils.to_constant(vim.wo[win].numberwidth);
+			vim.w[win].__statuscolumn = utils.to_constant(vim.wo[win].statuscolumn);
 
-		vim.wo[win].numberwidth = 1;
-		vim.wo[win].statuscolumn = "%!v:lua.require('bars.statuscolumn').render(" .. buffer .."," .. win ..")";
+			vim.wo[win].numberwidth = 1;
+			vim.wo[win].statuscolumn = "%!v:lua.require('bars.statuscolumn').render(" .. buffer .."," .. win ..")";
+		end, 0)
 
 		::continue::
 	end
@@ -358,7 +360,7 @@ statuscolumn.setup = function (config)
 		statuscolumn.config = vim.tbl_extend("force", statuscolumn.config, config);
 	end
 
-	for _, window in ipairs(statuscolumn.state.attached_windows) do
+	for window, _ in pairs(statuscolumn.state.attached_windows) do
 		vim.w[window].__scID = statuscolumn.update_id(window);
 	end
 end
