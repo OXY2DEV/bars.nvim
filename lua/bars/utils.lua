@@ -91,7 +91,7 @@ utils.set_hl = function (hl)
 	end
 end
 
-utils.to_constant = function (val)
+utils.constant = function (val)
 	return setmetatable({}, {
 		__index = function ()
 			return val;
@@ -100,6 +100,14 @@ utils.to_constant = function (val)
 		end,
 		__metatable = false
 	});
+end
+
+utils.get_const = function (val)
+	if type(val) ~= "table" then
+		return val;
+	else
+		return val.value;
+	end
 end
 
 return utils;

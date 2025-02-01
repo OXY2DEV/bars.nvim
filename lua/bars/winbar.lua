@@ -521,6 +521,8 @@ winbar.update_id = function (window)
 	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
 	table.sort(keys);
 
+	local ID = "default";
+
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
 			goto continue;
@@ -531,33 +533,29 @@ winbar.update_id = function (window)
 		local tmp = winbar.config[key];
 
 		if tmp.condition == true then
-			return key;
+			ID = key;
 		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
-			return key;
+			ID = key;
 		end
 
 		::continue::
 	end
 
-	return "default";
+	vim.w[window].__wbID = ID;
+	winbar.state.attached_windows[window] = true;
 
 	---|fE
 end
 
 --- Renders the winbar for a window.
----@param buffer integer
----@param window integer
 ---@return string
-winbar.render = function (buffer, window)
+winbar.render = function ()
 	---|fS
 
-	if window ~= vim.g.statusline_winid then
-		return "";
-	elseif winbar.state.attached_windows[window] ~= true then
-		return "";
-	end
+	local window = vim.g.statusline_winid;
+	local buffer = vim.api.nvim_win_get_buf(window);
 
-	local wbID = vim.w[window].__scID;
+	local wbID = vim.w[window].__wbID;
 
 	if not wbID then
 		return "";
@@ -580,86 +578,105 @@ winbar.render = function (buffer, window)
 	---|fE
 end
 
-winbar.detach = function (buffer)
+winbar.can_detach = function (win)
+	if vim.api.nvim_win_is_valid(win) == false then
+		return false;
+	end
+
+	local buffer = vim.api.nvim_win_get_buf(win);
+	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+
+	if vim.list_contains(winbar.config.ignore_filetypes, ft) then
+		return true;
+	elseif vim.list_contains(winbar.config.ignore_buftypes, bt) then
+		return true;
+	else
+		if not winbar.config.condition then
+			return false;
+		end
+
+		---@diagnostic disable-next-line
+		local ran_cond, stat = pcall(winbar.config.condition, buffer, win);
+
+		if ran_cond == false or stat == false then
+			return true;
+		else
+			return false;
+		end
+	end
+end
+
+winbar.detach = function (window)
 	---|fS
 
-	if type(buffer) ~= "number" then
-		return;
-	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
-		return;
-	elseif vim.api.nvim_buf_is_valid(buffer) == false then
-		return;
-	end
+	vim.defer_fn(function ()
+		vim.w[window].__wbID = nil;
 
-	local windows = vim.fn.win_findbuf(buffer)
+		vim.api.nvim_set_option_value(
+			"winbar",
+			utils.get_const(vim.w[window].__winbar) or utils.get_const(vim.g.__winbar) or "",
+			{
+				scope = "local",
+				win = window
+			}
+		);
 
-	for _, win in ipairs(windows) do
-		vim.defer_fn(function ()
-			winbar.state.attached_windows[win] = false;
-			vim.wo[win].winbar = vim.w[win].__winbar and vim.w[win].__winbar[1] or "";
-
-			vim.w[win].__wbID = nil;
-			vim.w[win].__winbar = nil;
-		end, 0);
-	end
+		winbar.state.attached_windows[window] = false;
+	end, 0);
 
 	---|fE
 end
 
---- Attaches the winbar module to the windows
---- of a buffer.
----@param buffer integer
-winbar.attach = function (buffer)
-	---|fS
+winbar.can_attach = function (win)
+	if vim.api.nvim_win_is_valid(win) == false then
+		return false;
+	end
 
+	local buffer = vim.api.nvim_win_get_buf(win);
 	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
 
-	if type(buffer) ~= "number" then
-		winbar.detach(buffer);
-		return;
-	elseif vim.api.nvim_buf_is_loaded(buffer) == false then
-		winbar.detach(buffer);
-		return;
-	elseif vim.api.nvim_buf_is_valid(buffer) == false then
-		winbar.detach(buffer);
-		return;
-	elseif vim.list_contains(winbar.config.ignore_filetypes, ft) then
-		winbar.detach(buffer);
-		return;
+	if vim.list_contains(winbar.config.ignore_filetypes, ft) then
+		return false;
 	elseif vim.list_contains(winbar.config.ignore_buftypes, bt) then
-		winbar.detach(buffer);
-		return;
-	elseif winbar.config.condition then
-		local checked_condition, result = pcall(winbar.config.condition, buffer);
-
-		if checked_condition == false then
-			winbar.detach(buffer);
-			return;
-		elseif result == false then
-			winbar.detach(buffer);
-			return;
-		end
-	end
-
-	local windows = vim.fn.win_findbuf(buffer);
-
-	for _, win in ipairs(windows) do
-		if winbar.state.attached_windows[win] == true then
-			goto continue;
+		return false;
+	else
+		if not winbar.config.condition then
+			return true;
 		end
 
-		vim.defer_fn(function ()
-			local wbID = winbar.update_id(win);
-			winbar.state.attached_windows[win] = true;
+		---@diagnostic disable-next-line
+		local ran_cond, stat = pcall(winbar.config.condition, buffer, win);
 
-			vim.w[win].__wbID = wbID;
-
-			vim.w[win].__winbar = utils.to_constant(vim.wo[win].winbar);
-			vim.wo[win].winbar = "%!v:lua.require('bars.winbar').render(" .. buffer .."," .. win ..")";
-		end, 0);
-
-		::continue::
+		if ran_cond == false or stat == false then
+			return false;
+		else
+			return true;
+		end
 	end
+end
+
+--- Attaches the winbar module to the windows
+--- of a buffer.
+---@param window integer
+winbar.attach = function (window)
+	---|fS
+
+	vim.defer_fn(function ()
+		if winbar.state.enable == false then
+			return;
+		elseif winbar.can_attach(window) == false then
+			return;
+		elseif winbar.state.attached_windows[window] == true then
+			if vim.wo[window].winbar == "%!v:lua.require('bars.winbar').render()" then
+				return;
+			end
+		end
+
+		winbar.update_id(window);
+
+		vim.w[window].__winbar = utils.constant(vim.wo[window].winbar);
+		vim.wo[window].winbar = "%!v:lua.require('bars.winbar').render()";
+	end, 0);
 
 	---|fE
 end
@@ -667,45 +684,17 @@ end
 --- Cleans up invalid buffers and recalculates
 --- valid buffers config ID.
 winbar.clean = function ()
-	for window, _ in pairs(winbar.state.attached_windows) do
-		if vim.api.nvim_win_is_valid(window) == false then
-			winbar.state.attached_windows[window] = false;
-			goto continue;
-		end
+	---|fS
 
-		local buffer = vim.api.nvim_win_get_buf(window);
-
-		local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
-
-		if type(buffer) ~= "number" then
-			winbar.detach(buffer);
-			return;
-		elseif vim.api.nvim_buf_is_loaded(buffer) == false then
-			winbar.detach(buffer);
-			return;
-		elseif vim.api.nvim_buf_is_valid(buffer) == false then
-			winbar.detach(buffer);
-			return;
-		elseif vim.list_contains(winbar.config.ignore_filetypes, ft) then
-			winbar.detach(buffer);
-			return;
-		elseif vim.list_contains(winbar.config.ignore_buftypes, bt) then
-			winbar.detach(buffer);
-			return;
-		elseif winbar.config.condition then
-			local checked_condition, result = pcall(winbar.config.condition, buffer);
-
-			if checked_condition == false then
-				winbar.detach(buffer);
-				return;
-			elseif result == false then
-				winbar.detach(buffer);
-				return;
+	vim.defer_fn(function ()
+		for window, _ in pairs(winbar.state.attached_windows) do
+			if winbar.can_detach(window) then
+				winbar.detach(window);
 			end
 		end
+	end, 0);
 
-		::continue::
-	end
+	---|fE
 end
 
 --- Sets up the winbar module.

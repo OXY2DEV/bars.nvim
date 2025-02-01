@@ -1,13 +1,20 @@
 local tlC = {};
 local utils = require("bars.utils");
 
+tlC.empty = function (config)
+	return table.concat({
+		utils.set_hl(config.hl),
+		"%="
+	});
+end
+
 tlC.tabs = function (config)
 	local tabs = vim.api.nvim_list_tabpages();
 	local _o = "";
 
 	for t, tab in ipairs(tabs) do
 		local current = tab == vim.api.nvim_get_current_tabpage();
-		local tab_config = utils.match(config, current == true and "active" or "inactive", {});
+		local tab_config = current == true and (config.active or {}) or (config.inactive or {});
 
 		_o = table.concat({
 			_o,
