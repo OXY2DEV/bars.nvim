@@ -554,17 +554,17 @@ end
 statusline.attach = function (window)
 	---|fS
 
-	if statusline.state.enable == false then
-		return;
-	elseif statusline.can_attach(window) == false then
-		return;
-	elseif statusline.state.attached_windows[window] == true then
-		if vim.wo[window].statusline == "%!v:lua.require('bars.statusline').render()" then
-			return;
-		end
-	end
-
 	vim.defer_fn(function ()
+		if statusline.state.enable == false then
+			return;
+		elseif statusline.can_attach(window) == false then
+			return;
+		elseif statusline.state.attached_windows[window] == true then
+			if vim.wo[window].statusline == "%!v:lua.require('bars.statusline').render()" then
+				return;
+			end
+		end
+
 		statusline.update_id(window);
 
 		vim.w[window].__statusline = utils.constant(vim.wo[window].statusline);
