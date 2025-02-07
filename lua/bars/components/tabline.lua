@@ -40,19 +40,37 @@ tlC.tabs = function (config)
 		vim.g.__bars_tabpage_from = 1;
 	end
 
+	if not vim.g.__bars_tabpage_list_locked then
+		vim.g.__bars_tabpage_list_locked = false;
+	end
+
 	---@type integer Start index. Must be above 0;
 	local from = math.max(vim.g.__bars_tabpage_from, 1);
 	---@type integer Number of tabs to show.
 	local max = config.max or 5;
+	---@type boolean Is the list position locked?
+	local locked = vim.g.__bars_tabpage_list_locked;
+
+	--- Maximum number of tabs to show.
+	--- Stored to he used by `autocmds`.
+	vim.g.__tabline_max_tabs = max;
 
 	if from ~= 1 then
-		_o = table.concat({
-			_o,
+		if locked == true then
+			_o = table.concat({
+				_o,
 
-			"%@v:lua.__tab_from_decrease@",
-			utils.create_segmant(config.nav_left_text, config.nav_left_hl),
-			"%X"
-		});
+				utils.create_segmant(config.nav_left_locked_text, config.nav_left_locked_hl),
+			});
+		else
+			_o = table.concat({
+				_o,
+
+				"%@v:lua.__tab_from_decrease@",
+				utils.create_segmant(config.nav_left_text, config.nav_left_hl),
+				"%X"
+			});
+		end
 	end
 
 	local wrapped = false;
@@ -134,18 +152,29 @@ tlC.tabs = function (config)
 			utils.create_segmant(tab_config.padding_right, tab_config.padding_right_hl or tab_config.hl),
 			utils.create_segmant(tab_config.corner_right, tab_config.corner_right_hl or tab_config.hl),
 
-			current == false and "%X" or ""
+			current == false and "%T" or ""
 		});
 	end
 
 	if max < #tabs then
-		_o = table.concat({
-			_o,
+		if locked == true then
+			_o = table.concat({
+				_o,
 
-			"%@v:lua.__tab_from_increase@",
-			utils.create_segmant(config.nav_right_text, config.nav_right_hl),
-			"%X"
-		});
+				utils.create_segmant(config.separator_text, config.separator_hl),
+				utils.create_segmant(config.nav_right_locked_text, config.nav_right_locked_hl),
+			});
+		else
+			_o = table.concat({
+				_o,
+
+				utils.create_segmant(config.separator_text, config.separator_hl),
+
+				"%@v:lua.__tab_from_increase@",
+				utils.create_segmant(config.nav_right_text, config.nav_right_hl),
+				"%X"
+			});
+		end
 	end
 
 

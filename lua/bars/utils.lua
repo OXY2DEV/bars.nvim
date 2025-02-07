@@ -96,8 +96,8 @@ utils.constant = function (val)
 		__index = function ()
 			return val;
 		end,
-		__newindex = function ()
-		end,
+		__newindex = function () end,
+
 		__metatable = false
 	});
 end

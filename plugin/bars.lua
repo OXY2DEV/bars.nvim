@@ -107,16 +107,52 @@ vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 	callback = function (event)
 		---|fS
 
-		pcall(vim.api.nvim__redraw, {
-			buf = event.buf,
-			flush = true,
+		--- We wrap this in `vim.schedule()` so
+		--- that the update happens after doing
+		--- something like,
+		--- 
+		--- ```vim
+		--- :lua vim.g.__bars_tabpage_list_locked = false
+		--- ```
+		---
+		--- We no longer have to redraw the screen
+		--- twice!
+		vim.schedule(function ()
+			--- Unstable API function.
+			--- Use `pcall()`
+			pcall(vim.api.nvim__redraw, {
+				buf = event.buf,
+				flush = true,
 
-			statuscolumn = true,
-			statusline = true,
-			winbar = true,
-			tabline = true
-		});
+				statuscolumn = true,
+				statusline = true,
+				winbar = true,
+				tabline = true
+			});
+		end);
 
+		---|fE
+	end
+});
+
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "TabNew" }, {
+	callback = function ()
+		---|fS
+
+		local max = vim.g.__tabline_max_tabs or 5;
+		local tabs = #vim.api.nvim_list_tabpages();
+
+		if not package.loaded["bars.tabline"] then
+			return;
+		elseif vim.g.__bars_tabpage_list_locked == true then
+			--- List movement locked.
+			return;
+		elseif tabs <= max then
+			return;
+		end
+
+		vim.g.__bars_tabpage_from = math.max(1, tabs - math.floor(max * 0.25));
 		---|fE
 	end
 });

@@ -18,11 +18,17 @@ tabline.config = {
 				overflow_text = " ┇ ",
 				overflow_hl = "Layer1I",
 
-				nav_left_text = " < ",
-				nav_left_hl = nil,
+				nav_left_text = "   ",
+				nav_left_hl = "Color0",
 
-				nav_right_text = " > ",
-				nav_right_hl = nil,
+				nav_left_locked_text = "    ",
+				nav_left_locked_hl = "Color1",
+
+				nav_right_text = "   ",
+				nav_right_hl = "Color0",
+
+				nav_right_locked_text = " 󰌾  ",
+				nav_right_locked_hl = "Color1",
 
 				active = {
 					padding_left = " ",
