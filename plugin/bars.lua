@@ -17,6 +17,8 @@ vim.g.__tabline = utils.constant(vim.o.tabline);
 
 ---|fE
 
+--- Attach various bars & lines globally if
+--- `global = true`.
 if require("bars").config.global == true then
 	require("bars.statuscolumn").global_attach();
 	require("bars.statusline").global_attach();
@@ -27,6 +29,14 @@ else
 	require("bars.tabline").attach();
 end
 
+--- Attach to new Windows.
+---
+--- Also rum this when a buffer is displayed
+--- in a window as the filetype/buftype may
+--- could have changed.
+---
+--- `VimEnter` is used because the other events
+--- don't trigger when entering Neovim.
 vim.api.nvim_create_autocmd({
 	"VimEnter",
 
@@ -34,6 +44,8 @@ vim.api.nvim_create_autocmd({
 	"BufWinEnter"
 }, {
 	callback = function ()
+		---|fS
+
 		require("bars.statusline").clean();
 		require("bars.statuscolumn").clean();
 		require("bars.winbar").clean();
@@ -47,12 +59,22 @@ vim.api.nvim_create_autocmd({
 			end
 
 			require("bars.tabline").attach();
-		end)
+		end);
+
+		---|fE
 	end
 });
 
+--- When the 'filetype' or 'buftype' option is set
+--- we must clean up any window that has become invalid
+--- and update the configuration of existing windows.
+---
+--- TODO, Check if this causes performance issues
+--- with large amount of windows.
 vim.api.nvim_create_autocmd({ "OptionSet" }, {
 	callback = function ()
+		---|fS
+
 		local option = vim.fn.expand("<amatch>");
 		local valid_options = { "filetype", "buftype" };
 
@@ -74,6 +96,27 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 			end
 
 			require("bars.tabline").attach();
-		end)
+		end);
+
+		---|fE
+	end
+});
+
+--- Update various bars & lines on Vim mode change.
+vim.api.nvim_create_autocmd({ "ModeChanged" }, {
+	callback = function (event)
+		---|fS
+
+		pcall(vim.api.nvim__redraw, {
+			buf = event.buf,
+			flush = true,
+
+			statuscolumn = true,
+			statusline = true,
+			winbar = true,
+			tabline = true
+		});
+
+		---|fE
 	end
 });
