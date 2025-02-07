@@ -254,7 +254,7 @@ end
 statuscolumn.detach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		vim.w[window].__scID = nil;
 
 		vim.api.nvim_set_option_value(
@@ -283,7 +283,7 @@ statuscolumn.detach = function (window)
 		);
 
 		statuscolumn.state.attached_windows[window] = false;
-	end, 0);
+	end);
 
 	---|fE
 end
@@ -322,27 +322,35 @@ end
 statuscolumn.attach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
-		if statuscolumn.state.enable == false then
+	if statuscolumn.state.enable == false then
+		return;
+	elseif statuscolumn.can_attach(window) == false then
+		return;
+	elseif statuscolumn.state.attached_windows[window] == true then
+		if vim.wo[window].statuscolumn == "%!v:lua.require('bars.statuscolumn').render()" then
+			statuscolumn.update_id(window);
 			return;
-		elseif statuscolumn.can_attach(window) == false then
-			return;
-		elseif statuscolumn.state.attached_windows[window] == true then
-			if vim.wo[window].statuscolumn == "%!v:lua.require('bars.statuscolumn').render()" then
-				return;
-			end
 		end
+	end
 
-		statuscolumn.update_id(window);
+	statuscolumn.update_id(window);
 
-		vim.w[window].__relativenumber = utils.constant(vim.wo[window].relativenumber);
-		vim.w[window].__numberwidth = utils.constant(vim.wo[window].numberwidth);
-		vim.w[window].__statuscolumn = utils.constant(vim.wo[window].statuscolumn);
+	vim.w[window].__relativenumber = utils.constant(vim.wo[window].relativenumber);
+	vim.w[window].__numberwidth = utils.constant(vim.wo[window].numberwidth);
+	vim.w[window].__statuscolumn = utils.constant(vim.wo[window].statuscolumn);
 
-		vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
-	end, 0);
+	vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
 
 	---|fE
+end
+
+--- Attaches globally.
+statuscolumn.global_attach = function ()
+	for _, window in ipairs(vim.api.nvim_list_wins()) do
+		statuscolumn.update_id(window);
+	end
+
+	vim.o.statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -350,13 +358,13 @@ end
 statuscolumn.clean = function ()
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		for window, _ in pairs(statuscolumn.state.attached_windows) do
 			if statuscolumn.can_detach(window) then
 				statuscolumn.detach(window);
 			end
 		end
-	end, 0);
+	end);
 
 	---|fE
 end

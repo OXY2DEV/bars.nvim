@@ -12,17 +12,36 @@ tabline.config = {
 			{
 				kind = "tabs",
 
-				active = {
-					padding_left = "  ",
-					padding_right = "  ",
+				separator_text = " ",
+				separator_hl = "Normal",
 
-					hl = "Layer2"
+				overflow_text = " ┇ ",
+				overflow_hl = "Layer1I",
+
+				nav_left_text = " < ",
+				nav_left_hl = nil,
+
+				nav_right_text = " > ",
+				nav_right_hl = nil,
+
+				active = {
+					padding_left = " ",
+					padding_right = " ",
+
+					win_count = " ┃ 󰨝 %d",
+					win_count_hl = nil,
+
+					icon = "󰛺 ",
+
+					hl = "Color4R"
 				},
 				inactive = {
-					padding_left = "  ",
-					padding_right = "  ",
+					padding_left = " ",
+					padding_right = " ",
 
-					hl = "Layer0"
+					icon = "󰛻 ",
+
+					hl = "Color0B"
 				}
 			},
 			{ kind = "empty", hl = "Normal" },
@@ -47,6 +66,8 @@ tabline.update_id = function ()
 	local ignore = { "default" };
 	table.sort(keys);
 
+	local ID = "default";
+
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
 			goto continue;
@@ -57,15 +78,16 @@ tabline.update_id = function ()
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
-			return key;
+			ID = key;
 		elseif pcall(tmp.condition --[[ @as function ]]) and tmp.condition() == true  then
-			return key;
+			ID = key;
 		end
 
 		::continue::
 	end
 
-	return "default";
+	vim.g.__tlID = ID;
+	tabline.state.attached = true;
 
 	---|fE
 end
@@ -119,13 +141,13 @@ end
 tabline.detach = function ()
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.scheduleefer_fn(function ()
 		tabline.state.attached = false;
 		vim.o.tabline = utils.get_const(vim.o.__tabline) or "";
 
 		vim.g.__tlID = nil;
 		vim.g.__tabline = nil;
-	end, 0);
+	end);
 
 	---|fE
 end
@@ -148,20 +170,14 @@ end
 tabline.attach = function ()
 	---|fS
 
-	vim.defer_fn(function ()
-		if tabline.can_attach() == false then
-			return;
-		end
+	if tabline.can_attach() == false then
+		return;
+	end
 
-		local tlID = tabline.update_id();
-		tabline.state.attached = true;
+	tabline.update_id();
 
-		vim.g.__tlID = tlID;
-		vim.g.__tabline = utils.constant(vim.o.tabline);
-
-		vim.g.__tabline = utils.constant(vim.o.tabline);
-		vim.o.tabline = "%!v:lua.require('bars.tabline').render()";
-	end, 0);
+	vim.g.__tabline = utils.constant(vim.o.tabline);
+	vim.o.tabline = "%!v:lua.require('bars.tabline').render()";
 
 	---|fE
 end
@@ -169,11 +185,11 @@ end
 --- Cleans up invalid buffers and recalculates
 --- valid buffers config ID.
 tabline.clean = function ()
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		if tabline.can_detach() then
 			tabline.detach();
 		end
-	end, 0);
+	end);
 end
 
 --- Sets up the tabline module.
@@ -183,7 +199,7 @@ tabline.setup = function (config)
 		tabline.config = vim.tbl_extend("force", tabline.config, config);
 	end
 
-	vim.g.__tlID = tabline.update_id();
+	tabline.update_id();
 end
 
 return tabline;

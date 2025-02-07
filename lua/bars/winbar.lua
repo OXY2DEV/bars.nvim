@@ -6,7 +6,7 @@ local components = require("bars.components.winbar");
 winbar.config = {
 	---|fS
 
-	ignore_filetypes = {},
+	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
 	condition = function (buffer)
@@ -33,24 +33,15 @@ winbar.config = {
 						padding_left = " ",
 						padding_right = " ",
 
-						icon = "",
+						icon = "󱎓",
 
-						hl = "Color4R"
+						hl = "Color7R"
 					},
 
 				},
 
 				["^luadoc$"] = {
 					---|fS
-
-					__lookup = {
-						padding_left = " ",
-						padding_right = " ",
-
-						icon = "",
-
-						hl = "Color4R"
-					},
 
 					documentation = {
 						icon = "󱪙 ",
@@ -227,15 +218,6 @@ winbar.config = {
 
 				["^lua$"] = {
 					---|fS
-
-					__lookup = {
-						padding_left = " ",
-						padding_right = " ",
-
-						icon = "",
-
-						hl = "Color4R"
-					},
 
 					chunk = {
 						icon = "󰢱 ",
@@ -609,7 +591,7 @@ end
 winbar.detach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		vim.w[window].__wbID = nil;
 
 		vim.api.nvim_set_option_value(
@@ -622,7 +604,7 @@ winbar.detach = function (window)
 		);
 
 		winbar.state.attached_windows[window] = false;
-	end, 0);
+	end);
 
 	---|fE
 end
@@ -661,24 +643,32 @@ end
 winbar.attach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
-		if winbar.state.enable == false then
+	if winbar.state.enable == false then
+		return;
+	elseif winbar.can_attach(window) == false then
+		return;
+	elseif winbar.state.attached_windows[window] == true then
+		if vim.wo[window].winbar == "%!v:lua.require('bars.winbar').render()" then
+			winbar.update_id(window);
 			return;
-		elseif winbar.can_attach(window) == false then
-			return;
-		elseif winbar.state.attached_windows[window] == true then
-			if vim.wo[window].winbar == "%!v:lua.require('bars.winbar').render()" then
-				return;
-			end
 		end
+	end
 
-		winbar.update_id(window);
+	winbar.update_id(window);
 
-		vim.w[window].__winbar = utils.constant(vim.wo[window].winbar);
-		vim.wo[window].winbar = "%!v:lua.require('bars.winbar').render()";
-	end, 0);
+	vim.w[window].__winbar = utils.constant(vim.wo[window].winbar);
+	vim.wo[window].winbar = "%!v:lua.require('bars.winbar').render()";
 
 	---|fE
+end
+
+--- Attaches globally.
+winbar.global_attach = function ()
+	for _, window in ipairs(vim.api.nvim_list_wins()) do
+		winbar.update_id(window);
+	end
+
+	vim.o.winbar = "%!v:lua.require('bars.winbar').render()";
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -686,13 +676,13 @@ end
 winbar.clean = function ()
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		for window, _ in pairs(winbar.state.attached_windows) do
 			if winbar.can_detach(window) then
 				winbar.detach(window);
 			end
 		end
-	end, 0);
+	end);
 
 	---|fE
 end

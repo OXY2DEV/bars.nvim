@@ -504,7 +504,7 @@ end
 statusline.detach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		vim.w[window].__slID = nil;
 		vim.api.nvim_set_option_value(
 			"statusline",
@@ -516,7 +516,7 @@ statusline.detach = function (window)
 		);
 
 		statusline.state.attached_windows[window] = false;
-	end, 0);
+	end);
 
 	---|fE
 end
@@ -554,24 +554,32 @@ end
 statusline.attach = function (window)
 	---|fS
 
-	vim.defer_fn(function ()
-		if statusline.state.enable == false then
+	if statusline.state.enable == false then
+		return;
+	elseif statusline.can_attach(window) == false then
+		return;
+	elseif statusline.state.attached_windows[window] == true then
+		if vim.wo[window].statusline == "%!v:lua.require('bars.statusline').render()" then
+			statusline.update_id(window);
 			return;
-		elseif statusline.can_attach(window) == false then
-			return;
-		elseif statusline.state.attached_windows[window] == true then
-			if vim.wo[window].statusline == "%!v:lua.require('bars.statusline').render()" then
-				return;
-			end
 		end
+	end
 
-		statusline.update_id(window);
+	statusline.update_id(window);
 
-		vim.w[window].__statusline = utils.constant(vim.wo[window].statusline);
-		vim.wo[window].statusline = "%!v:lua.require('bars.statusline').render()";
-	end, 0);
+	vim.w[window].__statusline = utils.constant(vim.wo[window].statusline);
+	vim.wo[window].statusline = "%!v:lua.require('bars.statusline').render()";
 
 	---|fE
+end
+
+--- Attaches globally.
+statusline.global_attach = function ()
+	for _, window in ipairs(vim.api.nvim_list_wins()) do
+		statusline.update_id(window);
+	end
+
+	vim.o.statusline = "%!v:lua.require('bars.statusline').render()";
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -579,13 +587,13 @@ end
 statusline.clean = function ()
 	---|fS
 
-	vim.defer_fn(function ()
+	vim.schedule(function ()
 		for window, _ in pairs(statusline.state.attached_windows) do
 			if statusline.can_detach(window) then
 				statusline.detach(window);
 			end
 		end
-	end, 0);
+	end);
 
 	---|fE
 end
