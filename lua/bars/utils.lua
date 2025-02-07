@@ -65,7 +65,7 @@ utils.match = function (source, text, ignore)
 		elseif string.match(text, k) == nil or type(source[k]) ~= "table" then
 			goto continue;
 		else
-			_c = vim.tbl_extend("force", _c, source[k]);
+			_c = vim.tbl_deep_extend("force", _c, source[k]);
 			break;
 		end
 
@@ -108,6 +108,24 @@ utils.get_const = function (val)
 	else
 		return val.value;
 	end
+end
+
+--- Creates a statusline/statuscolumn/winbar/table segment.
+---@param text string | nil
+---@param hl string | nil
+---@return string
+utils.create_segmant = function (text, hl)
+	---|fS
+
+	if not text then
+		return "";
+	elseif not hl or not utils.set_hl(hl) then
+		return text;
+	else
+		return utils.set_hl(hl) .. text;
+	end
+
+	---|fE
 end
 
 return utils;
