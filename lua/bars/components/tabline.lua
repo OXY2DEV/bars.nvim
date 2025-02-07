@@ -1,6 +1,28 @@
 local tlC = {};
 local utils = require("bars.utils");
 
+--- Assuming the length of an array is
+--- {max}, gets the relative index from
+--- {val}.
+---@param max integer
+---@param val integer
+---@return integer
+local function wrapped_index (max, val)
+	---+
+	if val < 1 then
+		if math.abs(val) < max then
+			return max + val;
+		else
+			return 1;
+		end
+	elseif val > max then
+		return (val % max) == 0 and max or (val % max);
+	else
+		return val;
+	end
+	---_
+end
+
 tlC.empty = function (config)
 	return table.concat({
 		utils.set_hl(config.hl),
@@ -12,36 +34,120 @@ tlC.tabs = function (config)
 	local tabs = vim.api.nvim_list_tabpages();
 	local _o = "";
 
-	for t, tab in ipairs(tabs) do
+	if not vim.g.__bars_tabpage_from then
+		vim.g.__bars_tabpage_from = 1;
+	elseif vim.g.__bars_tabpage_from > #tabs then
+		vim.g.__bars_tabpage_from = 1;
+	end
+
+	---@type integer Start index. Must be above 0;
+	local from = math.max(vim.g.__bars_tabpage_from, 1);
+	---@type integer Number of tabs to show.
+	local max = config.max or 5;
+
+	if from ~= 1 then
+		_o = table.concat({
+			_o,
+
+			"%@v:lua.__tab_from_decrease@",
+			utils.create_segmant(config.nav_left_text, config.nav_left_hl),
+			"%X"
+		});
+	end
+
+	local wrapped = false;
+
+	for t = from, from + (max - 1), 1 do
+		local tab_index = wrapped_index(#tabs, t);
+		local tab = tabs[tab_index];
+
+		if t > #tabs then
+			if tab_index == wrapped_index(#tabs, from) and wrapped == true then
+				--- Do not wrap around multiple
+				--- times.
+				break;
+			elseif from == 1 and #tabs < max then
+				--- If we are showing tabs from
+				--- the start and the number of 
+				--- tabs are less than the amount
+				--- we can show, then don't wrap.
+				break;
+			elseif tab_index == 1 then
+				--- Wrap marker should only be added
+				--- to the 1st entry.
+				wrapped = true;
+
+				_o = table.concat({
+					_o,
+					utils.set_hl(config.overflow_hl),
+					config.overflow_text or ""
+				});
+			else
+				_o = table.concat({
+					_o,
+					utils.create_segmant(config.separator_text, config.separator_hl)
+				});
+			end
+		elseif tab_index ~= 1 then
+			_o = table.concat({
+				_o,
+				utils.create_segmant(config.separator_text, config.separator_hl)
+			});
+		end
+
 		local current = tab == vim.api.nvim_get_current_tabpage();
 		local tab_config = current == true and (config.active or {}) or (config.inactive or {});
 
 		_o = table.concat({
 			_o,
 
-			"%" .. t .. "T",
+			current == false and "%" .. tab_index .. "T" or "",
 
-			utils.set_hl(tab_config.corner_left_hl or tab_config.hl),
-			tab_config.corner_left or "",
+			utils.create_segmant(tab_config.corner_left, tab_config.corner_left_hl or tab_config.hl),
+			utils.create_segmant(tab_config.padding_left, tab_config.padding_left_hl or tab_config.hl),
 
-			utils.set_hl(tab_config.padding_left_hl or tab_config.hl),
-			tab_config.padding_left or "",
+			utils.create_segmant(tab_config.icon, tab_config.icon_hl),
+		});
 
-			utils.set_hl(tab_config.icon_hl or tab_config.hl),
-			tab_config.icon or "",
+		if type(tab_config.win_count) == "string" then
+			local wins = vim.api.nvim_tabpage_list_wins(tab);
 
-			utils.set_hl(tab_config.hl),
-			tab,
+			_o = table.concat({
+				_o,
 
-			utils.set_hl(tab_config.padding_right_hl or tab_config.hl),
-			tab_config.padding_right or "",
+				utils.create_segmant(tab, tab_config.hl),
+				utils.create_segmant(
+					string.format(tab_config.win_count, #wins),
+					tab_config.win_count_hl
+				),
+			});
+		else
+			_o = table.concat({
+				_o,
+				utils.create_segmant(tab, tab_config.hl)
+			});
+		end
 
-			utils.set_hl(tab_config.corner_right_hl or tab_config.hl),
-			tab_config.corner_right or "",
+		_o = table.concat({
+			_o,
 
+			utils.create_segmant(tab_config.padding_right, tab_config.padding_right_hl or tab_config.hl),
+			utils.create_segmant(tab_config.corner_right, tab_config.corner_right_hl or tab_config.hl),
+
+			current == false and "%X" or ""
+		});
+	end
+
+	if max < #tabs then
+		_o = table.concat({
+			_o,
+
+			"%@v:lua.__tab_from_increase@",
+			utils.create_segmant(config.nav_right_text, config.nav_right_hl),
 			"%X"
 		});
 	end
+
 
 	return _o;
 end
