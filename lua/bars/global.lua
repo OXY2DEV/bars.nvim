@@ -6,7 +6,7 @@ _G.__change_diagnostic_state = function ()
 	local mousepos = vim.fn.getmousepos();
 	local window = mousepos.winid
 
-	if vim.list_contains(statusline.state.attached_windows, window) == false then
+	if statusline.state.attached_windows[window] ~= true then
 		--- Window isn't connected to bars.
 		return;
 	end
@@ -23,6 +23,48 @@ _G.__change_diagnostic_state = function ()
 		win = window,
 		flush = true,
 		statusline = true
+	});
+end
+
+_G.__tab_from_decrease = function ()
+	if not vim.g.__bars_tabpage_from then
+		vim.g.__bars_tabpage_from = 1;
+		return;
+	end
+
+	---@type integer Number of tabs.
+	local tabs = #vim.api.nvim_list_tabpages();
+
+	if vim.g.__bars_tabpage_from + 1 > tabs then
+		vim.g.__bars_tabpage_from = 1;
+	else
+		vim.g.__bars_tabpage_from = vim.g.__bars_tabpage_from + 1;
+	end
+
+	pcall(vim.api.nvim__redraw, {
+		flush = true,
+		tabline = true
+	});
+end
+
+_G.__tab_from_increase = function ()
+	if not vim.g.__bars_tabpage_from then
+		vim.g.__bars_tabpage_from = 1;
+		return;
+	end
+
+	---@type integer Number of tabs.
+	local tabs = #vim.api.nvim_list_tabpages();
+
+	if vim.g.__bars_tabpage_from - 1 < 1 then
+		vim.g.__bars_tabpage_from = tabs;
+	else
+		vim.g.__bars_tabpage_from = vim.g.__bars_tabpage_from - 1;
+	end
+
+	pcall(vim.api.nvim__redraw, {
+		flush = true,
+		tabline = true
 	});
 end
 
