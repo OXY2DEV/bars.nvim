@@ -12,22 +12,22 @@ tabline.config = {
 			{
 				kind = "tabs",
 
-				separator_text = " ",
+				separator = " ",
 				separator_hl = "Normal",
 
-				overflow_text = " ┇ ",
+				overflow = " ┇ ",
 				overflow_hl = "Layer1I",
 
-				nav_left_text = "   ",
+				nav_left = "   ",
 				nav_left_hl = "Color0",
 
-				nav_left_locked_text = "    ",
+				nav_left_locked = "    ",
 				nav_left_locked_hl = "Color1",
 
-				nav_right_text = "   ",
+				nav_right = "   ",
 				nav_right_hl = "Color0",
 
-				nav_right_locked_text = " 󰌾  ",
+				nav_right_locked = " 󰌾  ",
 				nav_right_locked_hl = "Color1",
 
 				active = {
@@ -81,11 +81,12 @@ tabline.update_id = function ()
 			goto continue;
 		end
 
+		---@type tabline.opts
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
 			ID = key;
-		elseif pcall(tmp.condition --[[ @as function ]]) and tmp.condition() == true  then
+		elseif pcall(tmp.condition) and tmp.condition() == true  then
 			ID = key;
 		end
 

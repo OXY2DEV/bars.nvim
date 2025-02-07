@@ -23,14 +23,26 @@ local function wrapped_index (max, val)
 	---_
 end
 
+--- Empty section.
+---@param config tabline.parts.empty
+---@return string
 tlC.empty = function (config)
+	---|fS
+
 	return table.concat({
 		utils.set_hl(config.hl),
 		"%="
 	});
+
+	---|fE
 end
 
+--- Tab list.
+---@param config tabline.parts.tabs
+---@return string
 tlC.tabs = function (config)
+	---|fS
+
 	local tabs = vim.api.nvim_list_tabpages();
 	local _o = "";
 
@@ -60,14 +72,14 @@ tlC.tabs = function (config)
 			_o = table.concat({
 				_o,
 
-				utils.create_segmant(config.nav_left_locked_text, config.nav_left_locked_hl),
+				utils.create_segmant(config.nav_left_locked, config.nav_left_locked_hl),
 			});
 		else
 			_o = table.concat({
 				_o,
 
 				"%@v:lua.__tab_from_decrease@",
-				utils.create_segmant(config.nav_left_text, config.nav_left_hl),
+				utils.create_segmant(config.nav_left, config.nav_left_hl),
 				"%X"
 			});
 		end
@@ -98,18 +110,18 @@ tlC.tabs = function (config)
 				_o = table.concat({
 					_o,
 					utils.set_hl(config.overflow_hl),
-					config.overflow_text or ""
+					config.overflow or ""
 				});
 			else
 				_o = table.concat({
 					_o,
-					utils.create_segmant(config.separator_text, config.separator_hl)
+					utils.create_segmant(config.separator, config.separator_hl)
 				});
 			end
 		elseif tab_index ~= 1 then
 			_o = table.concat({
 				_o,
-				utils.create_segmant(config.separator_text, config.separator_hl)
+				utils.create_segmant(config.separator, config.separator_hl)
 			});
 		end
 
@@ -161,24 +173,24 @@ tlC.tabs = function (config)
 			_o = table.concat({
 				_o,
 
-				utils.create_segmant(config.separator_text, config.separator_hl),
-				utils.create_segmant(config.nav_right_locked_text, config.nav_right_locked_hl),
+				utils.create_segmant(config.separator, config.separator_hl),
+				utils.create_segmant(config.nav_right_locked, config.nav_right_locked_hl),
 			});
 		else
 			_o = table.concat({
 				_o,
 
-				utils.create_segmant(config.separator_text, config.separator_hl),
+				utils.create_segmant(config.separator, config.separator_hl),
 
 				"%@v:lua.__tab_from_increase@",
-				utils.create_segmant(config.nav_right_text, config.nav_right_hl),
+				utils.create_segmant(config.nav_right, config.nav_right_hl),
 				"%X"
 			});
 		end
 	end
 
-
 	return _o;
+	---|fE
 end
 
 --- Returns the output of the section {name}.
