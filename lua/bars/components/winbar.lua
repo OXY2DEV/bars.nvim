@@ -53,18 +53,35 @@ wbC.node = function (buffer, window, main_config)
 		---|fE
 	end
 
-	local cursor = vim.api.nvim_win_get_cursor(window);
-	local node = vim.treesitter.get_node({
-		buffer = buffer,
-		pos = { cursor[1] - 1, cursor[2] },
+	local found_node, node;
 
-		ignore_injections = false;
-	});
+	--- BUG, When called normally `get_node()` will try
+	--- to get the node of the **current window** which
+	--- may not have a parser attached.
+	---
+	--- So, this must be called inside the window where
+	--- the winbar is being drawn.
+	vim.api.nvim_win_call(window, function ()
+		local cursor = vim.api.nvim_win_get_cursor(window);
+
+		found_node, node = pcall(vim.treesitter.get_node, {
+			buffer = buffer,
+			pos = { cursor[1] - 1, cursor[2] },
+
+			ignore_injections = false;
+		});
+	end)
+
+	if found_node == false then
+		return node;
+	end
 
 	local lookup = main_config.lookup or 9;
 	local _o = "";
 
 	while node do
+		---|fS
+
 		if lookup <= 0 then
 			break;
 		end
@@ -95,25 +112,16 @@ wbC.node = function (buffer, window, main_config)
 
 		_o = table.concat({
 			has_sep == true and utils.set_hl(main_config.separator_hl) or "",
-			has_sep == true and (main_config.separator or " > ") or "",
+			has_sep == true and (main_config.separator or "") or "",
 
-			utils.set_hl(item_config.corner_left_hl or item_config.hl),
-			item_config.corner_left or "",
+			utils.create_segmant(item_config.corner_left, item_config.corner_left_hl or item_config.hl),
+			utils.create_segmant(item_config.padding_left, item_config.padding_left_hl or item_config.hl),
+			utils.create_segmant(item_config.icon, item_config.icon_hl or item_config.hl),
 
-			utils.set_hl(item_config.padding_left_hl or item_config.hl),
-			item_config.padding_left or "",
+			utils.create_segmant(text, item_config.hl),
 
-			utils.set_hl(item_config.icon_hl or item_config.hl),
-			item_config.icon or "",
-
-			utils.set_hl(item_config.hl),
-			text,
-
-			utils.set_hl(item_config.padding_right_hl or item_config.hl),
-			item_config.padding_right or "",
-
-			utils.set_hl(item_config.corner_right_hl or item_config.hl),
-			item_config.corner_right or "",
+			utils.create_segmant(item_config.padding_right, item_config.padding_right_hl or item_config.hl),
+			utils.create_segmant(item_config.corner_right, item_config.corner_right_hl or item_config.hl),
 
 			_o,
 		});
@@ -122,6 +130,8 @@ wbC.node = function (buffer, window, main_config)
 		::ignore::
 
 		node = node:parent();
+
+		---|fE
 	end
 
 	if lookup <= 0 and node then
@@ -132,26 +142,16 @@ wbC.node = function (buffer, window, main_config)
 
 		_o = table.concat({
 
-			utils.set_hl(item_config.corner_left_hl or item_config.hl),
-			item_config.corner_left or "",
+			utils.create_segmant(item_config.corner_left, item_config.corner_left_hl or item_config.hl),
+			utils.create_segmant(item_config.padding_left, item_config.padding_left_hl or item_config.hl),
+			utils.create_segmant(item_config.icon, item_config.icon_hl or item_config.hl),
 
-			utils.set_hl(item_config.padding_left_hl or item_config.hl),
-			item_config.padding_left or "",
+			utils.create_segmant(item_config.text, item_config.hl),
 
-			utils.set_hl(item_config.icon_hl or item_config.hl),
-			item_config.icon or "",
+			utils.create_segmant(item_config.padding_right, item_config.padding_right_hl or item_config.hl),
+			utils.create_segmant(item_config.corner_right, item_config.corner_right_hl or item_config.hl),
 
-			utils.set_hl(item_config.hl),
-			item_config.text or "",
-
-			utils.set_hl(item_config.padding_right_hl or item_config.hl),
-			item_config.padding_right or "",
-
-			utils.set_hl(item_config.corner_right_hl or item_config.hl),
-			item_config.corner_right or "",
-
-			utils.set_hl(main_config.separator_hl) or "",
-			main_config.separator or " > ",
+			utils.create_segmant(main_config.separator, main_config.separator_hl),
 
 			_o,
 		});
@@ -168,8 +168,6 @@ wbC.node = function (buffer, window, main_config)
 			_o,
 			"%)"
 		});
-	else
-		_o = " " .. _o;
 	end
 
 	vim.w[window].__node_data = _o;
