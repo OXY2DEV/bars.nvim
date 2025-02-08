@@ -11,6 +11,10 @@ tabline.config = {
 			{ kind = "empty", hl = "Normal" },
 			{
 				kind = "tabs",
+				condition = function ()
+					return vim.g.__show_bufs ~= true;
+				end,
+
 
 				separator = " ",
 				separator_hl = "Normal",
@@ -48,6 +52,51 @@ tabline.config = {
 					icon = "󰛻 ",
 
 					hl = "Color0B"
+				}
+			},
+			{
+				kind = "bufs",
+				condition = function ()
+					return vim.g.__show_bufs == true;
+				end,
+
+				separator = " ",
+				separator_hl = "Normal",
+
+				overflow = " ┇ ",
+				overflow_hl = "Layer1I",
+
+				nav_left = "   ",
+				nav_left_hl = "Color0",
+
+				nav_left_locked = "    ",
+				nav_left_locked_hl = "Color1",
+
+				nav_right = "   ",
+				nav_right_hl = "Color0",
+
+				nav_right_locked = " 󰌾  ",
+				nav_right_locked_hl = "Color1",
+
+				active = {
+					padding_left = " ",
+					padding_right = " ",
+
+					win_count = " ┃ 󰨝 %d",
+					win_count_hl = nil,
+
+					icon = "",
+
+					hl = "Color7R"
+				},
+				inactive = {
+					padding_left = " ",
+					padding_right = " ",
+
+					icon = "",
+
+					hl = "Color0B",
+					max_name_len = 10,
 				}
 			},
 			{ kind = "empty", hl = "Normal" },

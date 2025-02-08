@@ -128,4 +128,35 @@ utils.create_segmant = function (text, hl)
 	---|fE
 end
 
+--- Gets the list of valid buffers
+---@return integer[]
+utils.get_valid_bufs = function ()
+	local bufs = vim.api.nvim_list_bufs();
+	local _b = {};
+
+	for _, buf in ipairs(bufs) do
+		if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].bt == "" then
+			table.insert(_b, buf);
+		end
+	end
+
+	return _b;
+end
+
+utils.create_to_buf = function (buffer)
+	if type(_G.__tabline_to_buf) ~= "table" then
+		_G.__tabline_to_buf = {};
+	end
+
+	_G.__tabline_to_buf["b" .. buffer] = function ()
+		if vim.api.nvim_buf_is_valid(buffer) == false then
+			return;
+		elseif #vim.fn.win_findbuf(buffer) > 0 then
+			vim.api.nvim_set_current_win(vim.fn.win_findbuf(buffer)[1]);
+		else
+			vim.api.nvim_set_current_buf(buffer);
+		end
+	end
+end
+
 return utils;
