@@ -1,66 +1,158 @@
-local bars = require("bars");
+--- Utility functions.
 local utils = require("bars.utils");
 
---- Checks if a module is enabled or not
----@param config boolean | table
----@return boolean
-local isEnabled = function (config)
-	if not config then
-		return false;
-	elseif type(config) == "boolean" then
-		return config;
-	elseif type(config) == "table" and type(config.enable) == "boolean" then
-		return config.enable
-	end
+--- Load all the global functions.
+require("bars.global");
 
-	return false;
+---|fS "Cache default values."
+
+vim.g.__statusline = vim.o.statusline;
+
+vim.g.__relativenumber = vim.o.relativenumber;
+vim.g.__numberwidth = vim.o.numberwidth;
+vim.g.__statuscolumn = vim.o.statuscolumn;
+
+vim.g.__winbar = vim.o.winbar;
+vim.g.__tabline = vim.o.tabline;
+
+---|fE
+
+--- Attach various bars & lines globally if
+--- `global = true`.
+if require("bars").config.global == true then
+	require("bars.statuscolumn").global_attach();
+	require("bars.statusline").global_attach();
+	require("bars.winbar").global_attach();
+
+	require("bars.tabline").attach();
+else
+	require("bars.tabline").attach();
 end
 
+--- Attach to new Windows.
+---
+--- Also rum this when a buffer is displayed
+--- in a window as the filetype/buftype may
+--- could have changed.
+---
+--- `VimEnter` is used because the other events
+--- don't trigger when entering Neovim.
+vim.api.nvim_create_autocmd({
+	"VimEnter",
 
-bars.add_hls(bars.configuration.highlight_groups);
-
-vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+	"WinNew",
+	"BufWinEnter"
+}, {
 	callback = function ()
-		bars.add_hls(bars.configuration.highlight_groups);
+		---|fS
+
+		require("bars.statusline").clean();
+		require("bars.statuscolumn").clean();
+		require("bars.winbar").clean();
+		require("bars.tabline").clean();
+
+		vim.schedule(function ()
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				require("bars.statusline").attach(win);
+				require("bars.statuscolumn").attach(win);
+				require("bars.winbar").attach(win);
+			end
+
+			require("bars.tabline").attach();
+		end);
+
+		---|fE
 	end
 });
 
---- Now, we can call the setup function at anytime
-pcall(vim.api.nvim_del_autocmd, bars.autocmd);
+--- When the 'filetype' or 'buftype' option is set
+--- we must clean up any window that has become invalid
+--- and update the configuration of existing windows.
+---
+--- TODO, Check if this causes performance issues
+--- with large amount of windows.
+vim.api.nvim_create_autocmd({ "OptionSet" }, {
+	callback = function ()
+		---|fS
 
---- TODO, Find other events to use
-bars.autocmd = vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType", "TermOpen" }, {
+		local option = vim.fn.expand("<amatch>");
+		local valid_options = { "filetype", "buftype" };
+
+		if vim.list_contains(valid_options, option) == false then
+			return;
+		end
+
+		--- Clean up invalid windows.
+		require("bars.statusline").clean();
+		require("bars.statuscolumn").clean();
+		require("bars.winbar").clean();
+		require("bars.tabline").clean();
+
+		vim.schedule(function ()
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				require("bars.statusline").attach(win);
+				require("bars.statuscolumn").attach(win);
+				require("bars.winbar").attach(win);
+			end
+
+			require("bars.tabline").attach();
+		end);
+
+		---|fE
+	end
+});
+
+--- Update various bars & lines on Vim mode change.
+vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 	callback = function (event)
-		if vim.list_contains(bars.configuration.exclude_filetypes, vim.bo[event.buf].filetype) then
-			for _, window in ipairs(utils.list_attached_wins(event.buf)) do
-				bars.statuscolumn.disable(window);
-				bars.statusline.disable(window);
-			end
+		---|fS
 
+		--- We wrap this in `vim.schedule()` so
+		--- that the update happens after doing
+		--- something like,
+		--- 
+		--- ```vim
+		--- :lua vim.g.__bars_tabpage_list_locked = false
+		--- ```
+		---
+		--- We no longer have to redraw the screen
+		--- twice!
+		vim.schedule(function ()
+			--- Unstable API function.
+			--- Use `pcall()`
+			pcall(vim.api.nvim__redraw, {
+				buf = event.buf,
+				flush = true,
+
+				statuscolumn = true,
+				statusline = true,
+				winbar = true,
+				tabline = true
+			});
+		end);
+
+		---|fE
+	end
+});
+
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "TabNew" }, {
+	callback = function ()
+		---|fS
+
+		local max = vim.g.__tabline_max_tabs or 5;
+		local tabs = #vim.api.nvim_list_tabpages();
+
+		if not package.loaded["bars.tabline"] then
+			return;
+		elseif vim.g.__bars_tabpage_list_locked == true then
+			--- List movement locked.
+			return;
+		elseif tabs <= max then
 			return;
 		end
 
-		if vim.islist(bars.configuration.exclude_buftypes) and vim.list_contains(bars.configuration.exclude_buftypes, vim.bo[event.buf].buftype) then
-			for _, window in ipairs(utils.list_attached_wins(event.buf)) do
-				bars.statuscolumn.disable(window);
-				bars.statusline.disable(window);
-			end
-
-			return;
-		end
-
-		for _, window in ipairs(utils.list_attached_wins(event.buf)) do
-			if isEnabled(bars.configuration.statuscolumn) then
-				bars.statuscolumn.init(event.buf, window);
-			end
-
-			if isEnabled(bars.configuration.statusline) then
-				bars.statusline.init(event.buf, window);
-			end
-		end
-
-		if isEnabled(bars.configuration.tabline) then
-			bars.tabline.init();
-		end
+		vim.g.__bars_tabpage_from = math.max(1, tabs - math.floor(max * 0.25));
+		---|fE
 	end
 });

@@ -1,97 +1,162 @@
 local utils = {};
 
---- Returns a list of attached windows
----@param buffer integer
----@return integer[]
-utils.list_attached_wins = function (buffer)
-	local windows = vim.api.nvim_list_wins();
-	local filtered = {};
-
-	for _, window in ipairs(windows) do
-		if vim.api.nvim_win_get_buf(window) == buffer then
-			table.insert(filtered, window);
-		end
-	end
-
-	return filtered;
+utils.clamp = function (value, min, max)
+	return math.min(math.max(value, min), max);
 end
 
---- Finds the correct configuration table
----@param config bars.statusline.config | bars.statuscolumn.config
----@param buf integer
----@return unknown
-utils.find_config = function (config, buf)
-	local filetype = vim.bo[buf].filetype;
-	local buftype = vim.bo[buf].buftype;
-
-	if config.custom then
-		for _, custom in ipairs(config.custom) do
-			if vim.islist(custom.filetypes) and vim.list_contains(custom.filetypes, filetype) then
-				return custom.parts;
-			elseif vim.islist(custom.buftypes) and vim.list_contains(custom.buftypes, buftype) then
-				return custom.parts;
-			end
-		end
-	end
-
-	return config.parts or {};
+utils.lerp = function (f, t, y)
+	return f + ((t - f) * y);
 end
 
----@param hl string
----@return string | nil
+--- Aligns text.
+---@param alignment "left" | "center" | "right"
+---@param text string
+---@param width integer
+---@return string
+utils.align = function (alignment, text, width)
+	text = tostring(text);
+	width = width or vim.o.columns or 10;
+	alignment = alignment or "left";
+
+	local tW = vim.fn.strdisplaywidth(text);
+
+	if alignment == "right" then
+		return string.format(
+			"%s%s",
+
+			string.rep(" ", width - tW),
+			text
+		);
+	elseif alignment == "center" then
+		return string.format(
+			"%s%s%s",
+
+			string.rep(" ", math.ceil(width - tW) / 2),
+			text,
+			string.rep(" ", math.floor(width - tW) / 2)
+		);
+	else
+		return string.format(
+			"%s%s",
+
+			text,
+			string.rep(" ", width - tW)
+		);
+	end
+end
+
+--- Matches a configuration from the
+--- {source}.
+---@param source { [string]: any }
+---@param text string
+---@param ignore string[]
+---@return any
+utils.match = function (source, text, ignore)
+	source = source or {};
+	ignore = ignore or {};
+
+	local _c = source.default or {};
+	local keys = vim.tbl_keys(source);
+	table.sort(keys);
+
+	for _, k in ipairs(keys) do
+		if vim.list_contains(ignore, k) then
+			goto continue;
+		elseif string.match(text, k) == nil or type(source[k]) ~= "table" then
+			goto continue;
+		else
+			_c = vim.tbl_deep_extend("force", _c, source[k]);
+			break;
+		end
+
+		--- In case we need to update anything
+
+	    ::continue::
+	end
+
+	return _c;
+end
+
+--- Creates a highlight group
+--- applier.
+---@param hl string?
+---@return string
 utils.set_hl = function (hl)
 	if type(hl) ~= "string" then
-		return;
+		return "";
+	elseif vim.fn.hlexists(hl) == 0 then
+		return "";
+	else
+		return string.format("%s%s#", "%#", hl);
 	end
-
-	if hl:match("%#(.-)#") then
-		return hl;
-	end
-
-	return "%#" .. hl .. "#"
 end
 
-utils.clamp = function (val, min, max)
-	return math.min(math.max(val, min), max)
+utils.constant = function (val)
+	return setmetatable({}, {
+		__index = function ()
+			return val;
+		end,
+		__newindex = function () end,
+
+		__metatable = false
+	});
 end
 
-utils.tbl_clamp = function (input, number)
-	if not vim.islist(input) then
-		return input;
+utils.get_const = function (val)
+	if type(val) ~= "table" then
+		return val;
+	else
+		return val.value;
+	end
+end
+
+--- Creates a statusline/statuscolumn/winbar/table segment.
+---@param text string | nil
+---@param hl string | nil
+---@return string
+utils.create_segmant = function (text, hl)
+	---|fS
+
+	if not text then
+		return "";
+	elseif not hl or not utils.set_hl(hl) then
+		return text;
+	else
+		return utils.set_hl(hl) .. text;
 	end
 
-	return input[utils.clamp(number, 1, #input)] or "";
+	---|fE
 end
 
-utils.sort_by_priority = function (list, min_lval)
-	local _item = {};
-	local lval = min_lval or 0;
+--- Gets the list of valid buffers
+---@return integer[]
+utils.get_valid_bufs = function ()
+	local bufs = vim.api.nvim_list_bufs();
+	local _b = {};
 
-	for _, item in ipairs(list or {}) do
-		if item[4] and item[4]["priority"] and item[4]["priority"] > lval then
-			table.insert(_item, item)
+	for _, buf in ipairs(bufs) do
+		if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].bt == "" then
+			table.insert(_b, buf);
 		end
 	end
 
-	return _item;
+	return _b;
 end
 
-utils.switch_to_buf = function (buf)
-	local tabs = vim.api.nvim_list_tabpages();
-
-	for _, tab in ipairs(tabs) do
-		local windows = vim.api.nvim_tabpage_list_wins(tab);
-
-		for _, window in ipairs(windows) do
-			if vim.api.nvim_win_get_buf(window) == buf then
-				vim.api.nvim_set_current_tabpage(tab);
-				vim.api.nvim_set_current_win(window);
-				return;
-			end
-		end
+utils.create_to_buf = function (buffer)
+	if type(_G.__tabline_to_buf) ~= "table" then
+		_G.__tabline_to_buf = {};
 	end
 
-	vim.api.nvim_set_current_buf(buf);
+	_G.__tabline_to_buf["b" .. buffer] = function ()
+		if vim.api.nvim_buf_is_valid(buffer) == false then
+			return;
+		elseif #vim.fn.win_findbuf(buffer) > 0 then
+			vim.api.nvim_set_current_win(vim.fn.win_findbuf(buffer)[1]);
+		else
+			vim.api.nvim_set_current_buf(buffer);
+		end
+	end
 end
 
 return utils;

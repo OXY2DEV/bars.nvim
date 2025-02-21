@@ -1,520 +1,261 @@
-local tabline = {};
-local storage = require("bars.storage");
-local icons = require("bars.icons");
+local tabline = {}
 local utils = require("bars.utils");
+local components = require("bars.components.tabline");
 
---- Truncates a segment of a path
----@param segment string
----@param len integer?
----@return string
-local truncate_segmant = function (segment, len)
-	if segment:match("^%.") then
-		return vim.fn.strcharpart(segment, 0, (len or 1) + 1);
-	else
-		return vim.fn.strcharpart(segment, 0, len or 1);
-	end
-end
+---@class tabline.config
+tabline.config = {
+	---|fS
 
---- Turns a highlight group into tabline part
----@param group_name string?
----@return string
-local set_hl = function (group_name)
-	if type(group_name) ~= "string" then
-		return "";
-	elseif vim.fn.hlexists("Bars" .. group_name) == 1 then
-		return "%#Bars" .. group_name .. "#";
-	elseif vim.fn.hlexists(group_name) == 1 then
-		return "%#" .. tostring(group_name) .. "#";
-	else
-		return "";
-	end
-end
+	default = {
+		parts = {
+			{ kind = "empty", hl = "Normal" },
+			{
+				kind = "tabs",
+				condition = function ()
+					return vim.g.__show_bufs ~= true;
+				end,
 
---- Turns a segment into a usable part in the tabline
----@param part bars.tabline.segment
----@return string
----@return integer
-local get_output = function (part, opts)
-	local _t = "";
-	local w = 0;
 
-	if part.click then
-		if type(part.click) == "string" then
-			_t = "%@" .. part.click .. "@";
-		elseif type(part.click) == "function" then
-			local id = storage.set_func("tabline", part.id or "unnamed", part.click);
+				separator = " ",
+				separator_hl = "Normal",
 
-			_t = "%@v:lua.__bars.tabline.funcs." .. id .. "@";
-		end
-	end
+				overflow = " ┇ ",
+				overflow_hl = "Layer1I",
 
-	if part.label then
-		_t = "%" .. tostring(part.label) .. "T";
-	end
+				nav_left = "   ",
+				nav_left_hl = "Color0",
 
-	--- Renders a chunk
-	---@param chunk [string, string | nil]?
-	local add = function (chunk)
-		if chunk then
-			local _c;
+				nav_left_locked = "    ",
+				nav_left_locked_hl = "Color1",
 
-			if vim.islist(chunk) and (vim.islist(chunk[1])) then
-				for _, mini_chunk in ipairs(chunk) do
-					local _e;
+				nav_right = "   ",
+				nav_right_hl = "Color0",
 
-					if #mini_chunk >= 2 then
-						_e = vim.api.nvim_eval_statusline(set_hl(mini_chunk[2]) .. mini_chunk[1], opts or {});
+				nav_right_locked = " 󰌾  ",
+				nav_right_locked_hl = "Color1",
 
-						_t = _t .. set_hl(mini_chunk[2]) .. mini_chunk[1];
-						w = w + _e.width;
-					elseif type(mini_chunk[1]) == "string" then
-						_e = vim.api.nvim_eval_statusline(mini_chunk[1], opts or {});
+				active = {
+					padding_left = " ",
+					padding_right = " ",
 
-						_t = _t .. mini_chunk[1];
-						w = w + _e.width;
-					end
-				end
-			elseif #chunk == 2 then
-				_c = vim.api.nvim_eval_statusline(set_hl(chunk[2]) .. chunk[1], opts or {});
+					win_count = " ┃ 󰨝 %d",
+					win_count_hl = nil,
 
-				_t = _t .. set_hl(chunk[2]) .. _c.str;
-				w = w + _c.width;
-			elseif type(chunk[1]) == "string" then
-				_c = vim.api.nvim_eval_statusline(chunk[1], opts or {});
+					icon = "󰛺 ",
 
-				_t = _t .. _c.str;
-				w = w + _c.width;
-			end
-		end
-	end
+					hl = "Color4R"
+				},
+				inactive = {
+					padding_left = " ",
+					padding_right = " ",
 
-	add(part.corner_left);
-	add(part.padding_left);
-	add(part.content);
-	add(part.padding_right);
-	add(part.corner_right);
+					icon = "󰛻 ",
 
-	if part.click then
-		_t = _t .. "%X";
-	end
-
-	if part.label then
-		_t = _t .. "%X";
-	end
-
-	return _t, w;
-end
-
----@type bars.tabline.config
-tabline.configuration = {
-	enable = true,
-	parts = {
-		{
-			type = "gap",
-			id = 2
-		},
-		{
-			type = "tabs",
-			id = 3,
-
-			active = {
-				corner_left = { "", "BarsTablineTabActiveSep" },
-				corner_right = { "", "BarsTablineTabActiveSep" },
-
-				padding_left = { " ", "BarsTablineTabActive" },
-				padding_right = { " " },
+					hl = "Color0B"
+				}
 			},
-			inactive = {
-				corner_left = { "", "BarsTablineTabInactiveSep" },
-				corner_right = { "",  "BarsTablineTabInactiveSep" },
+			{
+				kind = "bufs",
+				condition = function ()
+					return vim.g.__show_bufs == true;
+				end,
 
-				padding_left = { " ", "BarsTablineTabInactive" },
-				padding_right = { " " },
-			}
-		},
-		{
-			type = "bufs",
-			id = 1,
+				separator = " ",
+				separator_hl = "Normal",
 
-			active = {
-				corner_left = { "", "BarsTablineBufActiveSep" },
-				corner_right = { "", "BarsTablineBufActiveSep" },
+				overflow = " ┇ ",
+				overflow_hl = "Layer1I",
 
-				padding_left = { " ", "BarsTablineBufActive" },
-				padding_right = { " " },
+				nav_left = "   ",
+				nav_left_hl = "Color0",
+
+				nav_left_locked = "    ",
+				nav_left_locked_hl = "Color1",
+
+				nav_right = "   ",
+				nav_right_hl = "Color0",
+
+				nav_right_locked = " 󰌾  ",
+				nav_right_locked_hl = "Color1",
+
+				active = {
+					padding_left = " ",
+					padding_right = " ",
+
+					win_count = " ┃ 󰨝 %d",
+					win_count_hl = nil,
+
+					icon = "",
+
+					hl = "Color7R"
+				},
+				inactive = {
+					padding_left = " ",
+					padding_right = " ",
+
+					icon = "",
+
+					hl = "Color0B",
+					max_name_len = 10,
+				}
 			},
-			inactive = {
-				corner_left = { "", "BarsTablineBufInactiveSep" },
-				corner_right = { "", "BarsTablineBufInactiveSep" },
-
-				padding_left = { " ", "BarsTablineBufInactive" },
-				padding_right = { " " },
-			},
-
-			ignore = { "" }
-		},
+			{ kind = "empty", hl = "Normal" },
+		}
 	}
-}
 
+	---|fE
+};
 
+---@type tabline.state
+tabline.state = {
+	enable = true,
+	attached = false
+};
 
---- Shows buffers in the tabline
----@param config bars.tabline.bufs
----@param len integer
----@return string
----@return integer
-tabline.m_bufs = function (config, len)
-	local bufs = vim.api.nvim_list_bufs();
-	local current = vim.api.nvim_get_current_buf();
+--- Updates the configuration ID for the tabline.
+---@return string | nil
+tabline.update_id = function ()
+	---|fS
 
-	local count = config.max_count or 5;
-	local tmpBufs = {};
+	local keys = vim.tbl_keys(tabline.config);
+	local ignore = { "default" };
+	table.sort(keys);
 
-	for _, buffer in ipairs(bufs) do
-		local nm = vim.api.nvim_buf_get_name(buffer);
+	local ID = "default";
 
-		if vim.api.nvim_buf_is_loaded(buffer) == false then
+	for _, key in ipairs(keys) do
+		if vim.list_contains(ignore, key) then
+			goto continue;
+		elseif type(tabline.config[key]) ~= "table" then
 			goto continue;
 		end
 
-		for _, pattern in ipairs(config.ignore) do
-			if pattern ~= "" and nm:match(pattern) then
-				goto continue;
-			elseif nm == "" then
-				goto continue;
-			end
+		---@type tabline.opts
+		local tmp = tabline.config[key];
+
+		if tmp.condition == true then
+			ID = key;
+		elseif pcall(tmp.condition) and tmp.condition() == true  then
+			ID = key;
 		end
 
-		table.insert(tmpBufs, buffer);
 		::continue::
 	end
 
-	bufs = tmpBufs;
+	vim.g.__tlID = ID;
+	tabline.state.attached = true;
 
-	-- From where we should list buffers?
-	local rangeStart = storage.get("tabline", "bufViewStart");
-
-	-- Get where to start the range
-	if not rangeStart then
-		rangeStart = 1;
-		storage.set("tabline", "bufViewStart", 1);
-	elseif rangeStart >= #bufs then
-		rangeStart = 1;
-		storage.set("tabline", "bufViewStart", 1);
-	end
-
-	-- Assign unique names to parts
-	local names = {};
-	local get_name = function (name)
-		local segments = {};
-		local tail = vim.fn.fnamemodify(name, ":t");
-
-		for seg in name:gmatch("[^/]+") do
-			if seg ~= "" and seg ~= tail then
-				table.insert(segments, seg);
-			else
-				break;
-			end
-		end
-
-		name = tail;
-
-		while vim.list_contains(names, name) do
-			name = truncate_segmant(table.remove(segments), 1) .. "/" .. name;
-		end
-
-		table.insert(names, name);
-		return name;
-	end
-
-	-- Gets length of output text
-	local get_len = function (...)
-		local items = { ... };
-		local _l = 0;
-
-		for _, item in ipairs(items) do
-			if type(item) == "string" then
-				_l = _l + vim.fn.strdisplaywidth(item);
-			elseif vim.islist(item) and item[1] then
-				_l = _l + vim.fn.strdisplaywidth(item[1]);
-			end
-		end
-
-		return _l;
-	end
-
-	local available = vim.o.columns - (len or 0);
-	local _o = "";
-	local render = function (active, buffer, name)
-		local conf = config.inactive;
-		local _t = "";
-
-		if active == true then
-			conf = config.active;
-		end
-
-		local l = get_len(conf.corner_left, conf.padding_left);
-		local r = get_len(conf.corner_right, conf.padding_right);
-		local w = get_len(config.wrap);
-
-		if available <= l + r then
-			-- Not enough space left
-			if available >= w then
-				-- Show the divider when possible
-				_t = get_output({ content = config.wrap })
-			end
-
-			return;
-		end
-
-		-- available space is reduced
-		available = available - (l + r);
-
-		if active == true then
-			storage.set_func("tabline", "bufIncreaseLimit", function ()
-				local var = storage.get("tabline", "bufViewStart") or 0;
-				storage.set("tabline", "bufViewStart", var + 1);
-
-				vim.cmd("redrawt");
-			end);
-			_t = "%@v:lua.__bars.tabline.funcs.bufIncreaseLimit@";
-		else
-			local id = storage.set_func("tabline", "switchBuf" .. buffer, function ()
-				utils.switch_to_buf(buffer);
-			end);
-			_t = "%@v:lua.__bars.tabline.funcs." .. id .. "@";
-		end
-
-		-- Left side
-		_t = _t .. get_output({ content = conf.corner_left });
-		_t = _t .. get_output({ content = conf.padding_left });
-
-		-- Icon & text
-		_t = _t .. vim.fn.strcharpart(icons.get(name) .. name, 0, available - 1);
-		available = available - get_len(vim.fn.strcharpart(icons.get(name) .. name, 0, available - 1));
-
-		-- Right side
-		_t = _t .. get_output({ content = conf.padding_right });
-		_t = _t .. get_output({ content = conf.corner_right });
-
-		_t = _t .. "%X";
-
-		if active == true then
-			_o = _t .. _o;
-		else
-			_o = _o .. _t;
-		end
-	end
-
-	local bufAdded = 0;
-	local currAdded = false;
-	local sorted = {};
-
-	for b, buf in ipairs(bufs) do
-		if #bufs >= count then
-			if buf == current then
-				table.insert(sorted, 1, { buf, true });
-				currAdded = true;
-			elseif b >= rangeStart and bufAdded < count then
-				if currAdded == true and bufAdded < count then
-					table.insert(sorted, 1, { buf, false });
-				elseif currAdded == false and bufAdded < (count - 1) then
-					table.insert(sorted, { buf, false });
-				end
-			end
-		else
-			if buf == current then
-				table.insert(sorted, { buf, true });
-			else
-				table.insert(sorted, { buf, false });
-			end
-		end
-	end
-
-	for _, sr in ipairs(sorted) do
-		render(sr[2], sr[1], get_name(vim.api.nvim_buf_get_name(sr[1])))
-	end
-
-	return _o, 0;
+	---|fE
 end
 
---- Shows a lost of tabs
----@param config bars.tabline.tabs
+--- Renders the tabline.
 ---@return string
----@return integer
-tabline.m_tabs = function (config)
-	local tabs = vim.api.nvim_list_tabpages();
-	local current = vim.api.nvim_get_current_tabpage();
+tabline.render = function ()
+	---|fS
 
-	local count = config.max_count or 5;
-	local _t = {};
-
-	if #tabs > count then
-		-- From where we should list tabs?
-		local rangeStart = storage.get("tabline", "tabViewStart");
-
-		-- Get where to start the range
-		if not rangeStart then
-			rangeStart = 1;
-			storage.set("tabline", "tabViewStart", 1);
-		elseif (#tabs - rangeStart) + 1 < count then
-			rangeStart = 1;
-			storage.set("tabline", "tabViewStart", 1);
-		end
-
-		local rangeEnd = rangeStart + count;
-		local foundCurrent = false;
-
-		for label, tab in ipairs(tabs) do
-			if tab == current then
-				foundCurrent = true;
-				table.insert(_t, 1, {
-					current = true,
-					tab = tab, label = label
-				});
-			elseif label >= rangeStart and label <= rangeEnd then
-				if foundCurrent == true and #_t < count then
-					table.insert(_t, {
-						current = false,
-						tab = tab, label = label
-					});
-				elseif foundCurrent == false and #_t < (count - 1) then
-					table.insert(_t, {
-						current = false,
-						tab = tab, label = label
-					});
-				end
-			end
-		end
-	else
-		for label, tab in ipairs(tabs) do
-			if tab == current then
-				table.insert(_t, {
-					current = true,
-					tab = tab, label = label
-				});
-			else
-				table.insert(_t, {
-					current = false,
-					tab = tab, label = label
-				});
-			end
-		end
+	if tabline.state.attached ~= true then
+		return "";
 	end
 
-	local _o, _l = "", 0;
+	local tlID = vim.g.__tlID;
 
-	for _, item in ipairs(_t) do
-		local tmp, tmpl = get_output(vim.tbl_extend("force", item.current == true and config.active or config.inactive, {
-			content = {
-				tostring(item.tab)
-			},
-			label = item.label
-		}));
-
-		if item.current == true then
-			tmp, tmpl = get_output(vim.tbl_extend("force", config.active or {}, {
-				content = {
-					tostring(item.tab)
-				},
-
-				id = "tabIncreaseLimit",
-				click = function ()
-					local var = storage.get("tabline", "tabViewStart") or 0;
-					storage.set("tabline", "tabViewStart", var + 1);
-
-					vim.cmd("redrawt");
-				end
-			}));
-		end
-
-		_o = _o .. tmp;
-		_l = _l + tmpl
+	if not tlID then
+		return "";
 	end
 
-	return _o, _l;
-end
+	local config = tabline.config[tlID];
 
---- Renders a custom segment
----@param config bars.tabline.custom
----@param len integer
----@return string
----@return integer
-tabline.m_custom = function (config, len)
-	if not config.value or not pcall(config.value, len) then
-		return "", 0;
-	end
-
-	return get_output(config.value(len))
-end
-
---- Adds a gap to the tabline
----@param config bars.tabline.gap
----@return string
----@return integer
-tabline.m_gap = function (config)
-	return set_hl(config.hl) .. (config.before or "") .. "%=" .. (config.after or ""), 0;
-end
-
---- Draws the tabline
----@return string
-tabline.draw = function ()
-	local texts, _l = {}, 0;
-
-	for _, part in ipairs(tabline.configuration.parts) do
-		local tmp, tmp_l;
-
-		if part.type == "bufs" then
-			tmp, tmp_l = tabline.m_bufs(part, _l);
-		elseif part.type == "tabs" then
-			tmp, tmp_l = tabline.m_tabs(part);
-		elseif part.type == "custom" then
-			tmp, tmp_l = tabline.m_custom(part, _l);
-		elseif part.type == "gap" then
-			tmp, tmp_l = tabline.m_gap(part);
-		end
-
-		if tmp then
-			if part.id then
-				table.insert(texts, part.id, tmp);
-			else
-				table.insert(texts, tmp);
-			end
-
-			_l = _l + tmp_l;
-		end
-	end
-
-	-- Fix holes in the array
-	local tmp_txt = {};
-
-	for _, val in pairs(texts) do
-		table.insert(tmp_txt, val);
-	end
-
-	texts = tmp_txt;
-
-	return table.concat(texts);
-end
-
---- Initializes the tabline
-tabline.init = function ()
-	vim.o.tabline = "%!v:lua.require('bars.tabline').draw()";
-end
-
---- Disables the tabline
-tabline.disable = function ()
-	vim.g.tabline = "";
-end
-
---- Sets up the tabline
----@param config bars.tabline.config
-tabline.setup = function (config)
 	if type(config) ~= "table" then
+		return "";
+	end
+
+	local _o = "%#Normal#";
+
+	for _, part in ipairs(config.parts or {}) do
+		_o = _o .. components.get(part.kind, part, _o);
+	end
+
+	return _o;
+
+	---|fE
+end
+
+tabline.can_detach = function ()
+	if not tabline.config.condition then
+		return false;
+	end
+
+	local checked_condition, result = pcall(tabline.config.condition);
+
+	if checked_condition == false then
+		return false;
+	elseif result == false then
+		return true;
+	end
+end
+
+tabline.detach = function ()
+	---|fS
+
+	vim.scheduleefer_fn(function ()
+		tabline.state.attached = false;
+		vim.o.tabline = vim.o.__tabline or "";
+
+		vim.g.__tlID = nil;
+		vim.g.__tabline = nil;
+	end);
+
+	---|fE
+end
+
+tabline.can_attach = function ()
+	if not tabline.config.condition then
+		return true;
+	end
+
+	local checked_condition, result = pcall(tabline.config.condition);
+
+	if checked_condition == false then
+		return true;
+	elseif result == false then
+		return false;
+	end
+end
+
+--- Attaches the tabline module.
+tabline.attach = function ()
+	---|fS
+
+	if tabline.can_attach() == false then
 		return;
 	end
 
-	tabline.configuration = vim.tbl_deep_extend("force", tabline.configuration, config);
+	tabline.update_id();
+
+	vim.g.__tabline = vim.o.tabline;
+	vim.o.tabline = "%!v:lua.require('bars.tabline').render()";
+
+	---|fE
+end
+
+--- Cleans up invalid buffers and recalculates
+--- valid buffers config ID.
+tabline.clean = function ()
+	vim.schedule(function ()
+		if tabline.can_detach() then
+			tabline.detach();
+		end
+	end);
+end
+
+--- Sets up the tabline module.
+---@param config tabline.config | nil
+tabline.setup = function (config)
+	if type(config) == "table" then
+		tabline.config = vim.tbl_extend("force", tabline.config, config);
+	end
+
+	tabline.update_id();
 end
 
 return tabline;

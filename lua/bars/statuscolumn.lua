@@ -1,435 +1,384 @@
-local storage = require("bars.storage");
-local utils = require("bars.utils");
-local ffi = require("ffi");
-
 local statuscolumn = {};
+local utils = require("bars.utils");
+local components = require("bars.components.statuscolumn");
 
-ffi.cdef([[
-	typedef struct {} Error;
-	typedef struct {} win_T;
-	
-	typedef struct {
-		int start;
-		int level;
-		int llevel;
-		int lines; // This one only works on closed folds
-	} foldinfo_T;
+---@type statuscolumn.config
+statuscolumn.config = {
+	ignore_filetypes = { "query", "blink-cmp-menu" },
+	ignore_buftypes = { "nofile", "help" },
 
-	win_T *find_window_by_handle(int Window, Error *err);
-	foldinfo_T fold_info(win_T* wp, int lnum);
-]]);
+	default = {
+		parts = {
+			{
+				kind = "empty",
+				len = 1,
+				hl = "Normal"
+			},
+			{
+				kind = "signs",
+				len = 1,
+				hl = "Normal"
+			},
+			{
+				kind = "folds",
 
---- Turns a highlight group into a statusline part
----@param group_name (string | fun(): string)?
----@return string
-local set_hl = function (group_name, ...)
-	if type(group_name) ~= "string" then
-		return "";
-	elseif vim.fn.hlexists("Bars" .. group_name) == 1 then
-		return "%#Bars" .. group_name .. "#";
-	elseif vim.fn.hlexists(group_name) == 1 then
-		return "%#" .. tostring(group_name) .. "#";
-	else
-		return "";
-	end
-end
+				close_text = { "󰌶" },
+				close_hl = "Color0",
+				open_text = { "󱠂" },
+				open_hl = { "Color1", "Color2", "Color3", "Color4", "Color5", "Color6", "Color7" },
 
---- Gets the value when the value can be
---- optionally a function
----@param val any
----@param ... any
----@return any
-local get_value = function (val, ...)
-	if pcall(val, ...) then
-		return val(...);
-	end
+				scope_text = "│",
+				scope_end_text = "╰",
+				scope_merge_text = "├",
 
-	return val;
-end
+				fill_text = " ",
 
---- Gets the output of a part of the statuscolumn
----@param part table
----@param window integer
----@return string
----@return integer
-local get_output = function (part, window)
-	local _t = "";
-	local w = 0;
+				scope_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
+				scope_end_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
+				scope_merge_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
+			},
+			{
+				kind = "empty",
+				len = 1,
+				hl = "Normal"
+			},
+			{
+				kind = "lnum",
 
-	if part.click then
-		if type(part.click) == "string" then
-			_t = "%@" .. part.click .. "@";
-		elseif type(part.click) == "function" then
-			local id = storage.set_func("statuscolumn", part.id or "unnamed", part.click);
+				wrap_markers = "│",
+				virt_markers = "│",
 
-			_t = "%@v:lua.__bars.statuscolumn.funcs." .. id .. "@";
-		end
-	end
-
-	--- Renders a chunk
-	---@param chunk [string, string | nil]
-	local add = function (chunk)
-		if chunk then
-			local _c;
-
-			if vim.islist(chunk) and (vim.islist(chunk[1])) then
-				for _, mini_chunk in ipairs(chunk) do
-					local _e;
-
-					if #mini_chunk >= 2 then
-						_e = vim.api.nvim_eval_statusline(set_hl(mini_chunk[2], window) .. get_value(mini_chunk[1], window), { winid = window });
-
-						_t = _t .. set_hl(mini_chunk[2]) .. mini_chunk[1];
-						w = w + _e.width;
-					elseif type(mini_chunk[1]) == "string" then
-						_e = vim.api.nvim_eval_statusline(mini_chunk[1], { winid = window });
-
-						_t = _t .. mini_chunk[1];
-						w = w + _e.width;
-					end
-				end
-			elseif #chunk == 2 then
-				_c = vim.api.nvim_eval_statusline(set_hl(chunk[2]) .. chunk[1], { winid = window });
-
-				_t = _t .. set_hl(chunk[2]) .. chunk[1];
-				w = w + _c.width;
-			elseif type(chunk[1]) == "string" then
-				_c = vim.api.nvim_eval_statusline(chunk[1], { winid = window });
-
-				_t = _t .. chunk[1];
-				w = w + _c.width;
-			end
-		end
-	end
-
-	add(part.content);
-
-	if part.click then
-		_t = _t .. "%X";
-	end
-
-	return _t, w;
-end
-
----@type bars.statuscolumn.config
-statuscolumn.configuration = {
-	enable = true,
-	parts = {
-		{ type = "sign" },
-		{
-			type = "fold",
-
-			markers = {
-				default = {
-					content = { "  " }
+				wrap_hl = {
+					"Gradient4N0", "Gradient4N0", "Gradient4N1", "Gradient4N1",
+					"Gradient4N2", "Gradient4N2", "Gradient4N3", "Gradient4N3",
+					"Gradient4N4", "Gradient4N4"
 				},
-				open = {
-					{ " ", "BarsStatuscolumnFold1" }, { " ", "BarsStatuscolumnFold2" }, { " ", "BarsStatuscolumnFold3" },
-					{ " ", "BarsStatuscolumnFold4" }, { " ", "BarsStatuscolumnFold5" }, { " ", "BarsStatuscolumnFold6" },
+				virt_hl = {
+					"Gradient5N0", "Gradient5N0", "Gradient5N1", "Gradient5N1",
+					"Gradient5N2", "Gradient5N2", "Gradient5N3", "Gradient5N3",
+					"Gradient5N4", "Gradient5N4"
 				},
-				close = {
-					{ "╴", "BarsStatuscolumnFold1" }, { "╴", "BarsStatuscolumnFold2" }, { "╴", "BarsStatuscolumnFold3" },
-					{ "╴", "BarsStatuscolumnFold4" }, { "●╴", "BarsStatuscolumnFold5" }, { "◎╴", "BarsStatuscolumnFold6" },
-				},
-
-				scope = {
-					{ "│ ", "BarsStatuscolumnFold1" }, { "│ ", "BarsStatuscolumnFold2" }, { "│ ", "BarsStatuscolumnFold3" },
-					{ "│ ", "BarsStatuscolumnFold4" }, { "│ ", "BarsStatuscolumnFold5" }, { "│ ", "BarsStatuscolumnFold6" },
-				},
-				divider = {
-					{ "├╴", "BarsStatuscolumnFold1" }, { "├╴", "BarsStatuscolumnFold2" }, { "├╴", "BarsStatuscolumnFold3" },
-					{ "├╴", "BarsStatuscolumnFold4" }, { "├╴", "BarsStatuscolumnFold5" }, { "├╴", "BarsStatuscolumnFold6" },
-				},
-				foldend = {
-					{ "╰╼", "BarsStatuscolumnFold1" }, { "╰╼", "BarsStatuscolumnFold2" }, { "╰╼", "BarsStatuscolumnFold3" },
-					{ "╰╼", "BarsStatuscolumnFold4" }, { "╰╼", "BarsStatuscolumnFold5" }, { "╰╼", "BarsStatuscolumnFold6" },
+				hl = {
+					"Lnum",
+					"Shadow5", "Shadow4", "Shadow3",
+					"Shadow2", "Shadow1", "Shadow0"
 				}
 			},
-		},
-		{
-			type = "number",
-			mode = "hybrid",
+			{
+				kind = "empty",
+				len = 1,
+				hl = "Normal"
+			},
+			{
+				kind = "border",
+				text = "▎",
+				hl = function (_, window)
+					---|fS "Color matching the mode"
+					if vim.api.nvim_get_current_win() ~= window then
+						return "Layer2I";
+					end
 
-			hl = "LineNr",
-			lnum_hl = "BarsStatusColumnNum",
-			relnum_hl = "LineNr",
-			virtnum_hl = "TablineSel",
-			wrap_hl = "TablineSel"
-		},
-		{
-			type = "custom",
-			value = { content = { " " } }
-		},
-		{
-			type = "custom",
-			value = function (_, win)
-				if vim.api.nvim_get_current_win() ~= win then
-					return {
-						content = { "▎", "BarsStatusColumnGlow9" }
+					local _o = {};
+					local gr_map = {
+						default = "Gradient8N%d",
+
+						["v"] = "Gradient9N%d",
+						["V"] = "Gradient7N%d",
+						[""] = "Gradient2N%d",
+
+						["s"] = "Gradient9N%d",
+						["S"] = "Gradient7N%d",
+						[""] = "Gradient2N%d",
+
+						["i"] = "Gradient10N%d",
+						["ic"] = "Gradient10N%d",
+						["ix"] = "Gradient10N%d",
+
+						["R"] = "Gradient8N%d",
+						["Rc"] = "Gradient8N%d",
+
+						["c"] = "Gradient4N%d",
+						["!"] = "Gradient4N%d",
 					};
-				elseif vim.v.relnum <= 8 then
-					return {
-						content = { "▎", "BarsStatusColumnGlow" .. (vim.v.relnum + 1) }
-					};
-				else
-					return {
-						content = { "▎", "BarsStatusColumnGlow9" }
-					};
+
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+
+					for g = 0, 4 do
+						---@type string
+						local hl = gr_map[mode] or gr_map.default;
+
+						table.insert(_o, string.format(hl, g));
+					end
+
+					return _o;
+					---|fE
 				end
-			end,
+			},
 		}
 	},
 
-	custom = {
-		{
-			filetypes = {},
-			buftypes = { "terminal" },
-			parts = {}
+	query = {
+		condition = function (buffer)
+			return vim.bo[buffer].ft == "query";
+		end,
+		parts = {
+			{
+				kind = "empty",
+				len = 1,
+				hl = "Normal"
+			},
 		}
 	}
-}
+};
 
---- Renders a custom part in the statuscolumn
----@param config bars.statuscolumn.custom
----@param buffer integer
+---@type statuscolumn.state
+statuscolumn.state = {
+	enable = true,
+	attached_windows = {}
+};
+
+--- Updates the configuration ID for {window}.
 ---@param window integer
----@param len integer
----@return string
----@return integer
-statuscolumn.m_custom = function (config, buffer, window, len)
-	if type(config.value) == "table" then
-		return get_output(config.value --[[@as [string, string?] ]], window);
-	end
+---@return string | nil
+statuscolumn.update_id = function (window)
+	---|fS
 
-	if not config.value or not pcall(config.value --[[@as function]], buffer, window, len) then
-		return "", 0;
-	end
-
-	return get_output(config.value(buffer, window, len), window);
-end
-
---- Renders a foldcolumn
----@param config_table bars.statuscolumn.fold
----@param buffer integer
----@param window integer
----@return string
----@return integer
-statuscolumn.m_fold = function (config_table, buffer, window)
-	-- Can't use window-ID directly, we need the handle
-	local handle = ffi.C.find_window_by_handle(window, nil);
-
-	-- Next line
-	local next_line = utils.clamp(vim.v.lnum + 1, 1, vim.api.nvim_buf_line_count(buffer));
-
-	-- Fold related information to compare
-	local foldInfo = ffi.C.fold_info(handle, vim.v.lnum);
-	local foldInfo_after = ffi.C.fold_info(handle, next_line);
-
-	local markers = config_table.markers;
-	local closed;
-
-	vim.api.nvim_win_call(window, function ()
-		closed = vim.fn.foldclosed(vim.v.lnum);
-	end)
-
-	if foldInfo.start == vim.v.lnum then
-		if closed ~= -1 then
-			-- Opened fold
-			return get_output({
-				content = utils.tbl_clamp(markers.open, foldInfo.level)
-			}, window);
-		elseif foldInfo_after.level >= foldInfo.level then
-			-- Closed fold
-			return get_output({
-				content = utils.tbl_clamp(markers.close, foldInfo.level)
-			}, window);
-		elseif foldInfo_after.level >= 1 then
-			-- Inside a fold
-			return get_output({
-				content = utils.tbl_clamp(markers.scope, foldInfo.level)
-			}, window);
-		end
-	elseif foldInfo.start ~= foldInfo_after.start and foldInfo.level >= foldInfo_after.level then
-		if (foldInfo_after.level == 0 or (next_line == foldInfo_after.start and foldInfo_after.level <= vim.o.foldlevelstart)) and foldInfo.level >= foldInfo_after.level then
-			-- End of fold
-			return get_output({
-				content = utils.tbl_clamp(markers.foldend, foldInfo.level)
-			}, window);
-		else
-			-- Nested fold end
-			return get_output({
-				content = utils.tbl_clamp(markers.divider, foldInfo.level)
-			}, window);
-		end
-	elseif foldInfo.level > 0 then
-		if next_line == vim.v.lnum then
-			-- End of fold
-			return get_output({
-				content = utils.tbl_clamp(markers.foldend, foldInfo.level)
-			}, window);
-		else
-			-- Inside a fold
-			return get_output({
-				content = utils.tbl_clamp(markers.scope, foldInfo.level)
-			}, window);
-		end
-	end
-
-	return get_output(markers.default, window);
-end
-
---- Renders a sign column
----@param config_table bars.statuscolumn.sign
----@param buffer integer
----@param window integer
----@return string
----@return integer
-statuscolumn.m_signs = function (config_table, buffer, window)
-	-- Don't show the signs if the line is a wrapped/virtual line
-	if vim.v.virtnum ~= 0 then
-		return "  ", 2;
-	end
-
-	local signs = utils.sort_by_priority(
-		vim.api.nvim_buf_get_extmarks(buffer,
-			-1,
-			{ vim.v.lnum - 1, 0 },
-			{ vim.v.lnum - 1, -1 },
-			{
-				type = "sign",
-				details = true
-			}
-		),
-		config_table.min_priority
-	);
-
-	if signs and signs[1] and signs[1][4] and signs[1][4].sign_text then
-		return get_output({
-			content = {
-				signs[1][4].sign_text,
-				signs[1][4].sign_hl_group
-			}
-		}, window);
-	end
-
-	return "  ", 2;
-end
-
---- Renders a number column
----@param config_table bars.statuscolumn.number
----@param buffer integer
----@param window integer
----@return string
----@return integer
-statuscolumn.m_num = function (config_table, buffer, window)
-	local max_num_len = math.max(2, vim.fn.strchars(vim.api.nvim_buf_line_count(buffer)))
-
-	if config_table.mode == "absolute" then
-		return get_output({
-			content = { string.format("%+" .. max_num_len .. "s", tostring(vim.v.lnum)), config_table.lnum_hl or config_table.hl }
-		}, window);
-	elseif config_table.mode == "relative" then
-		return get_output({
-			content = { string.format("%+" .. max_num_len .. "s", tostring(vim.v.relnum)), config_table.relnum_hl or config_table.hl }
-		}, window);
-	else
-		if vim.v.virtnum == 0 then
-			if vim.v.relnum == 0 then
-				return get_output({
-					content = { string.format("%+" .. max_num_len .. "s", tostring(vim.v.lnum)), config_table.lnum_hl or config_table.hl }
-				}, window);
-			else
-				return get_output({
-					content = { string.format("%+" .. max_num_len .. "s", tostring(vim.v.relnum)), config_table.relnum_hl or config_table.hl }
-				}, window);
-			end
-		elseif vim.v.virtnum < 0 then
-			-- Virtual line
-			return get_output({
-				content = { string.rep(" ", max_num_len), config_table.virtnum_hl or config_table.hl }
-			}, window);
-		else
-			-- Wrapped line
-			return get_output({
-				content = { string.rep(" ", max_num_len), config_table.wrap_hl or config_table.hl }
-			}, window);
-		end
-	end
-end
-
---- Draws the statuscolumn
----@param window integer
----@param buffer integer
----@return string
-statuscolumn.draw = function (window, buffer)
-	local conf = utils.find_config(statuscolumn.configuration, buffer);
-	local texts, len = { "%#LineNr#"}, 0;
-
-	for _, part in ipairs(conf) do
-		local tmp, tmp_len = nil, 0;
-
-		if part.type == "number" then
-			tmp, tmp_len = statuscolumn.m_num(part, buffer, window);
-		elseif part.type == "fold" then
-			tmp, tmp_len = statuscolumn.m_fold(part, buffer, window);
-		elseif part.type == "sign" then
-			tmp, tmp_len =  statuscolumn.m_signs(part, buffer, window);
-		elseif part.type == "custom" then
-			tmp, tmp_len =  statuscolumn.m_custom(part, buffer, window, len);
-		end
-
-		if tmp then
-			if part.id then
-				table.insert(texts, part.id);
-			else
-				table.insert(texts, tmp);
-			end
-
-			len = len + (tmp_len or 0);
-		end
-	end
-
-
-	-- Fix holes in the array
-	local tmp_txt = {};
-
-	for _, val in pairs(texts) do
-		table.insert(tmp_txt, val);
-	end
-
-	texts = tmp_txt;
-
-	return table.concat(texts)
-end
-
---- Initializes the statuscolumn
----@param window integer
----@param buffer integer
-statuscolumn.init = function (buffer, window)
-	vim.wo[window].relativenumber = true; -- Redraw on cursor
-
-	vim.wo[window].foldcolumn = "0";
-	vim.wo[window].signcolumn = "no";
-
-	vim.wo[window].numberwidth = 1; -- Prevent Click related bug
-
-	vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').draw(" .. window .. "," .. buffer .. ")"
-end
-
---- Disables the statuscolumn
----@param window integer
-statuscolumn.disable = function (window)
-	vim.wo[window].statuscolumn = "";
-end
-
---- Sets up the statuscolumn
----@param config table?
-statuscolumn.setup = function (config)
-	if type(config) ~= "table" then
+	if type(window) ~= "number" then
+		return;
+	elseif vim.api.nvim_win_is_valid(window) == false then
 		return;
 	end
 
-	statuscolumn.configuration = vim.tbl_deep_extend("force", statuscolumn.configuration, config);
+	local buffer = vim.api.nvim_win_get_buf(window);
+
+	local keys = vim.tbl_keys(statuscolumn.config);
+	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
+	table.sort(keys);
+
+	local ID = "default";
+
+	for _, key in ipairs(keys) do
+		if vim.list_contains(ignore, key) then
+			goto continue;
+		elseif type(statuscolumn.config[key]) ~= "table" then
+			goto continue;
+		end
+
+		local tmp = statuscolumn.config[key];
+
+		if tmp.condition == true then
+			ID = key;
+			break;
+		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
+			ID = key;
+			break;
+		end
+
+		::continue::
+	end
+
+	statuscolumn.state.attached_windows[window] = true;
+	vim.w[window].__scID = ID;
+
+	---|fE
+end
+
+--- Renders the statuscolumn for a window.
+---@return string
+statuscolumn.render = function ()
+	---|fS
+
+	local window = vim.g.statusline_winid;
+	local buffer = vim.api.nvim_win_get_buf(window);
+
+	if window ~= vim.g.statusline_winid then
+		return "";
+	elseif statuscolumn.state.attached_windows[window] ~= true then
+		return "";
+	end
+
+	local scID = vim.w[window].__scID;
+
+	if not scID then
+		return "";
+	end
+
+	local config = statuscolumn.config[scID];
+
+	if type(config) ~= "table" then
+		return "";
+	end
+
+	local _o = "%#Normal#";
+
+	for _, part in ipairs(config.parts or {}) do
+		_o = _o .. components.get(part.kind, buffer, window, part, _o);
+	end
+
+	return _o;
+
+	---|fE
+end
+
+statuscolumn.can_detach = function (win)
+	if vim.api.nvim_win_is_valid(win) == false then
+		return false;
+	end
+
+	local buffer = vim.api.nvim_win_get_buf(win);
+	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+
+	if vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+		return true;
+	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
+		return true;
+	else
+		if not statuscolumn.config.condition then
+			return false;
+		end
+
+		---@diagnostic disable-next-line
+		local ran_cond, stat = pcall(statuscolumn.config.condition, buffer, win);
+
+		if ran_cond == false or stat == false then
+			return true;
+		else
+			return false;
+		end
+	end
+end
+
+--- Detaches from {buffer}.
+---@param window integer
+statuscolumn.detach = function (window)
+	---|fS
+
+	vim.schedule(function ()
+		vim.w[window].__scID = nil;
+
+		vim.api.nvim_set_option_value(
+			"statuscolumn",
+			vim.w[window].__statuscolumn or vim.g.__statuscolumn or "",
+			{
+				scope = "local",
+				win = window
+			}
+		);
+		vim.api.nvim_set_option_value(
+			"numberwidth",
+			vim.w[window].__numberwidth or vim.g.__numberwidth or 1,
+			{
+				scope = "local",
+				win = window
+			}
+		);
+		vim.api.nvim_set_option_value(
+			"relativenumber",
+			vim.w[window].__relativenumber or vim.g.__relativenumber or false,
+			{
+				scope = "local",
+				win = window
+			}
+		);
+
+		statuscolumn.state.attached_windows[window] = false;
+	end);
+
+	---|fE
+end
+
+statuscolumn.can_attach = function (win)
+	if vim.api.nvim_win_is_valid(win) == false then
+		return false;
+	end
+
+	local buffer = vim.api.nvim_win_get_buf(win);
+	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+
+	if vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+		return false;
+	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
+		return false;
+	else
+		if not statuscolumn.config.condition then
+			return true;
+		end
+
+		---@diagnostic disable-next-line
+		local ran_cond, stat = pcall(statuscolumn.config.condition, buffer, win);
+
+		if ran_cond == false or stat == false then
+			return false;
+		else
+			return true;
+		end
+	end
+end
+
+--- Attaches the statuscolumn module to the windows
+--- of a buffer.
+---@param window integer
+statuscolumn.attach = function (window)
+	---|fS
+
+	if statuscolumn.state.enable == false then
+		return;
+	elseif statuscolumn.can_attach(window) == false then
+		return;
+	elseif statuscolumn.state.attached_windows[window] == true then
+		if vim.wo[window].statuscolumn == "%!v:lua.require('bars.statuscolumn').render()" then
+			statuscolumn.update_id(window);
+			return;
+		end
+	end
+
+	statuscolumn.update_id(window);
+
+	vim.w[window].__relativenumber = vim.wo[window].relativenumber;
+	vim.w[window].__numberwidth = vim.wo[window].numberwidth;
+	vim.w[window].__statuscolumn = vim.wo[window].statuscolumn;
+
+	vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
+
+	---|fE
+end
+
+--- Attaches globally.
+statuscolumn.global_attach = function ()
+	for _, window in ipairs(vim.api.nvim_list_wins()) do
+		statuscolumn.update_id(window);
+	end
+
+	vim.o.statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
+end
+
+--- Cleans up invalid buffers and recalculates
+--- valid buffers config ID.
+statuscolumn.clean = function ()
+	---|fS
+
+	vim.schedule(function ()
+		for window, _ in pairs(statuscolumn.state.attached_windows) do
+			if statuscolumn.can_detach(window) then
+				statuscolumn.detach(window);
+			end
+		end
+	end);
+
+	---|fE
+end
+
+--- Sets up the statuscolumn module.
+---@param config statuscolumn.config | nil
+statuscolumn.setup = function (config)
+	if type(config) == "table" then
+		statuscolumn.config = vim.tbl_extend("force", statuscolumn.config, config);
+	end
+
+	for window, _ in pairs(statuscolumn.state.attached_windows) do
+		vim.w[window].__scID = statuscolumn.update_id(window);
+	end
 end
 
 return statuscolumn;
