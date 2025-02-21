@@ -306,14 +306,55 @@ slC.branch = function (_, window, main_config)
 
 	local branch;
 
-	if not vim.w[window].__git_branch then
-		branch = vim.split(vim.fn.system({
+	--- Gets the current git branch.
+	---@return string
+	local function get_branch ()
+		---|fS
+
+		--- Are we in a repo?
+		---@type string
+		local in_repo = vim.fn.system({
+			"git",
+			"-C",
+			cwd,
+			"rev-parse",
+			"--is-inside-work-tree"
+		});
+
+		if not in_repo or string.match(in_repo, "^true") == nil then
+			--- The output doesn't exist or it doesn't
+			--- start with "true" then return.
+			return "";
+		end
+
+		local _branch = vim.fn.system({
 			"git",
 			"-C",
 			cwd,
 			"branch",
 			"--show-current"
-		}), "\n", { trimempty = true });
+		});
+
+		if _branch == "" then
+			--- Detached HEAD.
+			_branch = vim.fn.system({
+				"git",
+				"-C",
+				cwd,
+				"rev-parse",
+				"--short",
+				"HEAD"
+			});
+		end
+
+		return _branch or "";
+
+		---|fE
+	end
+
+	if not vim.w[window].__git_branch then
+		get_branch()
+		branch = vim.split(get_branch(), "\n", { trimempty = true });
 
 		vim.w[window].__git_branch = branch;
 		vim.w[window].__branch_time = vim.uv.hrtime();
@@ -324,13 +365,7 @@ slC.branch = function (_, window, main_config)
 		local throttle = main_config.throttle or 2000;
 
 		if now - bef >= (throttle * 1e6) then
-			branch = vim.split(vim.fn.system({
-				"git",
-				"-C",
-				cwd,
-				"branch",
-				"--show-current"
-			}), "\n", { trimempty = true });
+		branch = vim.split(get_branch(), "\n", { trimempty = true });
 
 			vim.w[window].__git_branch = branch;
 			vim.w[window].__branch_time = vim.uv.hrtime();
