@@ -199,7 +199,7 @@ tabline.detach = function ()
 
 	vim.scheduleefer_fn(function ()
 		tabline.state.attached = false;
-		vim.o.tabline = utils.get_const(vim.o.__tabline) or "";
+		vim.o.tabline = vim.o.__tabline or "";
 
 		vim.g.__tlID = nil;
 		vim.g.__tabline = nil;
@@ -232,7 +232,7 @@ tabline.attach = function ()
 
 	tabline.update_id();
 
-	vim.g.__tabline = utils.constant(vim.o.tabline);
+	vim.g.__tabline = vim.o.tabline;
 	vim.o.tabline = "%!v:lua.require('bars.tabline').render()";
 
 	---|fE

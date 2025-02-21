@@ -259,7 +259,7 @@ statuscolumn.detach = function (window)
 
 		vim.api.nvim_set_option_value(
 			"statuscolumn",
-			utils.get_const(vim.w[window].__statuscolumn) or utils.get_const(vim.g.__statuscolumn) or "",
+			vim.w[window].__statuscolumn or vim.g.__statuscolumn or "",
 			{
 				scope = "local",
 				win = window
@@ -267,7 +267,7 @@ statuscolumn.detach = function (window)
 		);
 		vim.api.nvim_set_option_value(
 			"numberwidth",
-			utils.get_const(vim.w[window].__numberwidth) or utils.get_const(vim.g.__numberwidth) or 1,
+			vim.w[window].__numberwidth or vim.g.__numberwidth or 1,
 			{
 				scope = "local",
 				win = window
@@ -275,7 +275,7 @@ statuscolumn.detach = function (window)
 		);
 		vim.api.nvim_set_option_value(
 			"relativenumber",
-			utils.get_const(vim.w[window].__relativenumber) or utils.get_const(vim.g.__relativenumber) or false,
+			vim.w[window].__relativenumber or vim.g.__relativenumber or false,
 			{
 				scope = "local",
 				win = window
@@ -335,9 +335,9 @@ statuscolumn.attach = function (window)
 
 	statuscolumn.update_id(window);
 
-	vim.w[window].__relativenumber = utils.constant(vim.wo[window].relativenumber);
-	vim.w[window].__numberwidth = utils.constant(vim.wo[window].numberwidth);
-	vim.w[window].__statuscolumn = utils.constant(vim.wo[window].statuscolumn);
+	vim.w[window].__relativenumber = vim.wo[window].relativenumber;
+	vim.w[window].__numberwidth = vim.wo[window].numberwidth;
+	vim.w[window].__statuscolumn = vim.wo[window].statuscolumn;
 
 	vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
 

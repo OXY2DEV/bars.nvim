@@ -6,14 +6,14 @@ require("bars.global");
 
 ---|fS "Cache default values."
 
-vim.g.__statusline = utils.constant(vim.o.statusline);
+vim.g.__statusline = vim.o.statusline;
 
-vim.g.__relativenumber = utils.constant(vim.o.relativenumber);
-vim.g.__numberwidth = utils.constant(vim.o.numberwidth);
-vim.g.__statuscolumn = utils.constant(vim.o.statuscolumn);
+vim.g.__relativenumber = vim.o.relativenumber;
+vim.g.__numberwidth = vim.o.numberwidth;
+vim.g.__statuscolumn = vim.o.statuscolumn;
 
-vim.g.__winbar = utils.constant(vim.o.winbar);
-vim.g.__tabline = utils.constant(vim.o.tabline);
+vim.g.__winbar = vim.o.winbar;
+vim.g.__tabline = vim.o.tabline;
 
 ---|fE
 

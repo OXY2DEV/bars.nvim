@@ -508,7 +508,7 @@ statusline.detach = function (window)
 		vim.w[window].__slID = nil;
 		vim.api.nvim_set_option_value(
 			"statusline",
-			utils.get_const(vim.w[window].__statusline)or utils.get_const(vim.g.__statusline) or "",
+			vim.w[window].__statusline or vim.g.__statusline or "",
 			{
 				scope = "local",
 				win = window
@@ -567,7 +567,7 @@ statusline.attach = function (window)
 
 	statusline.update_id(window);
 
-	vim.w[window].__statusline = utils.constant(vim.wo[window].statusline);
+	vim.w[window].__statusline = vim.wo[window].statusline;
 	vim.wo[window].statusline = "%!v:lua.require('bars.statusline').render()";
 
 	---|fE

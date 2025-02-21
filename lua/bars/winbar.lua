@@ -688,7 +688,7 @@ winbar.detach = function (window)
 
 		vim.api.nvim_set_option_value(
 			"winbar",
-			utils.get_const(vim.w[window].__winbar) or utils.get_const(vim.g.__winbar) or "",
+			vim.w[window].__winbar or vim.g.__winbar or "",
 			{
 				scope = "local",
 				win = window
@@ -748,7 +748,7 @@ winbar.attach = function (window)
 
 	winbar.update_id(window);
 
-	vim.w[window].__winbar = utils.constant(vim.wo[window].winbar);
+	vim.w[window].__winbar = vim.wo[window].winbar;
 	vim.wo[window].winbar = "%!v:lua.require('bars.winbar').render()";
 
 	---|fE
