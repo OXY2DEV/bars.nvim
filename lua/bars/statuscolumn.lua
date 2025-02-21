@@ -205,8 +205,6 @@ statuscolumn.render = function ()
 		return "";
 	elseif statuscolumn.state.attached_windows[window] ~= true then
 		--- We aren't attached to this window.
-		--- Detach and exit.
-		statuscolumn.detach(window);
 		return "";
 	end
 
@@ -272,6 +270,10 @@ statuscolumn.detach = function (window)
 	---|fS
 
 	vim.schedule(function ()
+		if not window or vim.api.nvim_win_is_valid(window) == false then
+			return;
+		end
+
 		vim.w[window].__scID = nil;
 
 		vim.api.nvim_set_option_value(
@@ -339,7 +341,9 @@ end
 statuscolumn.attach = function (window)
 	---|fS
 
-	if statuscolumn.state.enable == false then
+	if not window or vim.api.nvim_win_is_valid(window) == false then
+		return;
+	elseif statuscolumn.state.enable == false then
 		return;
 	elseif statuscolumn.can_attach(window) == false then
 		return;
