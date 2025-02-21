@@ -22,7 +22,7 @@ ffi.cdef(table.concat(C, "\n"));
 --- Line number.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.lnum
+---@param config statuscolumn.parts.lnum
 ---@return string
 scC.lnum = function (buffer, window, config)
 	---|fS
@@ -73,30 +73,38 @@ scC.lnum = function (buffer, window, config)
 			});
 		end
 	elseif config.mode == 1 then
-		_o = _o
-			.. utils.set_hl(get(config.hl, vim.v.relnum + 1))
-			.. utils.align("right", vim.v.lnum, max_width)
-		;
+		_o = table.concat({
+			_o,
+			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
+			utils.align("right", vim.v.lnum, max_width)
+		});
 	elseif config.mode == 2 then
-		_o = _o
-			.. utils.set_hl(get(config.hl, vim.v.relnum + 1))
-			.. utils.align("right", vim.v.relnum, max_width)
-		;
+		_o = table.concat({
+			_o,
+			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
+			utils.align("right", vim.v.relnum, max_width)
+		});
 	elseif vim.v.relnum == 0 then
-		_o = _o
-			.. utils.set_hl(get(config.hl, vim.v.relnum + 1, true))
-			.. utils.align("right", vim.v.lnum, max_width)
-		;
+		_o = table.concat({
+			_o,
+			utils.set_hl(get(config.hl, vim.v.relnum + 1, true)),
+			utils.align("right", vim.v.lnum, max_width)
+		});
 	else
-		_o = _o
-			.. utils.set_hl(get(config.hl, vim.v.relnum + 1))
-			.. utils.align("right", vim.v.relnum, max_width)
-		;
+		_o = table.concat({
+			_o,
+			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
+			utils.align("right", vim.v.relnum, max_width)
+		});
 	end
 
-	--- FEAT, Maybe Later.
-	-- if config.click_support ~= false then
-	-- end
+	if config.click ~= false then
+		_o = table.concat({
+			"%@v:lua.__goto_lnum@",
+			_o,
+			"%X"
+		});
+	end
 
 	return _o;
 

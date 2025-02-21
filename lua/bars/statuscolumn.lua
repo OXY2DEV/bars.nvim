@@ -43,6 +43,11 @@ statuscolumn.config = {
 			},
 			{
 				kind = "lnum",
+				mode = 3,
+
+				click = function (_, window)
+					return window == vim.api.nvim_get_current_win();
+				end,
 
 				wrap_markers = "│",
 				virt_markers = "│",
@@ -121,6 +126,7 @@ statuscolumn.config = {
 		condition = function (buffer)
 			return vim.bo[buffer].ft == "query" and vim.bo[buffer].bt == "nofile";
 		end,
+
 		parts = {
 			{
 				kind = "empty",

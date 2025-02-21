@@ -1,6 +1,14 @@
 local statusline = require("bars.statusline");
 local utils = require("bars.utils");
 
+--- Goes to clicked line number.
+_G.__goto_lnum = function ()
+	local mousepos = vim.fn.getmousepos();
+	local cursor = vim.api.nvim_win_get_cursor(mousepos.winid);
+
+	pcall(vim.api.nvim_win_set_cursor, mousepos.winid, { mousepos.line, cursor[2] });
+end
+
 --- Changes the type of diagnostic
 --- that are shown on the statusline.
 _G.__change_diagnostic_state = function ()
