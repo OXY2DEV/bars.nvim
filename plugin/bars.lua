@@ -1,6 +1,3 @@
---- Utility functions.
-local utils = require("bars.utils");
-
 --- Load all the global functions.
 require("bars.global");
 
