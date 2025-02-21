@@ -1,10 +1,9 @@
 local statuscolumn = {};
-local utils = require("bars.utils");
 local components = require("bars.components.statuscolumn");
 
 ---@type statuscolumn.config
 statuscolumn.config = {
-	ignore_filetypes = { "query", "blink-cmp-menu" },
+	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
 	default = {
@@ -120,7 +119,7 @@ statuscolumn.config = {
 
 	query = {
 		condition = function (buffer)
-			return vim.bo[buffer].ft == "query";
+			return vim.bo[buffer].ft == "query" and vim.bo[buffer].bt == "nofile";
 		end,
 		parts = {
 			{
@@ -193,14 +192,26 @@ statuscolumn.render = function ()
 	local buffer = vim.api.nvim_win_get_buf(window);
 
 	if window ~= vim.g.statusline_winid then
+		--- Window ID changed while rendering.
+		--- Abort rendering.
+		---
+		--- Something must have caused lag.
 		return "";
 	elseif statuscolumn.state.attached_windows[window] ~= true then
+		--- We aren't attached to this window.
+		--- Detach and exit.
+		statuscolumn.detach(window);
 		return "";
 	end
 
-	local scID = vim.w[window].__scID;
+	--- Statuscolumn config ID.
+	---@type string
+	local scID = vim.w[window].__scID or "default";
 
 	if not scID then
+		--- ID not found?
+		--- User might've manually deleted
+		--- the ID.
 		return "";
 	end
 
