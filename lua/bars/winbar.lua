@@ -471,6 +471,98 @@ winbar.config = {
 					},
 
 					---|fE
+				},
+
+				["^lua_patterns$"] = {
+					chunk = {
+						icon = "󰛪 ",
+						hl = "@comment"
+					},
+
+
+					start_assertion = {
+						icon = "󰾺 ",
+						hl = "@keyword"
+					},
+
+					end_assertion = {
+						icon = "󰾸 ",
+						hl = "@keyword"
+					},
+
+
+					zero_or_more = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+
+					one_or_more = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+
+					lazy = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+
+					optional = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+
+
+					literal_character = {
+						icon = "󱄽 ",
+						hl = "@character"
+					},
+
+					character_reference = {
+						icon = " ",
+						hl = "@constant.builtin"
+					},
+
+					any_character = {
+						icon = " ",
+						hl = "@variable.member"
+					},
+
+
+					character_class = {
+						icon = "󰏗 ",
+						hl = "@variable.builtin"
+					},
+
+					character_range = {
+						icon = "󰊱 ",
+						hl = "@comment"
+					},
+
+					character_set = {
+						icon = "󱉓 ",
+						hl = "@label"
+					},
+
+					character_set_content = {
+						icon = "󰆦 ",
+						hl = "@comment"
+					},
+
+					caprure_group = {
+						icon = " ",
+						hl = "@label"
+					},
+
+
+					escaped_character = {
+						icon = "󰩈 ",
+						hl = "@string.escape"
+					},
+
+					escape_sequence = {
+						icon = "󰩈 ",
+						hl = "@character.special"
+					},
 				}
 			}
 		}
