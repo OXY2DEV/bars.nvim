@@ -339,7 +339,9 @@ slC.branch = function (_, window, main_config)
 		end
 	end
 
-	if branch[1]:match("^fatal%:") then
+	if not branch or vim.tbl_isempty(branch) then
+		return "";
+	elseif branch[1]:match("^fatal%:") then
 		return "";
 	elseif branch[1]:match("^error%:") then
 		return "";
