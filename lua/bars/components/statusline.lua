@@ -1,64 +1,134 @@
 local slC = {};
 local utils = require("bars.utils");
 
---- Shows current mode.
----@param _ integer Buffer ID.
----@param window integer Window ID.
----@param main_config statusline.parts.mode
+--- Shows current git branch.
+---@param _ any
+---@param window any
+---@param main_config statusline.parts.branch
 ---@return string
-slC.mode = function (_, window, main_config)
+slC.branch = function (_, window, main_config)
 	---|fS
 
-	local ignore = { "default", "min_width", "kind", "condition", "kind" };
+	local cwd;
+	local ignore = { "default", "condition", "throttle", "kind" };
 
-	---@type string Current mode shorthand.
-	local mode = vim.api.nvim_get_mode().mode;
-	local config = utils.match(main_config, mode, ignore);
+	vim.api.nvim_win_call(window, function ()
+		cwd = vim.fn.getcwd(window);
+	end);
 
-	local min_width = main_config.min_width or 42;
-
-	local w = vim.api.nvim_win_get_width(window)
-
-	if window ~= vim.api.nvim_get_current_win() or w <= min_width then
-		return table.concat({
-			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-
-			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
-		});
-	else
-		return table.concat({
-			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-			string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
-
-			string.format("%s%s", utils.set_hl(config.hl), config.text or mode or ""),
-
-			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
-		});
+	if type(cwd) ~= "string" then
+		return "";
 	end
 
-	---|fE
-end
+	local branch;
 
---- New section.
----@param config statusline.parts.section Configuration.
----@return string
-slC.section = function (_, _, config, _)
-	---|fS
+	--- Gets the current git branch.
+	---@return string
+	local function get_branch ()
+		---|fS
 
-	return table.concat({
-		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-		string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+		--- Are we in a repo?
+		---@type string
+		local in_repo = vim.fn.system({
+			"git",
+			"-C",
+			cwd,
+			"rev-parse",
+			"--is-inside-work-tree"
+		});
 
-		string.format("%s%s", utils.set_hl(config.hl), config.text or ""),
+		if not in_repo or string.match(in_repo, "^true") == nil then
+			--- The output doesn't exist or it doesn't
+			--- start with "true" then return.
+			return "";
+		end
 
-		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
-	});
+		--- First check if we are inside
+		--- a branch.
+		---@type string | ""
+		local _branch = vim.fn.system({
+			"git",
+			"-C",
+			cwd,
+			"branch",
+			"--show-current"
+		});
+
+		if _branch == "" then
+			--- We are not in a branch.
+			--- Attempt to get commit hash(short).
+			---@type string
+			_branch = vim.fn.system({
+				"git",
+				"-C",
+				cwd,
+				"rev-parse",
+				"--short",
+				"HEAD"
+			});
+		end
+
+		return _branch or "";
+
+		---|fE
+	end
+
+	if not vim.w[window].__git_branch then
+		--- Cached branch name not found.
+		--- Get current branch name.
+		---@type string
+		branch = vim.split(get_branch(), "\n", { trimempty = true });
+
+		vim.w[window].__git_branch = branch;
+		vim.w[window].__branch_time = vim.uv.hrtime();
+	else
+		---@type infowhat
+		local now = vim.uv.hrtime();
+		---@type integer
+		local bef = vim.w.__branch_time or 0;
+
+		--- Branch value update delay.
+		---@type integer
+		local throttle = main_config.throttle or 2000;
+
+		if now - bef >= (throttle * 1e6) then
+			--- We have waited longer than `throttle`.
+			---@type string
+			branch = vim.split(get_branch(), "\n", { trimempty = true });
+
+			--- Update cached value & update time.
+			vim.w[window].__git_branch = branch;
+			vim.w[window].__branch_time = vim.uv.hrtime();
+		else
+			--- Not enough time has passed.
+			--- Use cached value.
+			branch = vim.w[window].__git_branch;
+		end
+	end
+
+	if not branch or vim.tbl_isempty(branch) then
+		return "";
+	elseif branch[1]:match("^fatal%:") then
+		return "";
+	elseif branch[1]:match("^error%:") then
+		return "";
+	else
+		---@type branch.opts
+		local config = utils.match(main_config, branch[1], ignore);
+
+		return table.concat({
+			utils.set_hl(config.hl),
+
+			string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+			string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+			string.format("%s%s", utils.set_hl(config.icon_hl), config.icon or ""),
+
+			config.text or branch[1] or "",
+
+			string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+			string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or "")
+		});
+	end
 
 	---|fE
 end
@@ -148,24 +218,19 @@ slC.bufname = function (buffer, _, main_config)
 	end
 
 	return table.concat({
-		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-		string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+		utils.set_hl(config.hl),
 
-		string.format("%s%s", utils.set_hl(config.hl), config.text or ""),
+		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+		string.format("%s%s", utils.set_hl(config.icon_hl), config.icon or ""),
 
-		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+		string.format("%s", config.text or ""),
+
+		string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+		string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or ""),
 	});
 
 	---|fE
-end
-
---- Empty section.
----@param config statusline.parts.empty
----@return string
-slC.empty = function (_, _, config)
-	return utils.set_hl(config.hl) .. "%=";
 end
 
 --- Diagnostics section
@@ -285,115 +350,75 @@ slC.diagnostics = function (buffer, window, config)
 	---|fE
 end
 
---- Shows current git branch.
----@param _ any
----@param window any
----@param main_config statusline.parts.branch
+--- Empty section.
+---@param config statusline.parts.empty
 ---@return string
-slC.branch = function (_, window, main_config)
+slC.empty = function (_, _, config)
+	return utils.set_hl(config.hl) .. "%=";
+end
+
+--- Shows current mode.
+---@param _ integer Buffer ID.
+---@param window integer Window ID.
+---@param main_config statusline.parts.mode
+---@return string
+slC.mode = function (_, window, main_config)
 	---|fS
 
-	local cwd;
-	local ignore = { "default", "condition", "throttle", "kind" };
+	local ignore = { "default", "min_width", "kind", "condition", "kind" };
 
-	vim.api.nvim_win_call(window, function ()
-		cwd = vim.fn.getcwd(window);
-	end);
+	---@type string Current mode shorthand.
+	local mode = vim.api.nvim_get_mode().mode;
+	local config = utils.match(main_config, mode, ignore);
 
-	if type(cwd) ~= "string" then
-		return "";
-	end
+	local min_width = main_config.min_width or 42;
 
-	local branch;
+	local w = vim.api.nvim_win_get_width(window)
 
-	--- Gets the current git branch.
-	---@return string
-	local function get_branch ()
-		---|fS
-
-		--- Are we in a repo?
-		---@type string
-		local in_repo = vim.fn.system({
-			"git",
-			"-C",
-			cwd,
-			"rev-parse",
-			"--is-inside-work-tree"
-		});
-
-		if not in_repo or string.match(in_repo, "^true") == nil then
-			--- The output doesn't exist or it doesn't
-			--- start with "true" then return.
-			return "";
-		end
-
-		local _branch = vim.fn.system({
-			"git",
-			"-C",
-			cwd,
-			"branch",
-			"--show-current"
-		});
-
-		if _branch == "" then
-			--- Detached HEAD.
-			_branch = vim.fn.system({
-				"git",
-				"-C",
-				cwd,
-				"rev-parse",
-				"--short",
-				"HEAD"
-			});
-		end
-
-		return _branch or "";
-
-		---|fE
-	end
-
-	if not vim.w[window].__git_branch then
-		get_branch()
-		branch = vim.split(get_branch(), "\n", { trimempty = true });
-
-		vim.w[window].__git_branch = branch;
-		vim.w[window].__branch_time = vim.uv.hrtime();
-	else
-		local now = vim.uv.hrtime();
-		local bef = vim.w.__branch_time or 0;
-
-		local throttle = main_config.throttle or 2000;
-
-		if now - bef >= (throttle * 1e6) then
-		branch = vim.split(get_branch(), "\n", { trimempty = true });
-
-			vim.w[window].__git_branch = branch;
-			vim.w[window].__branch_time = vim.uv.hrtime();
-		else
-			branch = vim.w[window].__git_branch;
-		end
-	end
-
-	if not branch or vim.tbl_isempty(branch) then
-		return "";
-	elseif branch[1]:match("^fatal%:") then
-		return "";
-	elseif branch[1]:match("^error%:") then
-		return "";
-	else
-		local config = utils.match(main_config, branch[1], ignore);
-
+	if window ~= vim.api.nvim_get_current_win() or w <= min_width then
 		return table.concat({
 			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
 			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-			string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon or ""),
-
-			config.text or branch[1] or "",
 
 			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or "")
+			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+		});
+	else
+		return table.concat({
+			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
+			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
+			string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+
+			string.format("%s%s", utils.set_hl(config.hl), config.text or mode or ""),
+
+			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
+			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
 		});
 	end
+
+	---|fE
+end
+
+--- New section.
+---@param config statusline.parts.section Configuration.
+---@return string
+slC.section = function (_, _, config, _)
+	---|fS
+
+	return table.concat({
+		config.click and string.format("%@%s@", config.click) or "",
+
+		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
+		string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+
+		string.format("%s%s", utils.set_hl(config.hl), config.text or ""),
+
+		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
+		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+
+		config.click and "%X" or "",
+	});
 
 	---|fE
 end
@@ -443,6 +468,8 @@ slC.ruler = function (_, window, main_config)
 
 	---|fE
 end
+
+-----------------------------------------------------------------------------
 
 --- Returns the output of the section {name}.
 ---@param name string

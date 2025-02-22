@@ -1,5 +1,4 @@
 local statusline = {};
-local utils = require("bars.utils");
 local components = require("bars.components.statusline");
 
 --- Configuration table.

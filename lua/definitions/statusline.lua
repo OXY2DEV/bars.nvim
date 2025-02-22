@@ -1,16 +1,14 @@
 --- Type definitions for the statusline.
 ---@meta
 
-local M = {};
-
-
 --- Statusline state variable(s).
 ---@class statusline.state
 ---
---- When `true`, attach to new windows.
+--- Should we attach to new windows?
 ---@field enable boolean
+---
 --- List of attached windows.
----@field attached_windows { [integer]: boolean }
+---@field attached_windows table<integer, boolean>
 
 -----------------------------------------------------------------------------
 
@@ -22,62 +20,80 @@ local M = {};
 --- Buftypes to ignore.
 ---@field ignore_buftypes? string[]
 ---
----@field condition? fun(buffer: integer): boolean | nil
+--- Additional condition for attaching to new windows.
+---@field condition? fun(buffer: integer, window: integer): boolean | nil
 ---
---- Default configuration.
----@field default statusline.group
---- Custom configuration group {string}.
----@field [string] statusline.group
+--- Default style.
+---@field default statusline_style
+---
+--- Custom style.
+---@field [string] statusline_style
 
 
---- Configuration group.
----@class statusline.group
----
---- Condition for this group.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
---- Parts of this statusline group.
----@field parts table[]
+---@alias statusline_style
+---| statusline.parts.section
+---| statusline.parts.ruler
+---| statusline.parts.mode
+---| statusline.parts.diagnostics
+---| statusline.parts.branch
+---| statusline.parts.bufname
 
 -----------------------------------------------------------------------------
 
---- Section
----@class statusline.parts.section
+--- Shows current git branch.
+---@class statusline.parts.branch
 ---
----@field kind? "section"
+--- Optional condition for this component.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind "branch"
+---
+--- Delay(in milliseconds) between branch
+--- name updates.
+---@field throttle? integer
+---
+--- Default configuration for git branch.
+---@field default branch.opts
+---
+--- Configuration for branches whose name
+--- matches `string`.
+---@field [string] branch.opts
+
+
+--- Git branch component options.
+--- Drawn like so,
+---
+---```txt
+--- abc----de
+--- │││    │└ corner_right
+--- │││    └ padding_right
+--- ││└ icon
+--- │└ padding_left
+--- └ corner_left
+---```
+---@class branch.opts
 ---
 ---@field corner_left? string
 ---@field padding_left? string
----@field icon? string
 ---
+--- Alternate branch name.
 ---@field text? string
+---@field icon? string
 ---
 ---@field padding_right? string
 ---@field corner_right? string
 ---
----
+--- Primary highlight group.
 ---@field hl? string
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
----@field icon_hl? string
 ---
----@field text_hl? string
+---@field icon_hl? string
 ---
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
-
------------------------------------------------------------------------------
-
---- Mode.
----@class statusline.parts.mode
----
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
----@field kind "mode"
----@field min_width? integer
----
----@field default statusline.parts.section
----@field [string] statusline.parts.section
 
 -----------------------------------------------------------------------------
 
@@ -120,6 +136,50 @@ local M = {};
 ---
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
+
+-----------------------------------------------------------------------------
+
+--- Section
+---@class statusline.parts.section
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer): boolean
+---
+---@field kind? "section"
+---
+---@field corner_left? string
+---@field padding_left? string
+---@field icon? string
+---
+---@field text? string
+---
+---@field padding_right? string
+---@field corner_right? string
+---
+---
+---@field hl? string
+---
+---@field corner_left_hl? string
+---@field padding_left_hl? string
+---@field icon_hl? string
+---
+---@field text_hl? string
+---
+---@field padding_right_hl? string
+---@field corner_right_hl? string
+
+-----------------------------------------------------------------------------
+
+--- Mode.
+---@class statusline.parts.mode
+---
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+---@field kind "mode"
+---@field min_width? integer
+---
+---@field default statusline.parts.section
+---@field [string] statusline.parts.section
 
 -----------------------------------------------------------------------------
 
@@ -182,19 +242,6 @@ local M = {};
 
 -----------------------------------------------------------------------------
 
---- Git branch.
----@class statusline.parts.branch
----
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
----@field kind "branch"
----@field throttle? integer
----
----@field default statusline.parts.section
----@field [string] statusline.parts.section
-
------------------------------------------------------------------------------
-
 --- Custom ruler.
 ---@class statusline.parts.ruler
 ---
@@ -228,6 +275,3 @@ local M = {};
 ---
 ---@field hl? string
 
------------------------------------------------------------------------------
-
-return M;
