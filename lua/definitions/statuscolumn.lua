@@ -83,42 +83,97 @@
 ---@field hl? string | string[]
 
 
+--- Empty section.
 ---@class statuscolumn.parts.empty
 ---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of part is this?
 ---@field kind "empty"
+---
+--- How many columns should this span?
 ---@field len integer
 ---
+--- Highlight group for this section.
 ---@field hl? string
 
 
+--- Border for the statuscolumn.
 ---@class statuscolumn.parts.border
 ---
+--- What kind of component is this?
 ---@field kind "border"
 ---
+--- Text to use for the border.
+--- Can be a list to create a gradient.
 ---@field text string | string[]
+---
+--- Highlight group for the border.
+--- Can be a list to create a gradient.
 ---@field hl? string | string[]
 
 
+--- Fold column for the statuscolumn.
 ---@class statuscolumn.parts.folds
 ---
+--- What kind of component is this?
 ---@field kind "folds"
 ---
+--- Text to show for closed fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
 ---@field close_text string | string[]
+---
+--- Highlight group for the `close_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
 ---@field close_hl? string | string[]
 ---
+--- Text to show for opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
 ---@field open_text string | string[]
+---
+--- Highlight group for the `open_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
 ---@field open_hl? string | string[]
 ---
+--- Text to show the scope of opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
 ---@field scope_text string | string[]
+---
+--- Highlight group for the `scope_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
 ---@field scope_hl? string | string[]
 ---
+--- Text to show at the end of opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
 ---@field scope_end_text string | string[]
+---
+--- Highlight group for the `scope_end_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
 ---@field scope_end_hl? string | string[]
 ---
+--- Text to show where fold level changes.
+--- Can be a list to use a different
+--- text for different levels of folds.
 ---@field scope_merge_text string | string[]
+---
+--- Highlight group for the `scope_merge_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
 ---@field scope_merge_hl? string | string[]
 ---
----@field fill_text string | string[]
+--- Text for normal lines.
+---@field fill_text string
+---
+--- Highlight group for `fill_text`.
 ---@field fill_hl? string
 
 

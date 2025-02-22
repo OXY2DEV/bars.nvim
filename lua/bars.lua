@@ -1,26 +1,16 @@
 local bars = {};
 
----@class bars.config
----
---- When true, all options are set
---- globally.
---- Can be used to prevent visible
---- changes to the bars & lines when
---- opening Neovim or new windows.
----@field global boolean
----
----@field statusline statusline.config
----@field statuscolumn statuscolumn.config
----@field winbar winbar.config
----
----@field tabline tabline.config
+---@type bars.config
 bars.config = {
 	global = true
 };
 
+--- Setup function.
+--- Should be optional.
+---@param config bars.config | nil
 bars.setup = function (config)
+	--- Update the configuration.
 	if type(config) == "table" then
-		--- Update configuration.
 		bars.config = vim.tbl_deep_extend("force", bars.config, config);
 	end
 
