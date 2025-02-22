@@ -97,109 +97,84 @@
 
 -----------------------------------------------------------------------------
 
---- Buffer name.
+--- Shows buffer name.
 ---@class statusline.parts.bufname
 ---
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
+--- What kind of component is this?
 ---@field kind "bufname"
+---
+--- Maximum name length.
 ---@field max_len? integer
+---
+--- Symbol used to show truncation.
 ---@field truncate_symbol? string
 ---
 ---@field default bufname.opts
 ---@field [string] bufname.opts
 
 
+--- Buffer name component options.
+--- Drawn like so,
+---
+---```txt
+--- abc----de
+--- │││    │└ corner_right
+--- │││    └ padding_right
+--- ││└ icon / nomodifiable_icon
+--- │└ padding_left
+--- └ corner_left
+---```
 ---@class bufname.opts
 ---
 ---@field corner_left? string
 ---@field padding_left? string
 ---
+--- Alternate branch name.
+---@field text? string
 ---@field icon? string
+---
+--- Icon for 'nomodifiable' buffers.
 ---@field nomodifiable_icon? string
 ---
----@field text? string
----
 ---@field padding_right? string
 ---@field corner_right? string
 ---
----
+--- Primary highlight group.
 ---@field hl? string
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
 ---
----@field icon_hl? string[] | string
----@field nomodifiable_icon_hl? string
----
----@field text_hl? string
----
----@field padding_right_hl? string
----@field corner_right_hl? string
-
------------------------------------------------------------------------------
-
---- Section
----@class statusline.parts.section
----
---- Condition for this component.
----@field condition? fun(buffer: integer, window: integer): boolean
----
----@field kind? "section"
----
----@field corner_left? string
----@field padding_left? string
----@field icon? string
----
----@field text? string
----
----@field padding_right? string
----@field corner_right? string
----
----
----@field hl? string
----
----@field corner_left_hl? string
----@field padding_left_hl? string
 ---@field icon_hl? string
 ---
----@field text_hl? string
+--- Highlight group for `nomodifiable_icon`
+---@field nomodifiable_icon_hl? string
 ---
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
 
 -----------------------------------------------------------------------------
 
---- Mode.
----@class statusline.parts.mode
----
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
----@field kind "mode"
----@field min_width? integer
----
----@field default statusline.parts.section
----@field [string] statusline.parts.section
-
------------------------------------------------------------------------------
-
---- Empty space.
----@class statusline.parts.empty
----
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
----@field kind "empty"
----@field hl? string
-
------------------------------------------------------------------------------
-
---- Diagnostics count.
+--- Shows diagnostics count.
 ---@class statusline.parts.diagnostics
 ---
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
+--- What kind of component is this?
 ---@field kind "diagnostics"
+---
+--- Should this component be automatically hidden?
+---
+--- > This component gets hidden if a buffer has
+--- > no client attached to it.
 ---@field auto_hide? boolean
+---
+--- Determines what type of diagnostics are
+--- shown.
 ---@field default_mode?
 ---| 1 Error
 ---| 2 Warning
@@ -219,59 +194,205 @@
 ---@field hint_icon? string
 ---@field hint_hl? string
 ---
+--- Icon to show when no diagnostics are available.
 ---@field empty_icon? string
+---
+--- Text to show when no diagnostics are available.
 ---@field empty_text? string
+---
+--- Highlight group to use when no diagnostics are
+--- available.
 ---@field empty_hl? string
 ---
+--- Text used as separator between each diagnostics
+--- type.
 ---@field separator? string
+---
+--- Highlight group for the separator.
 ---@field separator_hl? string
 ---
+--- Left corner of the component. 
 ---@field corner_left? string
 ---@field corner_left_hl? string
 ---
+--- Left padding of the component. 
 ---@field padding_left? string
 ---@field padding_left_hl? string
 ---
+--- Right padding of the component. 
 ---@field padding_right? string
 ---@field padding_right_hl? string
 ---
+--- Right corner of the component. 
 ---@field corner_right? string
 ---@field corner_right_hl? string
 ---
+--- Primary highlight group for the component
 ---@field hl? string
+
+-----------------------------------------------------------------------------
+
+--- Empty space.
+---@class statusline.parts.empty
+---
+--- Optional condition for this component.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind "empty"
+---
+--- Highlight group for this component.
+---@field hl? string
+
+-----------------------------------------------------------------------------
+
+--- Shows current mode.
+---@class statusline.parts.mode
+---
+--- Optional condition for this component.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind "mode"
+---
+--- Should we show a compact version?
+---@field compact? boolean | fun(buffer: integer, window: integer): boolean
+---
+---@field default mode.opts
+---@field [string] mode.opts
+
+
+--- Mode name component options.
+--- Drawn like so,
+---
+---```txt
+--- abc----de
+--- │││    │└ corner_right
+--- │││    └ padding_right
+--- ││└ icon
+--- │└ padding_left
+--- └ corner_left
+---```
+---@class mode.opts
+---
+---@field corner_left? string
+---@field padding_left? string
+---
+--- Mode name.
+---@field text? string
+---@field icon? string
+---
+---@field padding_right? string
+---@field corner_right? string
+---
+--- Primary highlight group.
+---@field hl? string
+---
+---@field corner_left_hl? string
+---@field padding_left_hl? string
+---
+---@field icon_hl? string
+---
+---@field padding_right_hl? string
+---@field corner_right_hl? string
+
+-----------------------------------------------------------------------------
+
+--- Custom section for the statusline.
+--- Drawn like so,
+---
+---```txt
+--- abc-de
+--- │││││└ corner_right
+--- ││││└ padding_right
+--- │││└ text
+--- ││└ icon
+--- │└ padding_left
+--- └ corner_left
+---@class statusline.parts.section
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind? "section"
+---
+--- Reference to a click handler.
+---@field click? string
+---
+---@field corner_left? string
+---@field padding_left? string
+---@field icon? string
+---
+---@field text? string
+---
+---@field padding_right? string
+---@field corner_right? string
+---
+--- Primary highlight group
+---@field hl? string
+---
+---@field corner_left_hl? string
+---@field padding_left_hl? string
+---@field icon_hl? string
+---
+---@field text_hl? string
+---
+---@field padding_right_hl? string
+---@field corner_right_hl? string
 
 -----------------------------------------------------------------------------
 
 --- Custom ruler.
 ---@class statusline.parts.ruler
 ---
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
+--- What kind of component is this?
 ---@field kind "ruler"
 ---
+--- Default configuration.
 ---@field default ruler.opts
+---
+--- Configuration for visual modes.
 ---@field visual ruler.opts
 
 
+--- Ruler component options.
+--- Drawn like so,
+---
+---```txt
+--- abcXX-YYde
+--- │││  │  │└ corner_right
+--- │││  │  └ padding_right
+--- │││  └ separator
+--- ││└ icon
+--- │└ padding_left
+--- └ corner_left
 ---@class ruler.opts
 ---
----@field separator? string
----@field separator_hl? string
----
 ---@field corner_left? string
----@field corner_left_hl? string
----
 ---@field padding_left? string
----@field padding_left_hl? string
 ---
 ---@field icon? string
----@field icon_hl? string
+---
+--- Separator between texts.
+---@field separator? string
 ---
 ---@field padding_right? string
----@field padding_right_hl? string
----
 ---@field corner_right? string
+---
+---
+---@field corner_left_hl? string
+---@field padding_left_hl? string
+---
+---@field icon_hl? string
+---@field separator_hl? string
+---
+---@field padding_right_hl? string
 ---@field corner_right_hl? string
 ---
+--- Primary highlight group.
 ---@field hl? string
 

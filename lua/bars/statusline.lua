@@ -12,6 +12,14 @@ statusline.config = {
 			{
 				kind = "mode",
 
+				compact = function (_, window)
+					if window ~= vim.api.nvim_get_current_win() then
+						return true;
+					else
+						return vim.api.nvim_win_get_width(window) < math.ceil(vim.o.columns * 0.5);
+					end
+				end,
+
 				---|fS "Mode configuration"
 
 				default = {

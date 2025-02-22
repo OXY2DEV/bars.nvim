@@ -2,8 +2,8 @@ local slC = {};
 local utils = require("bars.utils");
 
 --- Shows current git branch.
----@param _ any
----@param window any
+---@param _ integer
+---@param window integer
 ---@param main_config statusline.parts.branch
 ---@return string
 slC.branch = function (_, window, main_config)
@@ -134,8 +134,8 @@ slC.branch = function (_, window, main_config)
 end
 
 --- Shows the buffer name.
----@param buffer any
----@param _ any
+---@param buffer integer
+---@param _ integer
 ---@param main_config statusline.parts.bufname
 slC.bufname = function (buffer, _, main_config)
 	---|fS
@@ -153,7 +153,7 @@ slC.bufname = function (buffer, _, main_config)
 		if vim.fn.strchars(fname) <= name_len then
 			return fname;
 		else
-			local truncate_symbol = main_config.truncate_symbol or ">";
+			local truncate_symbol = main_config.truncate_symbol or "…";
 
 			local ext  = vim.fn.fnamemodify(fname, ":e");
 			local name = vim.fn.fnamemodify(fname, ":t:r");
@@ -335,14 +335,15 @@ slC.diagnostics = function (buffer, window, config)
 
 	return table.concat({
 		"%@v:lua.__change_diagnostic_state@",
+		utils.set_hl(config.hl),
 
-		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
+		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
 
 		_d or "",
 
-		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+		string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or ""),
 
 		"%X"
 	});
@@ -358,64 +359,64 @@ slC.empty = function (_, _, config)
 end
 
 --- Shows current mode.
----@param _ integer Buffer ID.
----@param window integer Window ID.
 ---@param main_config statusline.parts.mode
 ---@return string
-slC.mode = function (_, window, main_config)
+slC.mode = function (_, _, main_config)
 	---|fS
 
 	local ignore = { "default", "min_width", "kind", "condition", "kind" };
 
 	---@type string Current mode shorthand.
 	local mode = vim.api.nvim_get_mode().mode;
+	---@type mode.opts
 	local config = utils.match(main_config, mode, ignore);
 
-	local min_width = main_config.min_width or 42;
-
-	local w = vim.api.nvim_win_get_width(window)
-
-	if window ~= vim.api.nvim_get_current_win() or w <= min_width then
+	if main_config.compact then
 		return table.concat({
-			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
+			utils.set_hl(config.hl),
 
-			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+			string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+			string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+
+			string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+			string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or ""),
 		});
 	else
 		return table.concat({
-			string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-			string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-			string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+			utils.set_hl(config.hl),
 
-			string.format("%s%s", utils.set_hl(config.hl), config.text or mode or ""),
+			string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+			string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+			string.format("%s%s", utils.set_hl(config.icon_hl), config.icon or ""),
 
-			string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-			string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+			string.format("%s", config.text or mode or ""),
+
+			string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+			string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or ""),
 		});
 	end
 
 	---|fE
 end
 
---- New section.
----@param config statusline.parts.section Configuration.
+--- Custom section.
+---@param config statusline.parts.section
 ---@return string
 slC.section = function (_, _, config, _)
 	---|fS
 
 	return table.concat({
 		config.click and string.format("%@%s@", config.click) or "",
+		utils.set_hl(config.hl),
 
-		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-		string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon         or ""),
+		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+		string.format("%s%s", utils.set_hl(config.icon_hl), config.icon or ""),
 
 		string.format("%s%s", utils.set_hl(config.hl), config.text or ""),
 
-		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+		string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or ""),
 
 		config.click and "%X" or "",
 	});
@@ -423,7 +424,7 @@ slC.section = function (_, _, config, _)
 	---|fE
 end
 
---- Custom ruler
+--- Ruler.
 ---@param _ integer
 ---@param window integer
 ---@param main_config statusline.parts.ruler
@@ -456,14 +457,16 @@ slC.ruler = function (_, window, main_config)
 	end
 
 	return table.concat({
-		string.format("%s%s", utils.set_hl(config.corner_left_hl  or config.hl), config.corner_left  or ""),
-		string.format("%s%s", utils.set_hl(config.padding_left_hl or config.hl), config.padding_left or ""),
-		string.format("%s%s", utils.set_hl(config.icon_hl         or config.hl), config.icon or ""),
+		utils.set_hl(config.hl),
+
+		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
+		string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
+		string.format("%s%s", utils.set_hl(config.icon_hl), config.icon or ""),
 
 		string.format("%s%s%s", x, config.separator or "", y),
 
-		string.format("%s%s", utils.set_hl(config.padding_right_hl or config.hl), config.padding_right or ""),
-		string.format("%s%s", utils.set_hl(config.corner_right_hl  or config.hl), config.corner_right  or "")
+		string.format("%s%s", utils.set_hl(config.padding_right_hl), config.padding_right or ""),
+		string.format("%s%s", utils.set_hl(config.corner_right_hl), config.corner_right  or "")
 	});
 
 	---|fE
@@ -485,7 +488,7 @@ slC.get = function (name, buffer, window, part_config, statusline)
 		--- Component doesn't exist.
 		return "";
 	elseif type(slC[name]) ~= "function" then
-		--- Attempting to get internal property.
+		--- Not a valid component.
 		return "";
 	else
 		if part_config.condition ~= nil then
