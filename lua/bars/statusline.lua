@@ -505,7 +505,12 @@ statusline.detach = function (window)
 	---|fS
 
 	vim.schedule(function ()
+		if not window or vim.api.nvim_win_is_valid(window) == false then
+			return;
+		end
+
 		vim.w[window].__slID = nil;
+
 		vim.api.nvim_set_option_value(
 			"statusline",
 			vim.w[window].__statusline or vim.g.__statusline or "",
