@@ -8,6 +8,8 @@ statusline.config = {
 	ignore_buftypes = {},
 
 	default = {
+		---|fS "Default configuration"
+
 		parts = {
 			{
 				kind = "mode",
@@ -204,6 +206,12 @@ statusline.config = {
 			},
 			{
 				kind = "ruler",
+				mode = function ()
+					local mode = vim.api.nvim_get_mode().mode;
+					local visual_modes = { "v", "V", "" };
+
+					return vim.list_contains(visual_modes, mode) and "visual" or "normal";
+				end,
 
 				default = {
 					padding_left = " ",
@@ -222,8 +230,12 @@ statusline.config = {
 				}
 			}
 		}
+
+		---|fE
 	},
 	["help"] = {
+		---|fS "Help statusline"
+
 		condition = function (buffer)
 			return vim.bo[buffer].buftype == "help";
 		end,
@@ -335,6 +347,31 @@ statusline.config = {
 				---|fE
 			},
 			{
+				kind = "ruler",
+				condition = function ()
+					local mode = vim.api.nvim_get_mode().mode;
+					local visual_modes = { "v", "V", "" };
+
+					return vim.list_contains(visual_modes, mode);
+				end,
+
+				default = {
+					padding_left = " ",
+					padding_right = " ",
+					icon = " ",
+
+					separator = "  ",
+
+					hl = "Color6R"
+				},
+
+				visual = {
+					icon = " ",
+
+					hl = "Color6R"
+				}
+			},
+			{
 				kind = "bufname",
 				condition = function (_, win)
 					return vim.api.nvim_win_get_width(win) >= 42;
@@ -374,6 +411,8 @@ statusline.config = {
 			},
 			{ kind = "empty", hl = "Normal" },
 		}
+
+		---|fE
 	}
 	-- ["lua"] = {
 	-- 	condition = function (buffer)

@@ -352,6 +352,12 @@
 --- What kind of component is this?
 ---@field kind "ruler"
 ---
+--- Should visual modes be shown
+---@field mode
+---| "normal" Show cursor position.
+---| "visual" Show selection size.
+---| fun(buffer: integer, window: integer): ( "normal" | "visual" )
+---
 --- Default configuration.
 ---@field default ruler.opts
 ---

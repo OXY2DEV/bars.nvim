@@ -432,13 +432,11 @@ end
 slC.ruler = function (_, window, main_config)
 	---|fS
 
-	local mode = vim.api.nvim_get_mode().mode;
-
 	---@type ruler.opts
 	local config;
 	local x, y;
 
-	if vim.list_contains({ "v", "V", "" }, mode) then
+	if main_config.mode == "visual" then
 		vim.api.nvim_win_call(window, function ()
 			local f, t = vim.fn.getpos("v"), vim.fn.getpos(".");
 
