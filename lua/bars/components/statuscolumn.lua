@@ -112,17 +112,17 @@ scC.lnum = function (buffer, window, config)
 end
 
 --- Empty section
----@param config statuscolumn.empty
+---@param config statuscolumn.parts.empty
 ---@return string
 scC.empty = function (_, _, config)
 	return table.concat({
 		utils.set_hl(config.hl),
-		string.rep(" ", config.len or 1)
+		string.rep(" ", config.width or 1)
 	});
 end
 
 --- Border.
----@param config statuscolumn.border
+---@param config statuscolumn.parts.border
 ---@return string
 scC.border = function (_, _, config)
 	---|fS
@@ -150,7 +150,7 @@ end
 --- Fold column.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.folds
+---@param config statuscolumn.parts.folds
 ---@return string
 scC.folds = function (buffer, window, config)
 	---|fS
@@ -278,7 +278,7 @@ end
 --- Sign column.
 ---@param buffer integer
 ---@param _ integer
----@param config statuscolumn.signs
+---@param config statuscolumn.parts.signs
 ---@return string
 scC.signs = function (buffer, _, config)
 	---|fS

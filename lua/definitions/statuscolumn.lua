@@ -80,7 +80,7 @@
 ---
 --- Highlight group for the line numbers.
 --- Can be a list to create a color gradient.
----@field hl? string | string[]
+---@field hl? string | string[] | fun(buffer: integer, window: integer): ( string | string[] )
 
 
 --- Empty section.
@@ -93,7 +93,7 @@
 ---@field kind "empty"
 ---
 --- How many columns should this span?
----@field len integer
+---@field width integer
 ---
 --- Highlight group for this section.
 ---@field hl? string

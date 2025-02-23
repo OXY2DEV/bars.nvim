@@ -10,12 +10,12 @@ statuscolumn.config = {
 		parts = {
 			{
 				kind = "empty",
-				len = 1,
+				width = 1,
 				hl = "Normal"
 			},
 			{
 				kind = "signs",
-				len = 1,
+				width = 1,
 				hl = "Normal"
 			},
 			{
@@ -38,7 +38,7 @@ statuscolumn.config = {
 			},
 			{
 				kind = "empty",
-				len = 1,
+				width = 1,
 				hl = "Normal"
 			},
 			{
@@ -70,7 +70,7 @@ statuscolumn.config = {
 			},
 			{
 				kind = "empty",
-				len = 1,
+				width = 1,
 				hl = "Normal"
 			},
 			{
@@ -130,7 +130,7 @@ statuscolumn.config = {
 		parts = {
 			{
 				kind = "empty",
-				len = 1,
+				width = 1,
 				hl = "Normal"
 			},
 		}
