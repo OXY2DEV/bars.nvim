@@ -102,6 +102,9 @@
 --- Border for the statuscolumn.
 ---@class statuscolumn.parts.border
 ---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
 --- What kind of component is this?
 ---@field kind "border"
 ---
@@ -116,6 +119,9 @@
 
 --- Fold column for the statuscolumn.
 ---@class statuscolumn.parts.folds
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
 --- What kind of component is this?
 ---@field kind "folds"
@@ -179,7 +185,18 @@
 
 ---@class statuscolumn.parts.signs
 ---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
 ---@field kind "signs"
+---
+--- Filter for signs.
+---@field filter? fun(buffer: integer, ns_map: table<integer, string>, ns: integer, row: integer, col: integer, extmark: table): boolean
+---
+--- Highlight group for the signs.
+--- NOTE, This will overwrite the
+--- sign's original highlight group.
 ---@field hl? string
 
 

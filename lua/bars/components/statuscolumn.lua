@@ -302,13 +302,28 @@ scC.signs = function (buffer, _, config)
 	local _o = "  ";
 	local priority = -999;
 
+	---@type table<integer, string>
+	local ns_map = {};
+
+	for ns, id in pairs(vim.api.nvim_get_namespaces()) do
+		ns_map[id] = ns;
+	end
+
 	for _, sign in ipairs(extmarks) do
 		local sPR = sign[4].priority or 0;
+		---@diagnostic disable-next-line
+		local has_filter, pass = pcall(config.filter, buffer, ns_map, unpack(sign));
+
+		if has_filter == true and pass ~= true then
+			goto continue;
+		end
 
 		if sPR > priority and sign[4].sign_text then
 			_o = utils.set_hl(sign[4].sign_hl_group) .. utils.align("left", sign[4].sign_text, 2);
 			priority = sPR;
 		end
+
+	    ::continue::
 	end
 
 	return _o;
@@ -325,6 +340,13 @@ end
 ---@return string
 scC.get = function (name, buffer, window, part_config, statuscolumn)
 	---|fS
+
+	--- Options that shouldn't be
+	--- evaluated.
+	---@type { [string]: string[] }
+	local eval_ignore = {
+		signs = { "filter" }
+	};
 
 	if type(name) ~= "string" then
 		--- Component doesn't exist.
@@ -352,6 +374,8 @@ scC.get = function (name, buffer, window, part_config, statuscolumn)
 
 		for key, value in pairs(static_config) do
 			if type(value) ~= "function" then
+				goto continue;
+			elseif vim.list_contains(eval_ignore[name] or {}, key) then
 				goto continue;
 			end
 

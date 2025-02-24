@@ -16,7 +16,41 @@ statuscolumn.config = {
 			{
 				kind = "signs",
 				width = 1,
-				hl = "Normal"
+				hl = "Normal",
+
+				filter = function (buffer, namespaces, _, _, _, details)
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+					local name = namespaces[details.ns_id] or "";
+
+					if package.loaded["markview"] and vim.bo[buffer] == "markdown" then
+						--- On markdown files when on normal
+						--- mode only show markview signs.
+						if mode == "n" then
+							return string.match(name, "^markview");
+						else
+							return true;
+						end
+					elseif package.loaded["helpview"] and vim.bo[buffer].ft == "help" then
+						--- On help files when on normal
+						--- mode only show helpview signs.
+						if mode == "n" then
+							return string.match(name, "^helpview");
+						else
+							return true;
+						end
+					else
+						if mode == "n" then
+							--- On normal mode only show LSP signs.
+							return string.match(name, "^vim[%._]lsp") ~= nil;
+						elseif vim.list_contains({ "i", "v", "V", "" }, mode) then
+							--- On visual mode only show git signs.
+							return string.match(name, "^gitsigns") ~= nil;
+						end
+
+						return true;
+					end
+				end
 			},
 			{
 				kind = "folds",
