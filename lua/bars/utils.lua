@@ -159,4 +159,72 @@ utils.create_to_buf = function (buffer)
 	end
 end
 
+--- Component-style path truncation.
+---@param path string
+---@param opts table
+---@return string
+utils.truncate_path = function (path, opts)
+	local default_opts = {
+		existing_paths = {},
+		raw_segmants = {},
+		rewrite_segmants = {},
+
+		length = 1
+	};
+
+	local function match (text)
+		local keys = vim.tbl_keys(opts.rewrite_segmants);
+		table.sort(keys);
+
+		for _, k in ipairs(keys) do
+			if string.match(text, k) ~= nil then
+				return opts.rewrite_segmants[k];
+			end
+		end
+	end
+
+	path = path or "";
+
+	if type(opts) == "table" then
+		opts = vim.tbl_deep_extend("force", default_opts, opts);
+	else
+		opts = default_opts;
+	end
+
+	--- Break the path into parts.
+	---@type string[]
+	local path_parts = vim.split(path, "/", { trimempty = true });
+	local _o;
+
+	while _o == nil or vim.tbl_contains(opts.existing_paths, _o) do
+		---@type string
+		local part = table.remove(path_parts);
+		local rewrite = match(part);
+
+		if rewrite then
+			local is_callable, rename = pcall(rewrite, part);
+
+			if is_callable == true and type(rename) == "string" then
+				part = rename;
+			elseif type(rewrite) == "string" then
+				part = rewrite;
+			end
+		elseif _o ~= nil and vim.list_contains(opts.raw_segmants, part) == false then
+			if string.match(part, "^%.") then
+				part = vim.fn.strcharpart(part, 0, opts.length + 1);
+			else
+				part = vim.fn.strcharpart(part, 0, opts.length);
+			end
+		end
+
+		_o = table.concat({
+			part,
+			_o ~= nil and "/" or "",
+			_o or ""
+		})
+	end
+
+	return _o;
+end
+
 return utils;

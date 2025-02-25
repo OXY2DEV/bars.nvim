@@ -93,6 +93,11 @@
 --- Highlight group for window count.
 ---@field win_count_hl? string
 ---
+--- Text to use between the bufname &
+--- window count.
+---@field divider? string
+---@field divider_hl? string
+---
 ---@field corner_left? string
 ---@field padding_left? string
 ---@field icon? string

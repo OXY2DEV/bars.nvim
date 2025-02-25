@@ -1,5 +1,4 @@
 local tabline = {}
-local utils = require("bars.utils");
 local components = require("bars.components.tabline");
 
 ---@class tabline.config
@@ -38,8 +37,12 @@ tabline.config = {
 					padding_left = " ",
 					padding_right = " ",
 
-					win_count = " ┃ 󰨝 %d",
+					divider = " ┃ ",
+
+					win_count = "󰨝 %d",
 					win_count_hl = nil,
+
+					-- bufname = "󰳽 %s",
 
 					icon = "󰛺 ",
 
@@ -49,7 +52,11 @@ tabline.config = {
 					padding_left = " ",
 					padding_right = " ",
 
+					divider = " | ",
+
 					icon = "󰛻 ",
+
+					-- bufname = "󰳽 %s",
 
 					hl = "Color0B"
 				}

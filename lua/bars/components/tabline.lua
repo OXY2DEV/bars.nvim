@@ -86,6 +86,7 @@ tlC.tabs = function (config)
 	end
 
 	local wrapped = false;
+	local rendered_paths = {};
 
 	for t = from, from + (max - 1), 1 do
 		local tab_index = wrapped_index(#tabs, t);
@@ -137,6 +138,7 @@ tlC.tabs = function (config)
 			utils.create_segmant(tab_config.padding_left, tab_config.padding_left_hl or tab_config.hl),
 
 			utils.create_segmant(tab_config.icon, tab_config.icon_hl),
+			utils.create_segmant(tab, tab_config.hl)
 		});
 
 		if type(tab_config.win_count) == "string" then
@@ -145,16 +147,42 @@ tlC.tabs = function (config)
 			_o = table.concat({
 				_o,
 
-				utils.create_segmant(tab, tab_config.hl),
+				utils.create_segmant(tab_config.divider, tab_config.divider_hl),
 				utils.create_segmant(
 					string.format(tab_config.win_count, #wins),
 					tab_config.win_count_hl
 				),
 			});
-		else
+		end
+
+		if type(tab_config.bufname) == "string" then
+			---@type integer
+			local winnr = vim.fn.tabpagewinnr(tab);
+			local winid = vim.fn.win_getid(winnr);
+
+			local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(winid))
+			local path;
+
+			if bufname == "" then
+				path = "No name";
+			else
+				path = utils.truncate_path(
+					vim.fn.fnamemodify(bufname, ":~"),
+					{
+						existing_paths = rendered_paths,
+					}
+				);
+				table.insert(rendered_paths, path);
+			end
+
 			_o = table.concat({
 				_o,
-				utils.create_segmant(tab, tab_config.hl)
+
+				utils.create_segmant(tab_config.divider, tab_config.divider_hl),
+				utils.create_segmant(
+					string.format(tab_config.bufname, path),
+					tab_config.bufname_hl
+				),
 			});
 		end
 
