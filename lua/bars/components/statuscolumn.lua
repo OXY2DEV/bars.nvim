@@ -212,7 +212,7 @@ scC.folds = function (buffer, window, config)
 				get(config.open_text, info.level) or ""
 			});
 		end
-	elseif vim.v.lnum == vim.api.nvim_buf_line_count(buffer) then
+	elseif info.level >= 1 and vim.v.lnum == vim.api.nvim_buf_line_count(buffer) then
 		--- Last line of a buffer.
 		_o = table.concat({
 			_o,
