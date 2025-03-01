@@ -1,5 +1,4 @@
 local winbar = {};
-local utils = require("bars.utils");
 local components = require("bars.components.winbar");
 
 ---@class winbar.config
@@ -9,18 +8,42 @@ winbar.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
-	condition = function (buffer)
-		local check_parsers, parsers = pcall(vim.treesitter.get_parser, buffer);
-
-		if check_parsers == false then
-			return false;
-		elseif parsers == nil then
-			return false;
-		end
-	end,
+	-- condition = function (buffer)
+	-- 	-- local check_parsers, parsers = pcall(vim.treesitter.get_parser, buffer);
+	-- 	--
+	-- 	-- if check_parsers == false then
+	-- 	-- 	return false;
+	-- 	-- elseif parsers == nil then
+	-- 	-- 	return false;
+	-- 	-- end
+	-- end,
 
 	default = {
 		parts = {
+			{
+				kind = "path",
+				condition = function (buffer)
+					local check_parsers, parser = pcall(vim.treesitter.get_parser, buffer);
+
+					if check_parsers == false then
+						return true;
+					elseif parser == nil then
+						return true;
+					else
+						return false;
+					end
+				end,
+
+				separator = " → ",
+				separator_hl = "Comment",
+
+				default = {
+					dir_icon = "󰉋 ",
+					icon = "󰈔 ",
+
+					hl = "Special"
+				}
+			},
 			{
 				kind = "node",
 				lookup = 3,

@@ -1,6 +1,75 @@
 local wbC = {};
 local utils = require("bars.utils");
 
+wbC.path = function (buffer, window, main_config)
+	---@type string | ""
+	local name = vim.api.nvim_buf_get_name(buffer);
+
+	if name == "" then
+		return;
+	else
+		name = vim.fn.fnamemodify(name, ":~:.");
+	end
+
+	---@type integer
+	local throttle = main_config.throttle or 50;
+
+	---@type integer
+	local before = vim.w[window].__path_time or 0;
+	---@type string
+	local old = vim.w[window].__path_data;
+	---@type integer
+	local now = vim.uv.hrtime();
+
+	if old and (now - before) < (throttle * 1e6) then
+		return old;
+	end
+
+	local sep = string.sub(package.config or "", 1, 1);
+
+	if sep == "\\" then
+		name = string.gsub(name, "^%u:", "");
+	end
+
+	---@type string[]
+	local parts = vim.split(name, "/", { trimempty = true });
+	local _o = "";
+
+	while #parts > 0 do
+		local part = parts[#parts];
+
+		local part_config = utils.match(main_config, part, {});
+		local is_dir = false;
+
+		if _o ~= "" and vim.fn.fnamemodify(part, ":e") == "" then
+			is_dir = true;
+		end
+
+		_o = table.concat({
+
+			utils.create_segmant(part_config.corner_left, part_config.corner_left_hl or part_config.hl),
+			utils.create_segmant(part_config.padding_left, part_config.padding_left_hl or part_config.hl),
+			utils.create_segmant(is_dir == true and part_config.dir_icon or part_config.icon, (is_dir == true and part_config.dir_icon_hl or part_config.icon_hl) or part_config.hl),
+
+			utils.create_segmant(part_config.text or part, part_config.hl),
+
+			utils.create_segmant(part_config.padding_right, part_config.padding_right_hl or part_config.hl),
+			utils.create_segmant(part_config.corner_right, part_config.corner_right_hl or part_config.hl),
+
+			utils.create_segmant(_o ~= "" and main_config.separator or "", main_config.separator_hl),
+
+			_o,
+		});
+
+		table.remove(parts, #parts);
+	end
+
+	vim.w[window].__path_data = _o;
+	vim.w[window].__path_time = now;
+
+	return _o;
+end
+
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
