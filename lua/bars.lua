@@ -5,6 +5,40 @@ bars.config = {
 	global = true
 };
 
+local function list_modules()
+	---@type table[]
+	local MODULES = {};
+
+	--- Use `table.insert` to preserve list
+	--- structure.
+	table.insert(MODULES, package.loaded["bars.statuscolumn"]);
+	table.insert(MODULES, package.loaded["bars.statusline"]);
+	table.insert(MODULES, package.loaded["bars.tabline"]);
+	table.insert(MODULES, package.loaded["bars.winbar"]);
+
+	return MODULES;
+end
+
+bars.actions = {
+	Toggle = function ()
+		local modules = list_modules();
+
+		for _, module in ipairs(modules) do
+			pcall(module.Toggle);
+		end
+	end,
+
+	Enable = nil,
+	Disable = nil,
+
+	toggle = nil,
+	enable = nil,
+	disable = nil,
+
+	eval = nil,
+	Eval = nil
+}
+
 --- Setup function.
 --- Should be optional.
 ---@param config bars.config | nil
