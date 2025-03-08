@@ -238,6 +238,8 @@ end
 tabline.can_attach = function ()
 	if tabline.state.enable ~= true then
 		return false;
+	elseif tabline.state.attached == true then
+		return false;
 	elseif tabline.config.condition == nil then
 		return true;
 	end
@@ -277,6 +279,8 @@ tabline.clean = function ()
 	end);
 end
 
+----------------------------------------------------------------------
+
 --- Toggles state of tabline.
 tabline.toggle = function ()
 	if  tabline.state.attached == true then
@@ -294,6 +298,24 @@ tabline.Toggle = function ()
 	--- false -> true
 	tabline.state.enable = not tabline.state.enable;
 end
+
+----------------------------------------------------------------------
+
+--- Enables *all* attached windows.
+tabline.Enable = function ()
+	tabline.state.enable = true;
+
+	tabline.attach();
+end
+
+--- Disables *all* attached windows.
+tabline.Disable = function ()
+	tabline.detach();
+
+	tabline.state.enable = false;
+end
+
+----------------------------------------------------------------------
 
 --- Sets up the tabline module.
 ---@param config tabline.config | nil
