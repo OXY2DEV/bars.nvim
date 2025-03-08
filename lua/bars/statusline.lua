@@ -1,6 +1,10 @@
 local statusline = {};
 local components = require("bars.components.statusline");
 
+--- Custom statusline.
+---@type string
+local STL = "%!v:lua.require('bars.statusline').render()";
+
 --- Configuration table.
 ---@type statusline.config
 statusline.config = {
@@ -557,14 +561,25 @@ statusline.detach = function (window)
 
 		vim.w[window].__slID = nil;
 
-		vim.api.nvim_set_option_value(
-			"statusline",
-			vim.w[window].__statusline or vim.g.__statusline or "",
-			{
-				scope = "local",
-				win = window
-			}
-		);
+		--- Cached statusline.
+		---@type string | nil
+		local _sl = vim.w[window].__statusline or vim.g.__statusline or "";
+
+		if _sl == "" or _sl == nil then
+			--- Reset statusline.
+			vim.api.nvim_win_call(window, function ()
+				vim.cmd("set statusline&");
+			end);
+		else
+			vim.api.nvim_set_option_value(
+				"statusline",
+				_sl,
+				{
+					scope = "local",
+					win = window
+				}
+			);
+		end
 
 		statusline.state.attached_windows[window] = false;
 	end);
@@ -610,7 +625,7 @@ statusline.attach = function (window)
 	elseif statusline.can_attach(window) == false then
 		return;
 	elseif statusline.state.attached_windows[window] == true then
-		if vim.wo[window].statusline == "%!v:lua.require('bars.statusline').render()" then
+		if vim.wo[window].statusline == STL then
 			statusline.update_id(window);
 			return;
 		end
@@ -618,8 +633,11 @@ statusline.attach = function (window)
 
 	statusline.update_id(window);
 
-	vim.w[window].__statusline = vim.wo[window].statusline;
-	vim.wo[window].statusline = "%!v:lua.require('bars.statusline').render()";
+	--- Do NOT cache if previous statusline 
+	--- is the same as the custom statusline.
+	vim.w[window].__statusline = vim.wo[window].statusline == STL and "" or vim.wo[window].statusline;
+
+	vim.wo[window].statusline = STL;
 
 	---|fE
 end
@@ -630,7 +648,7 @@ statusline.global_attach = function ()
 		statusline.update_id(window);
 	end
 
-	vim.o.statusline = "%!v:lua.require('bars.statusline').render()";
+	vim.o.statusline = STL;
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -647,6 +665,31 @@ statusline.clean = function ()
 	end);
 
 	---|fE
+end
+
+--- Toggles state of given window.
+---@param window integer
+statusline.toggle = function (window)
+	if type(window) ~= "number" or statusline.state.attached_windows[window] == nil then
+		return;
+	elseif statusline.state.attached_windows[window] == true then
+		statusline.detach(window);
+	else
+		statusline.attach(window);
+	end
+end
+
+--- Toggles statusline **globally**.
+statusline.Toggle = function ()
+	for window, state in pairs(statusline.state.attached_windows) do
+		if state ~= nil then
+			statusline.toggle(window);
+		end
+	end
+
+	--- true -> false,
+	--- false -> true
+	statusline.state.enable = not statusline.state.enable;
 end
 
 --- Sets up the statusline module.
