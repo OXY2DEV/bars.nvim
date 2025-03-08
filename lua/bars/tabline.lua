@@ -1,6 +1,10 @@
 local tabline = {}
 local components = require("bars.components.tabline");
 
+--- Custom tabline.
+---@type string
+local TBL = "%!v:lua.require('bars.tabline').render()";
+
 ---@class tabline.config
 tabline.config = {
 	---|fS
@@ -204,9 +208,25 @@ end
 tabline.detach = function ()
 	---|fS
 
-	vim.scheduleefer_fn(function ()
+	vim.schedule(function ()
 		tabline.state.attached = false;
-		vim.o.tabline = vim.o.__tabline or "";
+
+		--- Cached tabline.
+		---@type string | nil
+		local _tl = vim.g.__tabline or "";
+
+		if _tl == "" or _tl == nil then
+			--- Reset tabline.
+			vim.cmd("set tabline&");
+		else
+			vim.api.nvim_set_option_value(
+				"tabline",
+				_tl,
+				{
+					scope = "global"
+				}
+			);
+		end
 
 		vim.g.__tlID = nil;
 		vim.g.__tabline = nil;
@@ -216,7 +236,9 @@ tabline.detach = function ()
 end
 
 tabline.can_attach = function ()
-	if not tabline.config.condition then
+	if tabline.state.enable ~= true then
+		return false;
+	elseif tabline.config.condition == nil then
 		return true;
 	end
 
@@ -239,8 +261,8 @@ tabline.attach = function ()
 
 	tabline.update_id();
 
-	vim.g.__tabline = vim.o.tabline;
-	vim.o.tabline = "%!v:lua.require('bars.tabline').render()";
+	vim.g.__tabline = vim.o.tabline == TBL and "" or vim.o.tabline;
+	vim.o.tabline = TBL;
 
 	---|fE
 end
@@ -253,6 +275,24 @@ tabline.clean = function ()
 			tabline.detach();
 		end
 	end);
+end
+
+--- Toggles state of tabline.
+tabline.toggle = function ()
+	if  tabline.state.attached == true then
+		tabline.detach();
+	else
+		tabline.attach();
+	end
+end
+
+--- Toggles tabline.
+tabline.Toggle = function ()
+	tabline.toggle();
+
+	--- true -> false,
+	--- false -> true
+	tabline.state.enable = not tabline.state.enable;
 end
 
 --- Sets up the tabline module.
