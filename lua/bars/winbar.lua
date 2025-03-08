@@ -826,6 +826,8 @@ winbar.clean = function ()
 	---|fE
 end
 
+----------------------------------------------------------------------
+
 --- Toggles state of given window.
 ---@param window integer
 winbar.toggle = function (window)
@@ -850,6 +852,52 @@ winbar.Toggle = function ()
 	--- false -> true
 	winbar.state.enable = not winbar.state.enable;
 end
+
+----------------------------------------------------------------------
+
+--- Enables winbar for `window`.
+---@param window integer
+winbar.enable = function (window)
+	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
+		return;
+	end
+
+	winbar.attach(window);
+end
+
+--- Enables *all* attached windows.
+winbar.Enable = function ()
+	winbar.state.enable = true;
+
+	for window, state in pairs(winbar.state.attached_windows) do
+		if state ~= true then
+			winbar.attach(window);
+		end
+	end
+end
+
+--- Disables winbar for `window`.
+---@param window integer
+winbar.disable = function (window)
+	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
+		return;
+	end
+
+	winbar.detach(window);
+end
+
+--- Disables *all* attached windows.
+winbar.Disable = function ()
+	for window, state in pairs(winbar.state.attached_windows) do
+		if state ~= false then
+			winbar.detach(window);
+		end
+	end
+
+	winbar.state.enable = false;
+end
+
+----------------------------------------------------------------------
 
 --- Sets up the winbar module.
 ---@param config winbar.config | nil
