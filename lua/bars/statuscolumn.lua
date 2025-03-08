@@ -435,6 +435,7 @@ statuscolumn.global_attach = function ()
 		statuscolumn.update_id(window);
 	end
 
+	vim.g.__statuscolumn = vim.o.statuscolumn == STC and "" or vim.o.statuscolumn;
 	vim.o.statuscolumn = STC;
 end
 
