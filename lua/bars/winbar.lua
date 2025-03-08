@@ -742,6 +742,10 @@ end
 winbar.can_attach = function (win)
 	if vim.api.nvim_win_is_valid(win) == false then
 		return false;
+	elseif winbar.state.attached_windows[win] == false then
+		return false;
+	elseif winbar.state.enable == false then
+		return false;
 	end
 
 	local buffer = vim.api.nvim_win_get_buf(win);
@@ -794,10 +798,15 @@ end
 
 --- Attaches globally.
 winbar.global_attach = function ()
+	if winbar.state.enable == false then
+		return;
+	end
+
 	for _, window in ipairs(vim.api.nvim_list_wins()) do
 		winbar.update_id(window);
 	end
 
+	vim.g.__winbar = vim.o.winbar == WBR and "" or vim.o.winbar;
 	vim.o.winbar = WBR;
 end
 
