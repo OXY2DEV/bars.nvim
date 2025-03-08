@@ -676,6 +676,8 @@ statusline.clean = function ()
 	---|fE
 end
 
+----------------------------------------------------------------------
+
 --- Toggles state of given window.
 ---@param window integer
 statusline.toggle = function (window)
@@ -700,6 +702,52 @@ statusline.Toggle = function ()
 	--- false -> true
 	statusline.state.enable = not statusline.state.enable;
 end
+
+----------------------------------------------------------------------
+
+--- Enables statusline for `window`.
+---@param window integer
+statusline.enable = function (window)
+	if type(window) ~= "number" or statusline.state.attached_windows[window] == nil then
+		return;
+	end
+
+	statusline.attach(window);
+end
+
+--- Enables *all* attached windows.
+statusline.Enable = function ()
+	statusline.state.enable = true;
+
+	for window, state in pairs(statusline.state.attached_windows) do
+		if state ~= true then
+			statusline.attach(window);
+		end
+	end
+end
+
+--- Disables statusline for `window`.
+---@param window integer
+statusline.disable = function (window)
+	if type(window) ~= "number" or statusline.state.attached_windows[window] == nil then
+		return;
+	end
+
+	statusline.detach(window);
+end
+
+--- Disables *all* attached windows.
+statusline.Disable = function ()
+	for window, state in pairs(statusline.state.attached_windows) do
+		if state ~= false then
+			statusline.detach(window);
+		end
+	end
+
+	statusline.state.enable = false;
+end
+
+----------------------------------------------------------------------
 
 --- Sets up the statusline module.
 ---@param config statusline.config | nil
