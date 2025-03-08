@@ -360,6 +360,10 @@ end
 statuscolumn.can_attach = function (win)
 	if vim.api.nvim_win_is_valid(win) == false then
 		return false;
+	elseif statuscolumn.state.attached_windows[win] == false then
+		return false;
+	elseif statuscolumn.state.enable == false then
+		return false;
 	end
 
 	local buffer = vim.api.nvim_win_get_buf(win);
@@ -423,6 +427,10 @@ end
 
 --- Attaches globally.
 statuscolumn.global_attach = function ()
+	if statuscolumn.state.enable == false then
+		return;
+	end
+
 	for _, window in ipairs(vim.api.nvim_list_wins()) do
 		statuscolumn.update_id(window);
 	end
@@ -446,6 +454,8 @@ statuscolumn.clean = function ()
 	---|fE
 end
 
+----------------------------------------------------------------------
+
 --- Toggles state of given window.
 ---@param window integer
 statuscolumn.toggle = function (window)
@@ -454,7 +464,7 @@ statuscolumn.toggle = function (window)
 	elseif statuscolumn.state.attached_windows[window] == true then
 		statuscolumn.detach(window);
 	else
-			statuscolumn.attach(window);
+		statuscolumn.attach(window);
 	end
 end
 
@@ -470,6 +480,52 @@ statuscolumn.Toggle = function ()
 	--- false -> true
 	statuscolumn.state.enable = not statuscolumn.state.enable;
 end
+
+----------------------------------------------------------------------
+
+--- Enables statuscolumn for `window`.
+---@param window integer
+statuscolumn.enable = function (window)
+	if type(window) ~= "number" or statuscolumn.state.attached_windows[window] == nil then
+		return;
+	end
+
+	statuscolumn.attach(window);
+end
+
+--- Enables *all* attached windows.
+statuscolumn.Enable = function ()
+	statuscolumn.state.enable = true;
+
+	for window, state in pairs(statuscolumn.state.attached_windows) do
+		if state ~= true then
+			statuscolumn.attach(window);
+		end
+	end
+end
+
+--- Disables statuscolumn for `window`.
+---@param window integer
+statuscolumn.disable = function (window)
+	if type(window) ~= "number" or statuscolumn.state.attached_windows[window] == nil then
+		return;
+	end
+
+	statuscolumn.detach(window);
+end
+
+--- Disables *all* attached windows.
+statuscolumn.Disable = function ()
+	for window, state in pairs(statuscolumn.state.attached_windows) do
+		if state ~= false then
+			statuscolumn.detach(window);
+		end
+	end
+
+	statuscolumn.state.enable = false;
+end
+
+----------------------------------------------------------------------
 
 --- Sets up the statuscolumn module.
 ---@param config statuscolumn.config | nil
