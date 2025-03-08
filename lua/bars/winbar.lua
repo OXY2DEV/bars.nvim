@@ -1,6 +1,10 @@
 local winbar = {};
 local components = require("bars.components.winbar");
 
+--- Custom winbar.
+---@type string
+local WBR = "%!v:lua.require('bars.winbar').render()";
+
 ---@class winbar.config
 winbar.config = {
 	---|fS
@@ -709,14 +713,25 @@ winbar.detach = function (window)
 	vim.schedule(function ()
 		vim.w[window].__wbID = nil;
 
-		vim.api.nvim_set_option_value(
-			"winbar",
-			vim.w[window].__winbar or vim.g.__winbar or "",
-			{
-				scope = "local",
-				win = window
-			}
-		);
+		--- Cached winbar.
+		---@type string | nil
+		local _wb = vim.w[window].__winbar or vim.g.__winbar or "";
+
+		if _wb == "" or _wb == nil then
+			--- Reset winbar.
+			vim.api.nvim_win_call(window, function ()
+				vim.cmd("set winbar&");
+			end);
+		else
+			vim.api.nvim_set_option_value(
+				"winbar",
+				_wb,
+				{
+					scope = "local",
+					win = window
+				}
+			);
+		end
 
 		winbar.state.attached_windows[window] = false;
 	end);
@@ -763,7 +778,7 @@ winbar.attach = function (window)
 	elseif winbar.can_attach(window) == false then
 		return;
 	elseif winbar.state.attached_windows[window] == true then
-		if vim.wo[window].winbar == "%!v:lua.require('bars.winbar').render()" then
+		if vim.wo[window].winbar == WBR then
 			winbar.update_id(window);
 			return;
 		end
@@ -771,8 +786,8 @@ winbar.attach = function (window)
 
 	winbar.update_id(window);
 
-	vim.w[window].__winbar = vim.wo[window].winbar;
-	vim.wo[window].winbar = "%!v:lua.require('bars.winbar').render()";
+	vim.w[window].__winbar = vim.wo[window].winbar == WBR and "" or vim.wo[window].winbar;
+	vim.wo[window].winbar = WBR;
 
 	---|fE
 end
@@ -783,7 +798,7 @@ winbar.global_attach = function ()
 		winbar.update_id(window);
 	end
 
-	vim.o.winbar = "%!v:lua.require('bars.winbar').render()";
+	vim.o.winbar = WBR;
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -800,6 +815,31 @@ winbar.clean = function ()
 	end);
 
 	---|fE
+end
+
+--- Toggles state of given window.
+---@param window integer
+winbar.toggle = function (window)
+	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
+		return;
+	elseif winbar.state.attached_windows[window] == true then
+		winbar.detach(window);
+	else
+		winbar.attach(window);
+	end
+end
+
+--- Toggles winbar **globally**.
+winbar.Toggle = function ()
+	for window, state in pairs(winbar.state.attached_windows) do
+		if state ~= nil then
+			winbar.toggle(window);
+		end
+	end
+
+	--- true -> false,
+	--- false -> true
+	winbar.state.enable = not winbar.state.enable;
 end
 
 --- Sets up the winbar module.
