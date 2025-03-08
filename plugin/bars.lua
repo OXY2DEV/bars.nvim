@@ -1,5 +1,6 @@
 --- Load all the global functions.
 require("bars.global");
+local bars = require("bars")
 
 ---|fS "Cache default values."
 
@@ -153,3 +154,10 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 		---|fE
 	end
 });
+
+vim.api.nvim_create_user_command("Bars", function ()
+	bars.actions.Toggle();
+end, {
+	desc = "User command for bars.nvim"
+});
+
