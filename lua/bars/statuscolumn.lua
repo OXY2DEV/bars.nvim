@@ -1,6 +1,10 @@
 local statuscolumn = {};
 local components = require("bars.components.statuscolumn");
 
+--- Custom statuscolumn.
+---@type string
+local STC = "%!v:lua.require('bars.statuscolumn').render()";
+
 ---@type statuscolumn.config
 statuscolumn.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
@@ -326,14 +330,26 @@ statuscolumn.detach = function (window)
 				win = window
 			}
 		);
-		vim.api.nvim_set_option_value(
-			"relativenumber",
-			vim.w[window].__relativenumber or vim.g.__relativenumber or false,
-			{
-				scope = "local",
-				win = window
-			}
-		);
+
+		--- Cached statuscolumn.
+		---@type string | nil
+		local _st = vim.w[window].__statuscolumn or vim.g.__statuscolumn or "";
+
+		if _st == "" or _st == nil then
+			--- Reset statuscolumn.
+			vim.api.nvim_win_call(window, function ()
+				vim.cmd("set statuscolumn&");
+			end);
+		else
+			vim.api.nvim_set_option_value(
+				"statuscolumn",
+				_st,
+				{
+					scope = "local",
+					win = window
+				}
+			);
+		end
 
 		statuscolumn.state.attached_windows[window] = false;
 	end);
@@ -382,7 +398,7 @@ statuscolumn.attach = function (window)
 	elseif statuscolumn.can_attach(window) == false then
 		return;
 	elseif statuscolumn.state.attached_windows[window] == true then
-		if vim.wo[window].statuscolumn == "%!v:lua.require('bars.statuscolumn').render()" then
+		if vim.wo[window].statuscolumn == STC then
 			statuscolumn.update_id(window);
 			return;
 		end
@@ -392,9 +408,15 @@ statuscolumn.attach = function (window)
 
 	vim.w[window].__relativenumber = vim.wo[window].relativenumber;
 	vim.w[window].__numberwidth = vim.wo[window].numberwidth;
-	vim.w[window].__statuscolumn = vim.wo[window].statuscolumn;
 
-	vim.wo[window].statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
+	--- If the statuscolumn matches the one we set then
+	--- this is most likely due to inheriting window properties.
+	---
+	--- This window was most likely opened from another window
+	--- we had attached to before.
+	vim.w[window].__statuscolumn = vim.wo[window].statuscolumn == STC and "" or vim.wo[window].statuscolumn;
+
+	vim.wo[window].statuscolumn = STC;
 
 	---|fE
 end
@@ -405,7 +427,7 @@ statuscolumn.global_attach = function ()
 		statuscolumn.update_id(window);
 	end
 
-	vim.o.statuscolumn = "%!v:lua.require('bars.statuscolumn').render()";
+	vim.o.statuscolumn = STC;
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -424,11 +446,38 @@ statuscolumn.clean = function ()
 	---|fE
 end
 
+--- Toggles state of given window.
+---@param window integer
+statuscolumn.toggle = function (window)
+	if type(window) ~= "number" or statuscolumn.state.attached_windows[window] == nil then
+		return;
+	elseif statuscolumn.state.attached_windows[window] == true then
+		statuscolumn.detach(window);
+	else
+			statuscolumn.attach(window);
+	end
+end
+
+--- Toggles statuscolumn **globally**.
+statuscolumn.Toggle = function ()
+	for window, state in pairs(statuscolumn.state.attached_windows) do
+		if state ~= nil then
+			statuscolumn.toggle(window);
+		end
+	end
+
+	--- true -> false,
+	--- false -> true
+	statuscolumn.state.enable = not statuscolumn.state.enable;
+end
+
 --- Sets up the statuscolumn module.
 ---@param config statuscolumn.config | nil
 statuscolumn.setup = function (config)
 	if type(config) == "table" then
 		statuscolumn.config = vim.tbl_extend("force", statuscolumn.config, config);
+	elseif type(config) == "boolean" then
+		statuscolumn.state.enable = config;
 	end
 
 	for window, _ in pairs(statuscolumn.state.attached_windows) do
