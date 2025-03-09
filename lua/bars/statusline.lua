@@ -582,6 +582,16 @@ statusline.detach = function (window)
 		end
 
 		statusline.state.attached_windows[window] = false;
+
+		if _sl == "" or _sl == nil then
+			--- BUG, `set statusline&` resets the statusline
+			--- globally.
+			---
+			--- So, we reattach to all the other windows.
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				statusline.attach(win);
+			end
+		end
 	end);
 
 	---|fE
@@ -621,6 +631,8 @@ end
 
 --- Attaches the statusline module to the windows
 --- of a buffer.
+---@param window integer
+---@param force? boolean
 statusline.attach = function (window, force)
 	---|fS
 
@@ -683,7 +695,7 @@ statusline.enable = function (window)
 		return;
 	end
 
-	statusline.attach(window);
+	statusline.attach(window, true);
 end
 
 --- Enables *all* attached windows.
