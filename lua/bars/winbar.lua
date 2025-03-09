@@ -774,6 +774,7 @@ end
 --- Attaches the winbar module to the windows
 --- of a buffer.
 ---@param window integer
+---@param force? boolean
 winbar.attach = function (window, force)
 	---|fS
 
@@ -833,7 +834,7 @@ winbar.enable = function (window)
 		return;
 	end
 
-	winbar.attach(window);
+	winbar.attach(window, true);
 end
 
 --- Enables *all* attached windows.

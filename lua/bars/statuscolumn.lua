@@ -392,6 +392,7 @@ end
 --- Attaches the statuscolumn module to the windows
 --- of a buffer.
 ---@param window integer
+---@param force? boolean
 statuscolumn.attach = function (window, force)
 	---|fS
 
@@ -460,7 +461,7 @@ statuscolumn.enable = function (window)
 		return;
 	end
 
-	statuscolumn.attach(window);
+	statuscolumn.attach(window, true);
 end
 
 --- Enables *all* attached windows.
