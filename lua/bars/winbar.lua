@@ -826,33 +826,6 @@ end
 
 ----------------------------------------------------------------------
 
---- Toggles state of given window.
----@param window integer
-winbar.toggle = function (window)
-	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
-		return;
-	elseif winbar.state.attached_windows[window] == true then
-		winbar.detach(window);
-	else
-		winbar.attach(window, true);
-	end
-end
-
---- Toggles winbar **globally**.
-winbar.Toggle = function ()
-	--- true -> false,
-	--- false -> true
-	winbar.state.enable = not winbar.state.enable;
-
-	for window, state in pairs(winbar.state.attached_windows) do
-		if state ~= nil then
-			winbar.toggle(window);
-		end
-	end
-end
-
-----------------------------------------------------------------------
-
 --- Enables winbar for `window`.
 ---@param window integer
 winbar.enable = function (window)
@@ -869,7 +842,7 @@ winbar.Enable = function ()
 
 	for window, state in pairs(winbar.state.attached_windows) do
 		if state ~= true then
-			winbar.attach(window);
+			winbar.enable(window);
 		end
 	end
 end
@@ -888,11 +861,34 @@ end
 winbar.Disable = function ()
 	for window, state in pairs(winbar.state.attached_windows) do
 		if state ~= false then
-			winbar.detach(window);
+			winbar.disable(window);
 		end
 	end
 
 	winbar.state.enable = false;
+end
+
+----------------------------------------------------------------------
+
+--- Toggles state of given window.
+---@param window integer
+winbar.toggle = function (window)
+	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
+		return;
+	elseif winbar.state.attached_windows[window] == true then
+		winbar.disable(window);
+	else
+		winbar.enable(window);
+	end
+end
+
+--- Toggles winbar **globally**.
+winbar.Toggle = function ()
+	if winbar.state.enable == true then
+		winbar.Disable();
+	else
+		winbar.Enable();
+	end
 end
 
 ----------------------------------------------------------------------

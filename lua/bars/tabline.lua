@@ -281,26 +281,6 @@ end
 
 ----------------------------------------------------------------------
 
---- Toggles state of tabline.
-tabline.toggle = function ()
-	if  tabline.state.attached == true then
-		tabline.detach();
-	else
-		tabline.attach();
-	end
-end
-
---- Toggles tabline.
-tabline.Toggle = function ()
-	--- true -> false,
-	--- false -> true
-	tabline.state.enable = not tabline.state.enable;
-
-	tabline.toggle();
-end
-
-----------------------------------------------------------------------
-
 --- Enables *all* attached windows.
 tabline.Enable = function ()
 	tabline.state.enable = true;
@@ -313,6 +293,17 @@ tabline.Disable = function ()
 	tabline.detach();
 
 	tabline.state.enable = false;
+end
+
+----------------------------------------------------------------------
+
+--- Toggles tabline.
+tabline.Toggle = function ()
+	if tabline.state.enable == true then
+		tabline.Disable();
+	else
+		tabline.Enable();
+	end
 end
 
 ----------------------------------------------------------------------

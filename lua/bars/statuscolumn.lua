@@ -453,33 +453,6 @@ end
 
 ----------------------------------------------------------------------
 
---- Toggles state of given window.
----@param window integer
-statuscolumn.toggle = function (window)
-	if type(window) ~= "number" or statuscolumn.state.attached_windows[window] == nil then
-		return;
-	elseif statuscolumn.state.attached_windows[window] == true then
-		statuscolumn.detach(window);
-	else
-		statuscolumn.attach(window, true);
-	end
-end
-
---- Toggles statuscolumn **globally**.
-statuscolumn.Toggle = function ()
-	--- true -> false,
-	--- false -> true
-	statuscolumn.state.enable = not statuscolumn.state.enable;
-
-	for window, state in pairs(statuscolumn.state.attached_windows) do
-		if state ~= nil then
-			statuscolumn.toggle(window);
-		end
-	end
-end
-
-----------------------------------------------------------------------
-
 --- Enables statuscolumn for `window`.
 ---@param window integer
 statuscolumn.enable = function (window)
@@ -496,7 +469,7 @@ statuscolumn.Enable = function ()
 
 	for window, state in pairs(statuscolumn.state.attached_windows) do
 		if state ~= true then
-			statuscolumn.attach(window);
+			statuscolumn.enable(window);
 		end
 	end
 end
@@ -515,11 +488,34 @@ end
 statuscolumn.Disable = function ()
 	for window, state in pairs(statuscolumn.state.attached_windows) do
 		if state ~= false then
-			statuscolumn.detach(window);
+			statuscolumn.disable(window);
 		end
 	end
 
 	statuscolumn.state.enable = false;
+end
+
+----------------------------------------------------------------------
+
+--- Toggles state of given window.
+---@param window integer
+statuscolumn.toggle = function (window)
+	if type(window) ~= "number" or statuscolumn.state.attached_windows[window] == nil then
+		return;
+	elseif statuscolumn.state.attached_windows[window] == true then
+		statuscolumn.disable(window);
+	else
+		statuscolumn.enable(window);
+	end
+end
+
+--- Toggles statuscolumn **globally**.
+statuscolumn.Toggle = function ()
+	if statuscolumn.state.enable == true then
+		statuscolumn.Disable();
+	else
+		statuscolumn.Enable();
+	end
 end
 
 ----------------------------------------------------------------------

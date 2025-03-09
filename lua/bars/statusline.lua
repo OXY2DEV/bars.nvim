@@ -676,33 +676,6 @@ end
 
 ----------------------------------------------------------------------
 
---- Toggles state of given window.
----@param window integer
-statusline.toggle = function (window)
-	if type(window) ~= "number" or statusline.state.attached_windows[window] == nil then
-		return;
-	elseif statusline.state.attached_windows[window] == true then
-		statusline.detach(window);
-	else
-		statusline.attach(window, true);
-	end
-end
-
---- Toggles statusline **globally**.
-statusline.Toggle = function ()
-	--- true -> false,
-	--- false -> true
-	statusline.state.enable = not statusline.state.enable;
-
-	for window, state in pairs(statusline.state.attached_windows) do
-		if state ~= nil then
-			statusline.toggle(window);
-		end
-	end
-end
-
-----------------------------------------------------------------------
-
 --- Enables statusline for `window`.
 ---@param window integer
 statusline.enable = function (window)
@@ -719,7 +692,7 @@ statusline.Enable = function ()
 
 	for window, state in pairs(statusline.state.attached_windows) do
 		if state ~= true then
-			statusline.attach(window);
+			statusline.enable(window);
 		end
 	end
 end
@@ -738,11 +711,34 @@ end
 statusline.Disable = function ()
 	for window, state in pairs(statusline.state.attached_windows) do
 		if state ~= false then
-			statusline.detach(window);
+			statusline.disable(window);
 		end
 	end
 
 	statusline.state.enable = false;
+end
+
+----------------------------------------------------------------------
+
+--- Toggles state of given window.
+---@param window integer
+statusline.toggle = function (window)
+	if type(window) ~= "number" or statusline.state.attached_windows[window] == nil then
+		return;
+	elseif statusline.state.attached_windows[window] == true then
+		statusline.disable(window);
+	else
+		statusline.enable(window);
+	end
+end
+
+--- Toggles statusline **globally**.
+statusline.Toggle = function ()
+	if statusline.state.enable == true then
+		statusline.Disable();
+	else
+		statusline.Enable();
+	end
 end
 
 ----------------------------------------------------------------------
