@@ -5,38 +5,136 @@ bars.config = {
 	global = true
 };
 
-local function list_modules()
-	---@type table[]
-	local MODULES = {};
-
-	--- Use `table.insert` to preserve list
-	--- structure.
-	table.insert(MODULES, package.loaded["bars.statuscolumn"]);
-	table.insert(MODULES, package.loaded["bars.statusline"]);
-	table.insert(MODULES, package.loaded["bars.tabline"]);
-	table.insert(MODULES, package.loaded["bars.winbar"]);
-
-	return MODULES;
+---@return table<string, table>
+local function get_modules()
+	return {
+		statuscolumn = package.loaded["bars.statuscolumn"];
+		statusline = package.loaded["bars.statusline"];
+		tabline = package.loaded["bars.tabline"];
+		winbar = package.loaded["bars.winbar"];
+	};
 end
 
 bars.actions = {
-	Toggle = function ()
-		local modules = list_modules();
+	Toggle = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
 
-		for _, module in ipairs(modules) do
-			pcall(module.Toggle);
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) then
+				pcall(module.Toggle);
+			end
 		end
 	end,
 
-	Enable = nil,
-	Disable = nil,
+	Enable = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
 
-	toggle = nil,
-	enable = nil,
-	disable = nil,
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) then
+				pcall(module.Enable);
+			end
+		end
+	end,
+	Disable = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
 
-	eval = nil,
-	Eval = nil
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) then
+				pcall(module.Disable);
+			end
+		end
+	end,
+
+	toggle = function (affect, windows)
+		windows = windows or { vim.api.nvim_get_current_win() };
+
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) == false then
+				goto continue
+			end
+
+			for _, window in ipairs(windows) do
+				pcall(module.toggle, window);
+			end
+
+		    ::continue::
+		end
+	end,
+	enable = function (affect, windows)
+		windows = windows or { vim.api.nvim_get_current_win() };
+
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) == false then
+				goto continue
+			end
+
+			for _, window in ipairs(windows) do
+				pcall(module.enable, window);
+			end
+
+		    ::continue::
+		end
+	end,
+	disable = function (affect, windows)
+		windows = windows or { vim.api.nvim_get_current_win() };
+
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) == false then
+				goto continue
+			end
+
+			for _, window in ipairs(windows) do
+				pcall(module.enable, window);
+			end
+
+		    ::continue::
+		end
+	end,
+
+	clean = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) == false then
+				goto continue
+			end
+
+			pcall(module.clean);
+
+		    ::continue::
+		end
+	end,
+	update = function (affect, windows)
+		windows = windows or { vim.api.nvim_get_current_win() };
+
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) == false then
+				goto continue
+			end
+
+			for _, window in ipairs(windows) do
+				pcall(module.enable, window);
+			end
+
+		    ::continue::
+		end
+	end
 }
 
 --- Setup function.
