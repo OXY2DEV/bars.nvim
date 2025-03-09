@@ -357,10 +357,10 @@ statuscolumn.detach = function (window)
 	---|fE
 end
 
-statuscolumn.can_attach = function (win)
-	if vim.api.nvim_win_is_valid(win) == false then
+statuscolumn.can_attach = function (win, force)
+	if type(win) ~= "number" or vim.api.nvim_win_is_valid(win) == false then
 		return false;
-	elseif statuscolumn.state.attached_windows[win] == false then
+	elseif force ~= true and statuscolumn.state.attached_windows[win] == false then
 		return false;
 	elseif statuscolumn.state.enable == false then
 		return false;
@@ -392,14 +392,10 @@ end
 --- Attaches the statuscolumn module to the windows
 --- of a buffer.
 ---@param window integer
-statuscolumn.attach = function (window)
+statuscolumn.attach = function (window, force)
 	---|fS
 
-	if not window or vim.api.nvim_win_is_valid(window) == false then
-		return;
-	elseif statuscolumn.state.enable == false then
-		return;
-	elseif statuscolumn.can_attach(window) == false then
+	if statuscolumn.can_attach(window, force) == false then
 		return;
 	elseif statuscolumn.state.attached_windows[window] == true then
 		if vim.wo[window].statuscolumn == STC then
@@ -465,21 +461,21 @@ statuscolumn.toggle = function (window)
 	elseif statuscolumn.state.attached_windows[window] == true then
 		statuscolumn.detach(window);
 	else
-		statuscolumn.attach(window);
+		statuscolumn.attach(window, true);
 	end
 end
 
 --- Toggles statuscolumn **globally**.
 statuscolumn.Toggle = function ()
+	--- true -> false,
+	--- false -> true
+	statuscolumn.state.enable = not statuscolumn.state.enable;
+
 	for window, state in pairs(statuscolumn.state.attached_windows) do
 		if state ~= nil then
 			statuscolumn.toggle(window);
 		end
 	end
-
-	--- true -> false,
-	--- false -> true
-	statuscolumn.state.enable = not statuscolumn.state.enable;
 end
 
 ----------------------------------------------------------------------

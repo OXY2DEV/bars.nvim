@@ -587,10 +587,10 @@ statusline.detach = function (window)
 	---|fE
 end
 
-statusline.can_attach = function (win)
-	if vim.api.nvim_win_is_valid(win) == false then
+statusline.can_attach = function (win, force)
+	if type(win) ~= "number" or vim.api.nvim_win_is_valid(win) == false then
 		return false;
-	elseif statusline.state.attached_windows[win] == false then
+	elseif force ~= true and statusline.state.attached_windows[win] == false then
 		return false;
 	elseif statusline.state.enable == false then
 		return false;
@@ -621,12 +621,10 @@ end
 
 --- Attaches the statusline module to the windows
 --- of a buffer.
-statusline.attach = function (window)
+statusline.attach = function (window, force)
 	---|fS
 
-	if statusline.state.enable == false then
-		return;
-	elseif statusline.can_attach(window) == false then
+	if statusline.can_attach(window, force) == false then
 		return;
 	elseif statusline.state.attached_windows[window] == true then
 		if vim.wo[window].statusline == STL then
@@ -686,21 +684,21 @@ statusline.toggle = function (window)
 	elseif statusline.state.attached_windows[window] == true then
 		statusline.detach(window);
 	else
-		statusline.attach(window);
+		statusline.attach(window, true);
 	end
 end
 
 --- Toggles statusline **globally**.
 statusline.Toggle = function ()
+	--- true -> false,
+	--- false -> true
+	statusline.state.enable = not statusline.state.enable;
+
 	for window, state in pairs(statusline.state.attached_windows) do
 		if state ~= nil then
 			statusline.toggle(window);
 		end
 	end
-
-	--- true -> false,
-	--- false -> true
-	statusline.state.enable = not statusline.state.enable;
 end
 
 ----------------------------------------------------------------------

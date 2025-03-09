@@ -292,11 +292,11 @@ end
 
 --- Toggles tabline.
 tabline.Toggle = function ()
-	tabline.toggle();
-
 	--- true -> false,
 	--- false -> true
 	tabline.state.enable = not tabline.state.enable;
+
+	tabline.toggle();
 end
 
 ----------------------------------------------------------------------

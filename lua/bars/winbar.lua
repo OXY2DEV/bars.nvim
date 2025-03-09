@@ -739,10 +739,10 @@ winbar.detach = function (window)
 	---|fE
 end
 
-winbar.can_attach = function (win)
+winbar.can_attach = function (win, force)
 	if vim.api.nvim_win_is_valid(win) == false then
 		return false;
-	elseif winbar.state.attached_windows[win] == false then
+	elseif force ~= true and winbar.state.attached_windows[win] == false then
 		return false;
 	elseif winbar.state.enable == false then
 		return false;
@@ -774,12 +774,10 @@ end
 --- Attaches the winbar module to the windows
 --- of a buffer.
 ---@param window integer
-winbar.attach = function (window)
+winbar.attach = function (window, force)
 	---|fS
 
-	if winbar.state.enable == false then
-		return;
-	elseif winbar.can_attach(window) == false then
+	if winbar.can_attach(window, force) == false then
 		return;
 	elseif winbar.state.attached_windows[window] == true then
 		if vim.wo[window].winbar == WBR then
@@ -836,21 +834,21 @@ winbar.toggle = function (window)
 	elseif winbar.state.attached_windows[window] == true then
 		winbar.detach(window);
 	else
-		winbar.attach(window);
+		winbar.attach(window, true);
 	end
 end
 
 --- Toggles winbar **globally**.
 winbar.Toggle = function ()
+	--- true -> false,
+	--- false -> true
+	winbar.state.enable = not winbar.state.enable;
+
 	for window, state in pairs(winbar.state.attached_windows) do
 		if state ~= nil then
 			winbar.toggle(window);
 		end
 	end
-
-	--- true -> false,
-	--- false -> true
-	winbar.state.enable = not winbar.state.enable;
 end
 
 ----------------------------------------------------------------------
