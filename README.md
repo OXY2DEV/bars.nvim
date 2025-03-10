@@ -1,5 +1,8 @@
 # 🚀 bars.nvim
 
+<!--<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-mobile.png">-->
+<!--<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">-->
+
 <div align="center">
     <img alt="Neovim" src="https://img.shields.io/badge/Neovim-000?style=for-the-badge&logo=neovim&logoColor=A6E3A1&color=1E1E2E">
     <img alt="Repo size" src="https://img.shields.io/github/languages/code-size/OXY2DEV/bars.nvim?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggc3Ryb2tlPSIjQ0JBNkY3IiBmaWxsPSIjQ0JBNkY3IiBkPSJNOTYgMEM0MyAwIDAgNDMgMCA5NkwwIDQxNmMwIDUzIDQzIDk2IDk2IDk2bDI4OCAwIDMyIDBjMTcuNyAwIDMyLTE0LjMgMzItMzJzLTE0LjMtMzItMzItMzJsMC02NGMxNy43IDAgMzItMTQuMyAzMi0zMmwwLTMyMGMwLTE3LjctMTQuMy0zMi0zMi0zMkwzODQgMCA5NiAwem0wIDM4NGwyNTYgMCAwIDY0TDk2IDQ0OGMtMTcuNyAwLTMyLTE0LjMtMzItMzJzMTQuMy0zMiAzMi0zMnptMzItMjQwYzAtOC44IDcuMi0xNiAxNi0xNmwxOTIgMGM4LjggMCAxNiA3LjIgMTYgMTZzLTcuMiAxNi0xNiAxNmwtMTkyIDBjLTguOCAwLTE2LTcuMi0xNi0xNnptMTYgNDhsMTkyIDBjOC44IDAgMTYgNy4yIDE2IDE2cy03LjIgMTYtMTYgMTZsLTE5MiAwYy04LjggMC0xNi03LjItMTYtMTZzNy4yLTE2IDE2LTE2eiIvPjwvc3ZnPg%3D%3D&logoColor=CBA6F7&labelColor=1e1e2e&color=B4BEFE">
@@ -12,6 +15,7 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 
 - [✨ Features](#-features)
 - [📚 Requirements](#-requirements)
+- [💡 Guide](#-guide)
 - [📐 Installation](#-installation)
 - [🧭 Configuration](#-configuration)
 - [🧰 Commands](#-commands)
@@ -36,6 +40,17 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 - Nerd font >= 3.0.0
 - Git(`branch` in statusline).
 - Tree-sitter parser(`node` in winbar).
+
+## 💡 Guide
+
+Guide for creating your own custom statusline, statuscolumn, tabline & winbar are given below,
+
+<!-- Demo here -->
+
+- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn)
+- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Statusline)
+- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Winbar)
+- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Tabline)
 
 ## 📐 Installation
 
@@ -174,10 +189,4 @@ You can add any number of windows after the modifier to specify which windows to
 
 >[!TIP]
 > Cmdline completion are provided for all sub-commands/modifiers/windows!
-
-
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-mobile.png">
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">
-
-A starting point for creating custom bars & lines in `Neovim`.
 
