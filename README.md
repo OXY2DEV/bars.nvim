@@ -41,7 +41,7 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 Add this to your plugin list.
 
 ```vim
-Plug "OXY2DEV/patterns.nvim"
+Plug "OXY2DEV/bars.nvim"
 ```
 
 ### 💤 lazy.nvim
@@ -53,15 +53,15 @@ For `plugins.lua` users,
 
 ```lua
 {
-    "OXY2DEV/patterns.nvim",
+    "OXY2DEV/bars.nvim",
 },
 ```
 
-For `plugins/patterns.lua`,
+For `plugins/bars.lua`,
 
 ```lua
 return {
-    "OXY2DEV/patterns.nvim",
+    "OXY2DEV/bars.nvim",
 };
 ```
 
@@ -71,7 +71,7 @@ return {
 local MiniDeps = require("mini.deps");
 
 MiniDeps.add({
-    source = "OXY2DEV/patterns.nvim"
+    source = "OXY2DEV/bars.nvim"
 });
 ```
 
@@ -81,12 +81,12 @@ MiniDeps.add({
 > `luarocks package` may sometimes be a bit behind `main`.
 
 ```vim
-:Rocks install patterns.nvim
+:Rocks install bars.nvim
 ```
 
 ### 📥 GitHub release
 
-Tagged releases can be found in the [release page](https://github.com/OXY2DEV/patterns.nvim/releases).
+Tagged releases can be found in the [release page](https://github.com/OXY2DEV/bars.nvim/releases).
 
 >[!NOTE]
 > `Github releases` may sometimes be slightly behind `main`.
