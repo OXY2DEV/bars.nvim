@@ -247,6 +247,15 @@ wbC.node = function (buffer, window, main_config)
 	---|fE
 end
 
+--- Custom section.
+---@param config winbae.parts.custom
+---@return string
+wbC.custom = function (_, _, config)
+	return config.value;
+end
+
+----------------------------------------------------------------------
+
 --- Returns the output of the section {name}.
 ---@param name string
 ---@param buffer integer

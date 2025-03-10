@@ -425,6 +425,15 @@ tlC.bufs = function (config)
 	---|fE
 end
 
+--- Custom section
+---@param config tabline.parts.custom
+---@return string
+tlC.custom = function (_, _, config)
+	return config.value;
+end
+
+----------------------------------------------------------------------
+
 --- Returns the output of the section {name}.
 ---@param part_config table
 ---@param tabline string

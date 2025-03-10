@@ -470,6 +470,13 @@ slC.ruler = function (_, window, main_config)
 	---|fE
 end
 
+--- Custom section.
+---@param config statusline.parts.custom
+---@return string
+slC.custom = function (_, _, config)
+	return config.value.
+end
+
 -----------------------------------------------------------------------------
 
 --- Returns the output of the section {name}.

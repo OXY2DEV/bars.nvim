@@ -338,6 +338,13 @@ scC.signs = function (buffer, _, config)
 	---|fE
 end
 
+--- Custom column.
+---@param config statusline.parts.custom
+---@return string
+scC.custom = function (_, _, config)
+	return config.value;
+end
+
 --- Returns the output of the section {name}.
 ---@param name string
 ---@param buffer integer
