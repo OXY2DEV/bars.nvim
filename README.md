@@ -14,6 +14,7 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 - [📚 Requirements](#-requirements)
 - [📐 Installation](#-installation)
 - [🧭 Configuration](#-configuration)
+- [🧰 Commands](#-commands)
 
 ## ✨ Features
 
@@ -33,6 +34,8 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 > The version requirement varies for different parts of `bars.nvim`.
 
 - Nerd font >= 3.0.0
+- Git(`branch` in statusline).
+- Tree-sitter parser(`node` in winbar).
 
 ## 📐 Installation
 
@@ -92,6 +95,86 @@ Tagged releases can be found in the [release page](https://github.com/OXY2DEV/ba
 > `Github releases` may sometimes be slightly behind `main`.
 
 ## 🧭 Configuration
+
+This plugin can be configured in 2 ways,
+
+1. Via the `setup()` function.
+
+```lua
+require("bars").setup({
+    global = false
+});
+```
+
+2. Via the modules own setup function.
+
+```lua
+require("bars.statusline").setup({
+    ignore_filwtypes = { "help" }
+});
+```
+
+Check the [wiki]() to learn about all the configuration options!
+
+## 🧰 Commands
+
+This plugin provides a single command `:Bars` which has **sub-commands** that can be used to do different things.
+
+```
+USAGE,
+    :Bars
+
+    :Bars [sub-command]
+
+    :Bars [sub-command] [modifier]
+
+    :Bars [sub-command] [modifier] [window_1] [window_2] ..
+
+EXAMPLE,
+    :Bars toggle ? 1000
+```
+
+The sub-commands are given below,
+
+
+| Sub-command | Description                                                       |
+|-------------|-------------------------------------------------------------------|
+| Toggle      | Used to toggle statusline, statuscolumn etc. **globally**.        |
+| Enable      | Used to enable statusline, statuscolumn etc. **globally**.        |
+| Disable     | Used to disable statusline, statuscolumn etc. **globally**.       |
+| toggle      | Used to toggle statusline, statuscolumn etc. of given window(s).  |
+| enable      | Used to enable statusline, statuscolumn etc. of given window(s).  |
+| disable     | Used to disable statusline, statuscolumn etc. of given window(s). |
+| clean       | Cleans up cached values of deleted windows.                       |
+| update      | Updates the module's configuration ID of given window.            |
+
+
+All the sub-commands support **modifier** to specify which modules should be affected by the command.
+
+>[!TIP]
+> If you want to run a sub-command on the current window then you can ignore the modifier.
+>
+> ```vim
+> " Toggles all bars & lines for the current window.
+> :Bars toggle
+> ```
+
+Modifiers are given below,
+
+| Modifier     | Description                       |
+|--------------|-----------------------------------|
+| all          | Affects all modules.              |
+| ?            | Prompt which module(s) to affect. |
+| statusline   | Self-explanatory.                 |
+| statuscolumn | Self-explanatory.                 |
+| tabline      | Self-explanatory.                 |
+| winbar       | Self-explanatory.                 |
+
+You can add any number of windows after the modifier to specify which windows to run the command on.
+
+>[!TIP]
+> Cmdline completion are provided for all sub-commands/modifiers/windows!
+
 
 <img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-mobile.png">
 <img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">
