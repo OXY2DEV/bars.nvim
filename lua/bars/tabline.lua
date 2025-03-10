@@ -309,10 +309,12 @@ end
 ----------------------------------------------------------------------
 
 --- Sets up the tabline module.
----@param config tabline.config | nil
+---@param config tabline.config | boolean | nil
 tabline.setup = function (config)
 	if type(config) == "table" then
 		tabline.config = vim.tbl_extend("force", tabline.config, config);
+	elseif type(config) == "boolean" then
+		tabline.state.enable = config;
 	end
 
 	tabline.update_id();

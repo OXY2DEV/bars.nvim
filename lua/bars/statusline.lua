@@ -756,10 +756,12 @@ end
 ----------------------------------------------------------------------
 
 --- Sets up the statusline module.
----@param config statusline.config | nil
+---@param config statusline.config | boolean | nil
 statusline.setup = function (config)
 	if type(config) == "table" then
 		statusline.config = vim.tbl_extend("force", statusline.config, config);
+	elseif type(config) == "boolean" then
+		statusline.state.enable = config;
 	end
 
 	for window, _ in pairs(statusline.state.attached_windows) do

@@ -895,10 +895,12 @@ end
 ----------------------------------------------------------------------
 
 --- Sets up the winbar module.
----@param config winbar.config | nil
+---@param config winbar.config | boolean | nil
 winbar.setup = function (config)
 	if type(config) == "table" then
 		winbar.config = vim.tbl_extend("force", winbar.config, config);
+	elseif type(config) == "boolean" then
+		winbar.state.enable = config;
 	end
 
 	for window, _ in pairs(winbar.state.attached_windows) do

@@ -522,7 +522,7 @@ end
 ----------------------------------------------------------------------
 
 --- Sets up the statuscolumn module.
----@param config statuscolumn.config | nil
+---@param config statuscolumn.config | boolean | nil
 statuscolumn.setup = function (config)
 	if type(config) == "table" then
 		statuscolumn.config = vim.tbl_extend("force", statuscolumn.config, config);
