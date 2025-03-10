@@ -1,6 +1,8 @@
 --- Load all the global functions.
 require("bars.global");
-local bars = require("bars")
+local bars = require("bars");
+
+bars.setup();
 
 ---|fS "Cache default values."
 
