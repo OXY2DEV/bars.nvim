@@ -9,7 +9,17 @@ bars.config = {
 	statuscolumn = true,
 	statusline = true,
 	tabline = true,
-	winbar = true,
+	winbar = function ()
+		if not _G.is_within_termux then
+			--- The function doesn't
+			--- exist.
+			return true;
+		else
+			--- Winbar should be disabled
+			--- while inside Termux.
+			return _G.is_within_termux() == false;
+		end
+	end,
 
 	---|fE
 };
@@ -171,11 +181,27 @@ bars.setup = function (config)
 		bars.config = vim.tbl_deep_extend("force", bars.config, config);
 	end
 
-	require("bars.statusline").setup(bars.config.statusline);
-	require("bars.statuscolumn").setup(bars.config.statuscolumn);
-	require("bars.winbar").setup(bars.config.winbar);
+	local _config = {};
 
-	require("bars.tabline").setup(bars.config.tabline);
+	for key, value in pairs(bars.config) do
+		if type(value) == "function" then
+			local can_call, new_value = pcall(value);
+
+			if can_call == true then
+				_config[key] = new_value;
+			else
+				_config[key] = nil;
+			end
+		else
+			_config[key] = value;
+		end
+	end
+
+	require("bars.statusline").setup(_config.statusline);
+	require("bars.statuscolumn").setup(_config.statuscolumn);
+	require("bars.winbar").setup(_config.winbar);
+
+	require("bars.tabline").setup(_config.tabline);
 
 	---|fE
 end

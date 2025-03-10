@@ -10,8 +10,8 @@
 --- opening Neovim or new windows.
 ---@field global? boolean
 ---
----@field statusline? boolean | statusline.config Statusline configuration.
----@field statuscolumn? boolean | statuscolumn.config Statuscolumn configuration.
----@field winbar? boolean | winbar.config Winbar configuration.
+---@field statusline? boolean | statusline.config | fun(): (boolean | statusline.config) Statusline configuration.
+---@field statuscolumn? boolean | statuscolumn.config | fun(): (boolean | statuscolumn.config) Statuscolumn configuration.
+---@field winbar? boolean | winbar.config | fun(): (boolean | winbar.config) Winbar configuration.
 ---
----@field tabline? boolean | tabline.config Tabline configuration.
+---@field tabline? boolean | tabline.config | fun(): (boolean | tabline.config) Tabline configuration.
