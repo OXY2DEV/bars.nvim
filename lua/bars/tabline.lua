@@ -1,3 +1,4 @@
+--- Custom tabline module
 local tabline = {}
 local components = require("bars.components.tabline");
 
@@ -7,10 +8,10 @@ local TBL = "%!v:lua.require('bars.tabline').render()";
 
 ---@class tabline.config
 tabline.config = {
-	---|fS
-
 	default = {
 		parts = {
+			---|fS
+
 			{ kind = "empty", hl = "Normal" },
 			{
 				kind = "tabs",
@@ -111,10 +112,10 @@ tabline.config = {
 				}
 			},
 			{ kind = "empty", hl = "Normal" },
+
+			---|fE
 		}
 	}
-
-	---|fE
 };
 
 ---@type tabline.state
@@ -146,7 +147,7 @@ tabline.update_id = function ()
 
 		if tmp.condition == true then
 			ID = key;
-		elseif pcall(tmp.condition) and tmp.condition() == true  then
+		elseif pcall(tmp.condition --[[ @as fun():boolean ]]) and tmp.condition() == true  then
 			ID = key;
 		end
 
