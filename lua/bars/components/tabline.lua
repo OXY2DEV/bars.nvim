@@ -221,8 +221,8 @@ tlC.tabs = function (config)
 	---|fE
 end
 
---- Tab list.
----@param config tabline.parts.tabs
+--- Buffer list.
+---@param config tabline.parts.bufs
 ---@return string
 tlC.bufs = function (config)
 	---|fS
@@ -345,8 +345,8 @@ tlC.bufs = function (config)
 			name = "New file";
 		end
 
-		if buf_config.ft_icon ~= false and pcall(require, "icons") then
-			local icon_config = require("icons").get(
+		if buf_config.ft_icon ~= false and package.loaded["icons"] then
+			local icon_config = package.loaded["icons"].get(
 				vim.fn.fnamemodify(name, ":e"),
 				{
 					buf_config.icon_hl, buf_config.icon,
@@ -429,7 +429,7 @@ end
 ---@param config tabline.parts.custom
 ---@return string
 tlC.custom = function (_, _, config)
-	return config.value;
+	return config.value --[[ @as string ]];
 end
 
 ----------------------------------------------------------------------
