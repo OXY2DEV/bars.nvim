@@ -1,3 +1,4 @@
+--- Custom winbar module.
 local winbar = {};
 local components = require("bars.components.winbar");
 
@@ -7,8 +8,6 @@ local WBR = "%!v:lua.require('bars.winbar').render()";
 
 ---@class winbar.config
 winbar.config = {
-	---|fS
-
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
@@ -24,6 +23,8 @@ winbar.config = {
 
 	default = {
 		parts = {
+			---|fS
+
 			{
 				kind = "path",
 				condition = function (buffer)
@@ -50,7 +51,7 @@ winbar.config = {
 			},
 			{
 				kind = "node",
-				lookup = 3,
+				depth = 3,
 
 				separator = " → ",
 				separator_hl = "Comment",
@@ -592,10 +593,10 @@ winbar.config = {
 					},
 				}
 			}
+
+			---|fE
 		}
 	}
-
-	---|fE
 };
 
 ---@type winbar.state
@@ -679,7 +680,12 @@ winbar.render = function ()
 	---|fE
 end
 
+--- Can we detach from {win}?
+---@param win integer
+---@return boolean
 winbar.can_detach = function (win)
+	---|fS
+
 	if vim.api.nvim_win_is_valid(win) == false then
 		return false;
 	end
@@ -705,8 +711,12 @@ winbar.can_detach = function (win)
 			return false;
 		end
 	end
+
+	---|fE
 end
 
+--- Detaches from {window}.
+---@param window integer
 winbar.detach = function (window)
 	---|fS
 
@@ -739,7 +749,13 @@ winbar.detach = function (window)
 	---|fE
 end
 
+--- Can we attach to {win}
+---@param win integer
+---@param force? boolean Forcefully attaches to a window whose state is `false`.
+---@return boolean
 winbar.can_attach = function (win, force)
+	---|fS
+
 	if vim.api.nvim_win_is_valid(win) == false then
 		return false;
 	elseif force ~= true and winbar.state.attached_windows[win] == false then
@@ -769,12 +785,14 @@ winbar.can_attach = function (win, force)
 			return true;
 		end
 	end
+
+	---|fE
 end
 
 --- Attaches the winbar module to the windows
 --- of a buffer.
 ---@param window integer
----@param force? boolean
+---@param force? boolean Forcefully attaches to a window whose state is `false`.
 winbar.attach = function (window, force)
 	---|fS
 
@@ -797,6 +815,8 @@ end
 
 --- Attaches globally.
 winbar.global_attach = function ()
+	---|fS
+
 	if winbar.state.enable == false then
 		return;
 	end
@@ -807,6 +827,8 @@ winbar.global_attach = function ()
 
 	vim.g.__winbar = vim.o.winbar == WBR and "" or vim.o.winbar;
 	vim.o.winbar = WBR;
+
+	---|fE
 end
 
 --- Cleans up invalid buffers and recalculates
@@ -830,15 +852,21 @@ end
 --- Enables winbar for `window`.
 ---@param window integer
 winbar.enable = function (window)
+	---|fS
+
 	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
 		return;
 	end
 
 	winbar.attach(window, true);
+
+	---|fE
 end
 
 --- Enables *all* attached windows.
 winbar.Enable = function ()
+	---|fS
+
 	winbar.state.enable = true;
 
 	for window, state in pairs(winbar.state.attached_windows) do
@@ -846,20 +874,28 @@ winbar.Enable = function ()
 			winbar.enable(window);
 		end
 	end
+
+	---|fE
 end
 
 --- Disables winbar for `window`.
 ---@param window integer
 winbar.disable = function (window)
+	---|fS
+
 	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
 		return;
 	end
 
 	winbar.detach(window);
+
+	---|fE
 end
 
 --- Disables *all* attached windows.
 winbar.Disable = function ()
+	---|fS
+
 	for window, state in pairs(winbar.state.attached_windows) do
 		if state ~= false then
 			winbar.disable(window);
@@ -867,6 +903,8 @@ winbar.Disable = function ()
 	end
 
 	winbar.state.enable = false;
+
+	---|fE
 end
 
 ----------------------------------------------------------------------
@@ -874,6 +912,8 @@ end
 --- Toggles state of given window.
 ---@param window integer
 winbar.toggle = function (window)
+	---|fS
+
 	if type(window) ~= "number" or winbar.state.attached_windows[window] == nil then
 		return;
 	elseif winbar.state.attached_windows[window] == true then
@@ -881,15 +921,21 @@ winbar.toggle = function (window)
 	else
 		winbar.enable(window);
 	end
+
+	---|fE
 end
 
 --- Toggles winbar **globally**.
 winbar.Toggle = function ()
+	---|fS
+
 	if winbar.state.enable == true then
 		winbar.Disable();
 	else
 		winbar.Enable();
 	end
+
+	---|fE
 end
 
 ----------------------------------------------------------------------
@@ -897,6 +943,8 @@ end
 --- Sets up the winbar module.
 ---@param config winbar.config | boolean | nil
 winbar.setup = function (config)
+	---|fS
+
 	if type(config) == "table" then
 		winbar.config = vim.tbl_extend("force", winbar.config, config);
 	elseif type(config) == "boolean" then
@@ -906,6 +954,8 @@ winbar.setup = function (config)
 	for window, _ in pairs(winbar.state.attached_windows) do
 		vim.w[window].__wbID = winbar.update_id(window);
 	end
+
+	---|fE
 end
 
 return winbar;

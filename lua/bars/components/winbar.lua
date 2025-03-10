@@ -1,79 +1,10 @@
 local wbC = {};
 local utils = require("bars.utils");
 
-wbC.path = function (buffer, window, main_config)
-	---@type string | ""
-	local name = vim.api.nvim_buf_get_name(buffer);
-
-	if name == "" then
-		return;
-	else
-		name = vim.fn.fnamemodify(name, ":~:.");
-	end
-
-	---@type integer
-	local throttle = main_config.throttle or 50;
-
-	---@type integer
-	local before = vim.w[window].__path_time or 0;
-	---@type string
-	local old = vim.w[window].__path_data;
-	---@type integer
-	local now = vim.uv.hrtime();
-
-	if old and (now - before) < (throttle * 1e6) then
-		return old;
-	end
-
-	local sep = string.sub(package.config or "", 1, 1);
-
-	if sep == "\\" then
-		name = string.gsub(name, "^%u:", "");
-	end
-
-	---@type string[]
-	local parts = vim.split(name, "/", { trimempty = true });
-	local _o = "";
-
-	while #parts > 0 do
-		local part = parts[#parts];
-
-		local part_config = utils.match(main_config, part, {});
-		local is_dir = false;
-
-		if _o ~= "" and vim.fn.fnamemodify(part, ":e") == "" then
-			is_dir = true;
-		end
-
-		_o = table.concat({
-
-			utils.create_segmant(part_config.corner_left, part_config.corner_left_hl or part_config.hl),
-			utils.create_segmant(part_config.padding_left, part_config.padding_left_hl or part_config.hl),
-			utils.create_segmant(is_dir == true and part_config.dir_icon or part_config.icon, (is_dir == true and part_config.dir_icon_hl or part_config.icon_hl) or part_config.hl),
-
-			utils.create_segmant(part_config.text or part, part_config.hl),
-
-			utils.create_segmant(part_config.padding_right, part_config.padding_right_hl or part_config.hl),
-			utils.create_segmant(part_config.corner_right, part_config.corner_right_hl or part_config.hl),
-
-			utils.create_segmant(_o ~= "" and main_config.separator or "", main_config.separator_hl),
-
-			_o,
-		});
-
-		table.remove(parts, #parts);
-	end
-
-	vim.w[window].__path_data = _o;
-	vim.w[window].__path_time = now;
-
-	return _o;
-end
-
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.node
+---@param main_config winbar.part.node
 ---@return string
 wbC.node = function (buffer, window, main_config)
 	---|fS
@@ -145,13 +76,13 @@ wbC.node = function (buffer, window, main_config)
 		return node;
 	end
 
-	local lookup = main_config.lookup or 9;
+	local depth = main_config.depth or 9;
 	local _o = "";
 
 	while node do
 		---|fS
 
-		if lookup <= 0 then
+		if depth <= 0 then
 			break;
 		end
 
@@ -161,7 +92,7 @@ wbC.node = function (buffer, window, main_config)
 		local item_config = utils.match(lang_config, node:type(), {});
 		local has_sep = true;
 
-		if lookup == 1 then
+		if depth == 1 then
 			has_sep = false;
 		elseif not node:parent() then
 			has_sep = false;
@@ -194,7 +125,7 @@ wbC.node = function (buffer, window, main_config)
 
 			_o,
 		});
-		lookup = lookup - 1;
+		depth = depth - 1;
 
 		::ignore::
 
@@ -203,7 +134,7 @@ wbC.node = function (buffer, window, main_config)
 		---|fE
 	end
 
-	if lookup <= 0 and node then
+	if depth <= 0 and node then
 		local lanuage = get_language(node);
 		local lang_config = utils.match(main_config, lanuage or "default", {});
 
@@ -226,19 +157,6 @@ wbC.node = function (buffer, window, main_config)
 		});
 	end
 
-	if type(main_config.max_width) == "number" then
-		_o = table.concat({
-			"%",
-			0,
-			".",
-			main_config.max_width,
-			"(",
-			" ",
-			_o,
-			"%)"
-		});
-	end
-
 	vim.w[window].__node_data = _o;
 	vim.w[window].__node_time = now;
 
@@ -247,11 +165,89 @@ wbC.node = function (buffer, window, main_config)
 	---|fE
 end
 
+--- Node under cursor
+---@param buffer integer
+---@param window integer
+---@param main_config winbar.part.path
+---@return string
+wbC.path = function (buffer, window, main_config)
+	---|fS
+
+	---@type string | ""
+	local name = vim.api.nvim_buf_get_name(buffer);
+
+	if name == "" then
+		return "";
+	else
+		name = vim.fn.fnamemodify(name, ":~:.");
+	end
+
+	---@type integer
+	local throttle = main_config.throttle or 50;
+
+	---@type integer
+	local before = vim.w[window].__path_time or 0;
+	---@type string
+	local old = vim.w[window].__path_data;
+	---@type integer
+	local now = vim.uv.hrtime();
+
+	if old and (now - before) < (throttle * 1e6) then
+		return old;
+	end
+
+	local sep = string.sub(package.config or "", 1, 1);
+
+	if sep == "\\" then
+		name = string.gsub(name, "^%u:", "");
+	end
+
+	---@type string[]
+	local parts = vim.split(name, sep, { trimempty = true });
+	local _o = "";
+
+	while #parts > 0 do
+		local part = parts[#parts];
+
+		local part_config = utils.match(main_config, part, {});
+		local is_dir = false;
+
+		if _o ~= "" and vim.fn.fnamemodify(part, ":e") == "" then
+			is_dir = true;
+		end
+
+		_o = table.concat({
+
+			utils.create_segmant(part_config.corner_left, part_config.corner_left_hl or part_config.hl),
+			utils.create_segmant(part_config.padding_left, part_config.padding_left_hl or part_config.hl),
+			utils.create_segmant(is_dir == true and part_config.dir_icon or part_config.icon, (is_dir == true and part_config.dir_icon_hl or part_config.icon_hl) or part_config.hl),
+
+			utils.create_segmant(part_config.text or part, part_config.hl),
+
+			utils.create_segmant(part_config.padding_right, part_config.padding_right_hl or part_config.hl),
+			utils.create_segmant(part_config.corner_right, part_config.corner_right_hl or part_config.hl),
+
+			utils.create_segmant(_o ~= "" and main_config.separator or "", main_config.separator_hl),
+
+			_o,
+		});
+
+		table.remove(parts, #parts);
+	end
+
+	vim.w[window].__path_data = _o;
+	vim.w[window].__path_time = now;
+
+	return _o;
+
+	---|fE
+end
+
 --- Custom section.
----@param config winbae.parts.custom
+---@param config winbar.part.custom
 ---@return string
 wbC.custom = function (_, _, config)
-	return config.value;
+	return config.value --[[ @as string ]];
 end
 
 ----------------------------------------------------------------------
