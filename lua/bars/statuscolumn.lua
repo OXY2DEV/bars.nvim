@@ -45,11 +45,11 @@ statuscolumn.config = {
 					local mode = vim.api.nvim_get_mode().mode;
 					local name = namespaces[details.ns_id] or "";
 
-					if package.loaded["markview"] and vim.bo[buffer] == "markdown" then
+					if package.loaded["markview"] and vim.bo[buffer].ft == "markdown" then
 						--- On markdown files when on normal
 						--- mode only show markview signs.
 						if mode == "n" then
-							return string.match(name, "^markview");
+							return string.match(name, "^markview") ~= nil;
 						else
 							return true;
 						end
@@ -57,7 +57,7 @@ statuscolumn.config = {
 						--- On help files when on normal
 						--- mode only show helpview signs.
 						if mode == "n" then
-							return string.match(name, "^helpview");
+							return string.match(name, "^helpview") ~= nil;
 						else
 							return true;
 						end
