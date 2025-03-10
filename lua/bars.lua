@@ -2,20 +2,41 @@ local bars = {};
 
 ---@type bars.config
 bars.config = {
-	global = true
+	---|fS
+
+	global = true,
+
+	statuscolumn = true,
+	statusline = true,
+	tabline = true,
+	winbar = true,
+
+	---|fE
 };
 
+--- Gets the modules need by `bars.nvim`.
+--- Note: This is to prevent loading
+---       the modules at start.
 ---@return table<string, table>
 local function get_modules()
+	---|fS
+
 	return {
 		statuscolumn = package.loaded["bars.statuscolumn"];
 		statusline = package.loaded["bars.statusline"];
 		tabline = package.loaded["bars.tabline"];
 		winbar = package.loaded["bars.winbar"];
 	};
+
+	---|fE
 end
 
+--- Various actions that exposes the plugin's
+--- functionality outside.
+---@type table<string, function>
 bars.actions = {
+	---|fS
+
 	Toggle = function (affect)
 		local modules = get_modules();
 		affect = affect or vim.tbl_keys(modules);
@@ -135,12 +156,16 @@ bars.actions = {
 		    ::continue::
 		end
 	end
-}
+
+	---|fE
+};
 
 --- Setup function.
 --- Should be optional.
 ---@param config bars.config | nil
 bars.setup = function (config)
+	---|fS
+
 	--- Update the configuration.
 	if type(config) == "table" then
 		bars.config = vim.tbl_deep_extend("force", bars.config, config);
@@ -151,6 +176,8 @@ bars.setup = function (config)
 	require("bars.winbar").setup(bars.config.winbar);
 
 	require("bars.tabline").setup(bars.config.tabline);
+
+	---|fE
 end
 
 return bars;
