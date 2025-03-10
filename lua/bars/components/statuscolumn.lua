@@ -342,7 +342,7 @@ end
 ---@param config statusline.parts.custom
 ---@return string
 scC.custom = function (_, _, config)
-	return config.value;
+	return config.value --[[ @as string ]];
 end
 
 --- Returns the output of the section {name}.

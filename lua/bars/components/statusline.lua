@@ -474,7 +474,7 @@ end
 ---@param config statusline.parts.custom
 ---@return string
 slC.custom = function (_, _, config)
-	return config.value;
+	return config.value --[[ @as string ]];
 end
 
 -----------------------------------------------------------------------------
