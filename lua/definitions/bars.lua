@@ -1,3 +1,5 @@
+---@meta
+
 --- Primary configuration table.
 ---@class bars.config
 ---
@@ -8,8 +10,8 @@
 --- opening Neovim or new windows.
 ---@field global? boolean
 ---
----@field statusline? statusline.config Statusline configuration.
----@field statuscolumn? statuscolumn.config Statuscolumn configuration.
----@field winbar? winbar.config Winbar configuration.
+---@field statusline? boolean | statusline.config Statusline configuration.
+---@field statuscolumn? boolean | statuscolumn.config Statuscolumn configuration.
+---@field winbar? boolean | winbar.config Winbar configuration.
 ---
----@field tabline? tabline.config Tabline configuration.
+---@field tabline? boolean | tabline.config Tabline configuration.

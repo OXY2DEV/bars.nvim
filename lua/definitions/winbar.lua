@@ -1,41 +1,116 @@
 ---@meta
 
+--- State variables for the winbar
+--- module.
 ---@class winbar.state
 ---
 ---@field enable boolean
+---
+--- State for attached windows.
 ---@field attached_windows { [integer]: boolean }
 
+----------------------------------------------------------------------
 
+--- Configuration for the winbar module.
 ---@class winbar.config
 ---
+--- Filetypes to ignore.
 ---@field ignore_filetypes string[]
+---
+--- Buftypes to ignore.
 ---@field ignore_buftypes string[]
 ---
----@field condition? fun(buffer: integer): boolean | nil
+--- Additional condition for attaching to
+--- windows.
+---@field condition? fun(buffer: integer, window: integer): boolean | nil
 ---
----@field defaukt table
----@field [string] table
+--- Default style.
+---@field default winbar_part[]
+---
+--- Style named `string`
+---@field [string] winbar_part[]
 
 
----@class winbar.node
+---@alias winbar_part
+---| winbar.part.node
+---| winbar.part.path
+
+
+---@class winbar.part.node
 ---
 ---@field kind "node"
----@field throttle? integer
----@field lookup? integer
----@field max_width? integer
 ---
+--- Condition for this part
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+---
+--- Update delay(in milliseconds).
+---@field throttle? integer
+---
+--- Maximum node depth.
+---@field depth? integer
+---
+--- Separator between nodes.
 ---@field separator? string
+---
+--- Highlight group for the separator.
 ---@field separator_hl? string
 ---
+--- Default configuration for languages.
 ---@field default node.opts
+---
+--- Configuration for language named `string`.
 ---@field [string] node.opts
 
 
 ---@class node.opts
 ---
----@field default table
+--- Default configuration for nodes.
+---@field default winbar.section
+---
+--- Configuration for the ellipsis.
 ---@field __lookup table
----@field [string] table
+---
+--- Configuration for nodes named `string.
+---@field [string] winbar.section
+
+
+--- Configuration for file path.
+---@class winbar.part.path
+---
+--- What kind of part is this?
+---@field kind "path"
+---
+--- Condition for this part
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+---
+--- Update delay(in milliseconds).
+---@field throttle? integer
+---
+--- Separator between path parts.
+---@field separator? string
+---
+---Highlight group for separator.
+---@field separator_hl? string
+---
+--- Default configuration for path segment.
+---@field default winbar.section
+---
+--- Configuration for segments matching `string`.
+---@field [string] winbar.section
+
+
+--- Custom section for the winbar.
+---@class winbar.part.custom
+---
+--- What kind of part is this?
+---@field kind "custom"
+---
+--- Condition for this part
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+---
+--- Text to show for this section.
+---@field value string | fun(buffer: integer, window: integer, winbar: string): string
+
 
 ---@class winbar.section
 ---

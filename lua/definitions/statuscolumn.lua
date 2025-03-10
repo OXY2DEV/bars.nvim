@@ -6,6 +6,10 @@
 --- Is the module enabled?
 ---@field enable boolean
 ---
+--- State for attached windows,
+---   true -> Enabled(should be rendered).
+---   false -> Attached but disabled.
+---
 ---@field attached_windows table<integer, boolean>
 
 -----------------------------------------------------------------------------
@@ -28,6 +32,7 @@
 --- Configuration style.
 ---@field [string] statuscolumn.style
 
+
 --- A configuration style.
 --- Must have a condition(unless `default`)
 --- and a list of parts.
@@ -38,12 +43,14 @@
 --- Parts for this style.
 ---@field parts statuscolumn_part[]
 
+
 ---@alias statuscolumn_part
 ---| statuscolumn.parts.lnum Line number.
 ---| statuscolumn.parts.folds Fold column.
 ---| statuscolumn.parts.signs Sign column.
 ---| statuscolumn.parts.empty An empty column.
 ---| statuscolumn.parts.border A statuscolumn border. 
+---| statuscolumn.parts.custom
 
 -----------------------------------------------------------------------------
 
@@ -53,7 +60,8 @@
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
----@field kind "lnum" What kind of part is this?
+--- What kind of part is this?
+---@field kind "lnum"
 ---
 ---@field click? boolean | fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
@@ -105,7 +113,7 @@
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "border"
 ---
 --- Text to use for the border.
@@ -123,7 +131,7 @@
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "folds"
 ---
 --- Text to show for closed fold.
@@ -188,7 +196,7 @@
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "signs"
 ---
 --- Filter for signs.
@@ -199,5 +207,17 @@
 --- sign's original highlight group.
 ---@field hl? string
 
+
+--- Custom part for the statuscolumn.
+---@class statuscolumn.parts.custom
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of part is this?
+---@field kind "custom"
+---
+--- Text to render.
+---@field value string | fun(buffer: integer, window: integer, statuscolumn: string): string
 
 

@@ -7,7 +7,9 @@
 --- Should we attach to new windows?
 ---@field enable boolean
 ---
---- List of attached windows.
+--- State of attached windows.
+---   true -> Attached & rendering.
+---   false -> Attached only.
 ---@field attached_windows table<integer, boolean>
 
 -----------------------------------------------------------------------------
@@ -37,16 +39,17 @@
 ---| statusline.parts.diagnostics
 ---| statusline.parts.branch
 ---| statusline.parts.bufname
+---| statusline.parts.custom
 
 -----------------------------------------------------------------------------
 
 --- Shows current git branch.
 ---@class statusline.parts.branch
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "branch"
 ---
 --- Delay(in milliseconds) between branch
@@ -61,7 +64,7 @@
 ---@field [string] branch.opts
 
 
---- Git branch component options.
+--- Git branch part options.
 --- Drawn like so,
 ---
 ---```txt
@@ -100,10 +103,10 @@
 --- Shows buffer name.
 ---@class statusline.parts.bufname
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "bufname"
 ---
 --- Maximum name length.
@@ -116,7 +119,7 @@
 ---@field [string] bufname.opts
 
 
---- Buffer name component options.
+--- Buffer name part options.
 --- Drawn like so,
 ---
 ---```txt
@@ -161,15 +164,15 @@
 --- Shows diagnostics count.
 ---@class statusline.parts.diagnostics
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "diagnostics"
 ---
---- Should this component be automatically hidden?
+--- Should this part be automatically hidden?
 ---
---- > This component gets hidden if a buffer has
+--- > This part gets hidden if a buffer has
 --- > no client attached to it.
 ---@field auto_hide? boolean
 ---
@@ -211,23 +214,23 @@
 --- Highlight group for the separator.
 ---@field separator_hl? string
 ---
---- Left corner of the component. 
+--- Left corner of the part. 
 ---@field corner_left? string
 ---@field corner_left_hl? string
 ---
---- Left padding of the component. 
+--- Left padding of the part. 
 ---@field padding_left? string
 ---@field padding_left_hl? string
 ---
---- Right padding of the component. 
+--- Right padding of the part. 
 ---@field padding_right? string
 ---@field padding_right_hl? string
 ---
---- Right corner of the component. 
+--- Right corner of the part. 
 ---@field corner_right? string
 ---@field corner_right_hl? string
 ---
---- Primary highlight group for the component
+--- Primary highlight group for the part
 ---@field hl? string
 
 -----------------------------------------------------------------------------
@@ -235,13 +238,13 @@
 --- Empty space.
 ---@class statusline.parts.empty
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "empty"
 ---
---- Highlight group for this component.
+--- Highlight group for this part.
 ---@field hl? string
 
 -----------------------------------------------------------------------------
@@ -249,10 +252,10 @@
 --- Shows current mode.
 ---@class statusline.parts.mode
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "mode"
 ---
 --- Should we show a compact version?
@@ -262,7 +265,7 @@
 ---@field [string] mode.opts
 
 
---- Mode name component options.
+--- Mode name part options.
 --- Drawn like so,
 ---
 ---```txt
@@ -311,10 +314,10 @@
 --- └ corner_left
 ---@class statusline.parts.section
 ---
---- Condition for this component.
+--- Condition for this part.
 ---@field condition? fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind? "section"
 ---
 --- Reference to a click handler.
@@ -346,10 +349,10 @@
 --- Custom ruler.
 ---@class statusline.parts.ruler
 ---
---- Optional condition for this component.
+--- Optional condition for this part.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of component is this?
+--- What kind of part is this?
 ---@field kind "ruler"
 ---
 --- Should visual modes be shown
@@ -365,7 +368,7 @@
 ---@field visual ruler.opts
 
 
---- Ruler component options.
+--- Ruler part options.
 --- Drawn like so,
 ---
 ---```txt
@@ -401,4 +404,17 @@
 ---
 --- Primary highlight group.
 ---@field hl? string
+
+
+--- Custom statusline part.
+---@class statusline.parts.custom
+---
+--- Optional condition for this part.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of part is this?
+---@field kind "ruler"
+---
+--- Text to show for this part.
+---@field value fun(buffer: integer, window: integer): string
 
