@@ -26,7 +26,7 @@ statuscolumn.config = {
 	end,
 
 	default = {
-		parts = {
+		components = {
 			---|fS
 
 			{
@@ -187,7 +187,7 @@ statuscolumn.config = {
 			return vim.bo[buffer].ft == "query" and vim.bo[buffer].bt == "nofile";
 		end,
 
-		parts = {
+		components = {
 			{
 				kind = "empty",
 				width = 1,
@@ -289,8 +289,8 @@ statuscolumn.render = function ()
 
 	local _o = "%#Normal#";
 
-	for _, part in ipairs(config.parts or {}) do
-		_o = _o .. components.get(part.kind, buffer, window, part, _o);
+	for _, component in ipairs(config.components or {}) do
+		_o = _o .. components.get(component.kind, buffer, window, component, _o);
 	end
 
 	return _o;

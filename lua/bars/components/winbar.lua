@@ -4,7 +4,7 @@ local utils = require("bars.utils");
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.part.node
+---@param main_config winbar.component.node
 ---@return string
 wbC.node = function (buffer, window, main_config)
 	---|fS
@@ -168,7 +168,7 @@ end
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.part.path
+---@param main_config winbar.component.path
 ---@return string
 wbC.path = function (buffer, window, main_config)
 	---|fS
@@ -209,7 +209,7 @@ wbC.path = function (buffer, window, main_config)
 	while #parts > 0 do
 		local part = parts[#parts];
 
-		local part_config = utils.match(main_config, part, {});
+		local component_config = utils.match(main_config, part, {});
 		local is_dir = false;
 
 		if _o ~= "" and vim.fn.fnamemodify(part, ":e") == "" then
@@ -218,14 +218,14 @@ wbC.path = function (buffer, window, main_config)
 
 		_o = table.concat({
 
-			utils.create_segmant(part_config.corner_left, part_config.corner_left_hl or part_config.hl),
-			utils.create_segmant(part_config.padding_left, part_config.padding_left_hl or part_config.hl),
-			utils.create_segmant(is_dir == true and part_config.dir_icon or part_config.icon, (is_dir == true and part_config.dir_icon_hl or part_config.icon_hl) or part_config.hl),
+			utils.create_segmant(component_config.corner_left, component_config.corner_left_hl or component_config.hl),
+			utils.create_segmant(component_config.padding_left, component_config.padding_left_hl or component_config.hl),
+			utils.create_segmant(is_dir == true and component_config.dir_icon or component_config.icon, (is_dir == true and component_config.dir_icon_hl or component_config.icon_hl) or component_config.hl),
 
-			utils.create_segmant(part_config.text or part, part_config.hl),
+			utils.create_segmant(component_config.text or part, component_config.hl),
 
-			utils.create_segmant(part_config.padding_right, part_config.padding_right_hl or part_config.hl),
-			utils.create_segmant(part_config.corner_right, part_config.corner_right_hl or part_config.hl),
+			utils.create_segmant(component_config.padding_right, component_config.padding_right_hl or component_config.hl),
+			utils.create_segmant(component_config.corner_right, component_config.corner_right_hl or component_config.hl),
 
 			utils.create_segmant(_o ~= "" and main_config.separator or "", main_config.separator_hl),
 
@@ -244,7 +244,7 @@ wbC.path = function (buffer, window, main_config)
 end
 
 --- Custom section.
----@param config winbar.part.custom
+---@param config winbar.component.custom
 ---@return string
 wbC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
@@ -256,10 +256,10 @@ end
 ---@param name string
 ---@param buffer integer
 ---@param window integer
----@param part_config table
+---@param component_config table
 ---@param winbar string
 ---@return string
-wbC.get = function (name, buffer, window, part_config, winbar)
+wbC.get = function (name, buffer, window, component_config, winbar)
 	---|fS
 
 	if type(name) ~= "string" then
@@ -269,12 +269,12 @@ wbC.get = function (name, buffer, window, part_config, winbar)
 		--- Attempting to get internal property.
 		return "";
 	else
-		if part_config.condition ~= nil then
-			if part_config.condition == false then
-				--- Part is disabled.
+		if component_config.condition ~= nil then
+			if component_config.condition == false then
+				--- Component is disabled.
 				return "";
 			else
-				local sucess, val = pcall(part_config.condition, buffer, window, winbar);
+				local sucess, val = pcall(component_config.condition, buffer, window, winbar);
 
 				if sucess == false then
 					return "";
@@ -284,7 +284,7 @@ wbC.get = function (name, buffer, window, part_config, winbar)
 			end
 		end
 
-		local static_config = vim.deepcopy(part_config);
+		local static_config = vim.deepcopy(component_config);
 
 		for key, value in pairs(static_config) do
 			if type(value) ~= "function" then

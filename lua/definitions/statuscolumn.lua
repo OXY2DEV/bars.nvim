@@ -35,32 +35,33 @@
 
 --- A configuration style.
 --- Must have a condition(unless `default`)
---- and a list of parts.
+--- and a list of components.
 ---@class statuscolumn.style
 ---
----@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.
+--- Condition for this style.
+---@field condition? fun(buffer: integer, window: integer): boolean
 ---
---- Parts for this style.
----@field parts statuscolumn_part[]
+--- Components for this style.
+---@field components statuscolumn_component[]
 
 
----@alias statuscolumn_part
----| statuscolumn.parts.lnum Line number.
----| statuscolumn.parts.folds Fold column.
----| statuscolumn.parts.signs Sign column.
----| statuscolumn.parts.empty An empty column.
----| statuscolumn.parts.border A statuscolumn border. 
----| statuscolumn.parts.custom
+---@alias statuscolumn_component
+---| statuscolumn.components.lnum
+---| statuscolumn.components.folds
+---| statuscolumn.components.signs
+---| statuscolumn.components.empty
+---| statuscolumn.components.border
+---| statuscolumn.components.custom
 
 -----------------------------------------------------------------------------
 
 --- Line number for statuscolumn.
----@class statuscolumn.parts.lnum
+---@class statuscolumn.components.lnum
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "lnum"
 ---
 ---@field click? boolean | fun(buffer: integer, window: integer, statuscolumn: string): boolean
@@ -92,12 +93,12 @@
 
 
 --- Empty section.
----@class statuscolumn.parts.empty
+---@class statuscolumn.components.empty
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "empty"
 ---
 --- How many columns should this span?
@@ -108,12 +109,12 @@
 
 
 --- Border for the statuscolumn.
----@class statuscolumn.parts.border
+---@class statuscolumn.components.border
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "border"
 ---
 --- Text to use for the border.
@@ -126,12 +127,12 @@
 
 
 --- Fold column for the statuscolumn.
----@class statuscolumn.parts.folds
+---@class statuscolumn.components.folds
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "folds"
 ---
 --- Text to show for closed fold.
@@ -191,12 +192,12 @@
 ---@field fill_hl? string
 
 
----@class statuscolumn.parts.signs
+---@class statuscolumn.components.signs
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "signs"
 ---
 --- Filter for signs.
@@ -208,13 +209,13 @@
 ---@field hl? string
 
 
---- Custom part for the statuscolumn.
----@class statuscolumn.parts.custom
+--- Custom component for the statuscolumn.
+---@class statuscolumn.components.custom
 ---
 --- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "custom"
 ---
 --- Text to render.

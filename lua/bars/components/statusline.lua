@@ -4,7 +4,7 @@ local utils = require("bars.utils");
 --- Shows current git branch.
 ---@param _ integer
 ---@param window integer
----@param main_config statusline.parts.branch
+---@param main_config statusline.components.branch
 ---@return string
 slC.branch = function (_, window, main_config)
 	---|fS
@@ -136,7 +136,7 @@ end
 --- Shows the buffer name.
 ---@param buffer integer
 ---@param _ integer
----@param main_config statusline.parts.bufname
+---@param main_config statusline.components.bufname
 slC.bufname = function (buffer, _, main_config)
 	---|fS
 
@@ -162,7 +162,7 @@ slC.bufname = function (buffer, _, main_config)
 
 			return string.format(
 				"%s%s%s%s",
-				vim.fn.strcharpart(name, 0, math.max(available_len, 2)),
+				vim.fn.strcharcomponent(name, 0, math.max(available_len, 2)),
 				truncate_symbol,
 				ext ~= "" and "." or "",
 				ext ~= "" and ext or ""
@@ -236,7 +236,7 @@ end
 --- Diagnostics section
 ---@param buffer integer
 ---@param window integer
----@param config statusline.parts.diagnostics
+---@param config statusline.components.diagnostics
 ---@return string
 slC.diagnostics = function (buffer, window, config)
 	---|fS
@@ -352,14 +352,14 @@ slC.diagnostics = function (buffer, window, config)
 end
 
 --- Empty section.
----@param config statusline.parts.empty
+---@param config statusline.components.empty
 ---@return string
 slC.empty = function (_, _, config)
 	return utils.set_hl(config.hl) .. "%=";
 end
 
 --- Shows current mode.
----@param main_config statusline.parts.mode
+---@param main_config statusline.components.mode
 ---@return string
 slC.mode = function (_, _, main_config)
 	---|fS
@@ -400,7 +400,7 @@ slC.mode = function (_, _, main_config)
 end
 
 --- Custom section.
----@param config statusline.parts.section
+---@param config statusline.components.section
 ---@return string
 slC.section = function (_, _, config, _)
 	---|fS
@@ -427,7 +427,7 @@ end
 --- Ruler.
 ---@param _ integer
 ---@param window integer
----@param main_config statusline.parts.ruler
+---@param main_config statusline.components.ruler
 ---@return string
 slC.ruler = function (_, window, main_config)
 	---|fS
@@ -471,7 +471,7 @@ slC.ruler = function (_, window, main_config)
 end
 
 --- Custom section.
----@param config statusline.parts.custom
+---@param config statusline.components.custom
 ---@return string
 slC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
@@ -483,10 +483,10 @@ end
 ---@param name string
 ---@param buffer integer
 ---@param window integer
----@param part_config table
+---@param component_config table
 ---@param statusline string
 ---@return string
-slC.get = function (name, buffer, window, part_config, statusline)
+slC.get = function (name, buffer, window, component_config, statusline)
 	---|fS
 
 	if type(name) ~= "string" then
@@ -496,12 +496,12 @@ slC.get = function (name, buffer, window, part_config, statusline)
 		--- Not a valid component.
 		return "";
 	else
-		if part_config.condition ~= nil then
-			if part_config.condition == false then
-				--- Part is disabled.
+		if component_config.condition ~= nil then
+			if component_config.condition == false then
+				--- Component is disabled.
 				return "";
 			else
-				local sucess, val = pcall(part_config.condition, buffer, window, statusline);
+				local sucess, val = pcall(component_config.condition, buffer, window, statusline);
 
 				if sucess == false then
 					return "";
@@ -511,7 +511,7 @@ slC.get = function (name, buffer, window, part_config, statusline)
 			end
 		end
 
-		local static_config = vim.deepcopy(part_config);
+		local static_config = vim.deepcopy(component_config);
 
 		for key, value in pairs(static_config) do
 			if type(value) ~= "function" then

@@ -22,7 +22,7 @@ ffi.cdef(table.concat(C, "\n"));
 --- Line number.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.parts.lnum
+---@param config statuscolumn.components.lnum
 ---@return string
 scC.lnum = function (buffer, window, config)
 	---|fS
@@ -112,7 +112,7 @@ scC.lnum = function (buffer, window, config)
 end
 
 --- Empty section
----@param config statuscolumn.parts.empty
+---@param config statuscolumn.components.empty
 ---@return string
 scC.empty = function (_, _, config)
 	return table.concat({
@@ -122,7 +122,7 @@ scC.empty = function (_, _, config)
 end
 
 --- Border.
----@param config statuscolumn.parts.border
+---@param config statuscolumn.components.border
 ---@return string
 scC.border = function (_, _, config)
 	---|fS
@@ -150,7 +150,7 @@ end
 --- Fold column.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.parts.folds
+---@param config statuscolumn.components.folds
 ---@return string
 scC.folds = function (buffer, window, config)
 	---|fS
@@ -285,7 +285,7 @@ end
 --- Sign column.
 ---@param buffer integer
 ---@param _ integer
----@param config statuscolumn.parts.signs
+---@param config statuscolumn.components.signs
 ---@return string
 scC.signs = function (buffer, _, config)
 	---|fS
@@ -339,7 +339,7 @@ scC.signs = function (buffer, _, config)
 end
 
 --- Custom column.
----@param config statusline.parts.custom
+---@param config statusline.components.custom
 ---@return string
 scC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
@@ -349,10 +349,10 @@ end
 ---@param name string
 ---@param buffer integer
 ---@param window integer
----@param part_config table
+---@param component_config table
 ---@param statuscolumn string
 ---@return string
-scC.get = function (name, buffer, window, part_config, statuscolumn)
+scC.get = function (name, buffer, window, component_config, statuscolumn)
 	---|fS
 
 	--- Options that shouldn't be
@@ -369,12 +369,12 @@ scC.get = function (name, buffer, window, part_config, statuscolumn)
 		--- Attempting to get internal property.
 		return "";
 	else
-		if part_config.condition ~= nil then
-			if part_config.condition == false then
-				--- Part is disabled.
+		if component_config.condition ~= nil then
+			if component_config.condition == false then
+				--- Component is disabled.
 				return "";
 			else
-				local sucess, val = pcall(part_config.condition, buffer, window, statuscolumn);
+				local sucess, val = pcall(component_config.condition, buffer, window, statuscolumn);
 
 				if sucess == false then
 					return "";
@@ -384,7 +384,7 @@ scC.get = function (name, buffer, window, part_config, statuscolumn)
 			end
 		end
 
-		local static_config = vim.deepcopy(part_config);
+		local static_config = vim.deepcopy(component_config);
 
 		for key, value in pairs(static_config) do
 			if type(value) ~= "function" then

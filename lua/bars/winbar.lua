@@ -22,7 +22,7 @@ winbar.config = {
 	-- end,
 
 	default = {
-		parts = {
+		components = {
 			---|fS
 
 			{
@@ -671,8 +671,8 @@ winbar.render = function ()
 
 	local _o = "%#Normal#";
 
-	for _, part in ipairs(config.parts or {}) do
-		_o = _o .. components.get(part.kind, buffer, window, part, _o);
+	for _, component in ipairs(config.components or {}) do
+		_o = _o .. components.get(component.kind, buffer, window, component, _o);
 	end
 
 	return _o;

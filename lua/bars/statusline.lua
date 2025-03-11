@@ -14,7 +14,7 @@ statusline.config = {
 	default = {
 		---|fS "Default configuration"
 
-		parts = {
+		components = {
 			{
 				kind = "mode",
 
@@ -243,7 +243,7 @@ statusline.config = {
 		condition = function (buffer)
 			return vim.bo[buffer].buftype == "help";
 		end,
-		parts = {
+		components = {
 			{ kind = "empty", hl = "Normal" },
 			{
 				kind = "mode",
@@ -492,8 +492,8 @@ statusline.render = function ()
 
 	local _o = "";
 
-	for _, part in ipairs(config.parts or {}) do
-		_o = _o .. components.get(part.kind, buffer, window, part, _o);
+	for _, component in ipairs(config.components or {}) do
+		_o = _o .. components.get(component.kind, buffer, window, component, _o);
 	end
 
 	return _o;

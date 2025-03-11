@@ -24,7 +24,7 @@ local function wrapped_index (max, val)
 end
 
 --- Empty section.
----@param config tabline.parts.empty
+---@param config tabline.components.empty
 ---@return string
 tlC.empty = function (config)
 	---|fS
@@ -38,7 +38,7 @@ tlC.empty = function (config)
 end
 
 --- Tab list.
----@param config tabline.parts.tabs
+---@param config tabline.components.tabs
 ---@return string
 tlC.tabs = function (config)
 	---|fS
@@ -222,7 +222,7 @@ tlC.tabs = function (config)
 end
 
 --- Buffer list.
----@param config tabline.parts.bufs
+---@param config tabline.components.bufs
 ---@return string
 tlC.bufs = function (config)
 	---|fS
@@ -242,7 +242,7 @@ tlC.bufs = function (config)
 
 			return string.format(
 				"%s%s%s%s",
-				vim.fn.strcharpart(name, 0, math.max(available_len, 2)),
+				vim.fn.strcharcomponent(name, 0, math.max(available_len, 2)),
 				truncate_symbol,
 				ext ~= "" and "." or "",
 				ext ~= "" and ext or ""
@@ -426,7 +426,7 @@ tlC.bufs = function (config)
 end
 
 --- Custom section
----@param config tabline.parts.custom
+---@param config tabline.components.custom
 ---@return string
 tlC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
@@ -435,10 +435,10 @@ end
 ----------------------------------------------------------------------
 
 --- Returns the output of the section {name}.
----@param part_config table
+---@param component_config table
 ---@param tabline string
 ---@return string
-tlC.get = function (name, part_config, tabline)
+tlC.get = function (name, component_config, tabline)
 	---|fS
 
 	if type(name) ~= "string" then
@@ -448,12 +448,12 @@ tlC.get = function (name, part_config, tabline)
 		--- Attempting to get internal property.
 		return "";
 	else
-		if part_config.condition ~= nil then
-			if part_config.condition == false then
-				--- Part is disabled.
+		if component_config.condition ~= nil then
+			if component_config.condition == false then
+				--- Component is disabled.
 				return "";
 			else
-				local sucess, val = pcall(part_config.condition, tabline);
+				local sucess, val = pcall(component_config.condition, tabline);
 
 				if sucess == false then
 					return "";
@@ -463,7 +463,7 @@ tlC.get = function (name, part_config, tabline)
 			end
 		end
 
-		local static_config = vim.deepcopy(part_config);
+		local static_config = vim.deepcopy(component_config);
 
 		for key, value in pairs(static_config) do
 			if type(value) ~= "function" then

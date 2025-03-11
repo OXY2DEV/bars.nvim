@@ -191,34 +191,34 @@ utils.truncate_path = function (path, opts)
 		opts = default_opts;
 	end
 
-	--- Break the path into parts.
+	--- Break the path into components.
 	---@type string[]
-	local path_parts = vim.split(path, "/", { trimempty = true });
+	local path_components = vim.split(path, "/", { trimempty = true });
 	local _o;
 
 	while _o == nil or vim.tbl_contains(opts.existing_paths, _o) do
 		---@type string
-		local part = table.remove(path_parts);
-		local rewrite = match(part);
+		local component = table.remove(path_components);
+		local rewrite = match(component);
 
 		if rewrite then
-			local is_callable, rename = pcall(rewrite, part);
+			local is_callable, rename = pcall(rewrite, component);
 
 			if is_callable == true and type(rename) == "string" then
-				part = rename;
+				component = rename;
 			elseif type(rewrite) == "string" then
-				part = rewrite;
+				component = rewrite;
 			end
-		elseif _o ~= nil and vim.list_contains(opts.raw_segmants, part) == false then
-			if string.match(part, "^%.") then
-				part = vim.fn.strcharpart(part, 0, opts.length + 1);
+		elseif _o ~= nil and vim.list_contains(opts.raw_segmants, component) == false then
+			if string.match(component, "^%.") then
+				component = vim.fn.strcharcomponent(component, 0, opts.length + 1);
 			else
-				part = vim.fn.strcharpart(part, 0, opts.length);
+				component = vim.fn.strcharcomponent(component, 0, opts.length);
 			end
 		end
 
 		_o = table.concat({
-			part,
+			component,
 			_o ~= nil and "/" or "",
 			_o or ""
 		})

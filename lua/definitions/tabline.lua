@@ -31,37 +31,37 @@
 --- Has no effect for `default`.
 ---@field condition? boolean | fun(): boolean
 ---
---- Parts for the tabline.
----@field parts tabline_part[]
+--- Components for the tabline.
+---@field components tabline_component[]
 
 
----@alias tabline_part
----| tabline.parts.tabs
----| tabline.parts.bufs
----| tabline.parts.empty
----| tabline.parts.custom
+---@alias tabline_component
+---| tabline.components.tabs
+---| tabline.components.bufs
+---| tabline.components.empty
+---| tabline.components.custom
 
 ----------------------------------------------------------------------
 
---- Empty tabline part.
----@class tabline.parts.empty
+--- Empty tabline component.
+---@class tabline.components.empty
 ---
---- Condition for this part.
+--- Condition for this component.
 ---@field condition? fun(): boolean
 ---
---- Part type.
+--- Component type.
 ---@field kind "empty"
 ---
---- Highlight group for the part.
+--- Highlight group for the component.
 ---@field hl? string
 
 
----@class tabline.parts.tabs
+---@class tabline.components.tabs
 ---
---- Condition for this part.
+--- Condition for this component.
 ---@field condition? fun(): boolean
 ---
---- Part type.
+--- Component type.
 ---@field kind "tabs"
 ---
 --- Maximum number of tabs to show.
@@ -155,12 +155,12 @@
 ---@field corner_right_hl? string
 
 
----@class tabline.parts.bufs
+---@class tabline.components.bufs
 ---
---- Condition for this part.
+--- Condition for this component.
 ---@field condition? fun(): boolean
 ---
---- Part type.
+--- Component type.
 ---@field kind "bufs"
 ---
 --- Maximum number of tabs to show.
@@ -257,15 +257,15 @@
 ---@field corner_right_hl? string
 
 
----@class tabline.parts.custom
+---@class tabline.components.custom
 ---
---- Condition for this part.
+--- Condition for this component.
 ---@field condition? fun(): boolean
 ---
---- Part type.
+--- Component type.
 ---@field kind "custom"
 ---
---- Text for this part.
+--- Text for this component.
 ---@field value string | fun(): string
 
 

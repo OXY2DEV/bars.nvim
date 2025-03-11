@@ -25,22 +25,22 @@
 ---@field condition? fun(buffer: integer, window: integer): boolean | nil
 ---
 --- Default style.
----@field default winbar_part[]
+---@field default winbar_component[]
 ---
 --- Style named `string`
----@field [string] winbar_part[]
+---@field [string] winbar_component[]
 
 
----@alias winbar_part
----| winbar.part.node
----| winbar.part.path
+---@alias winbar_component
+---| winbar.component.node
+---| winbar.component.path
 
 
----@class winbar.part.node
+---@class winbar.component.node
 ---
 ---@field kind "node"
 ---
---- Condition for this part
+--- Condition for this component
 ---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
 ---
 --- Update delay(in milliseconds).
@@ -75,18 +75,18 @@
 
 
 --- Configuration for file path.
----@class winbar.part.path
+---@class winbar.component.path
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "path"
 ---
---- Condition for this part
+--- Condition for this component
 ---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
 ---
 --- Update delay(in milliseconds).
 ---@field throttle? integer
 ---
---- Separator between path parts.
+--- Separator between path components.
 ---@field separator? string
 ---
 ---Highlight group for separator.
@@ -100,12 +100,12 @@
 
 
 --- Custom section for the winbar.
----@class winbar.part.custom
+---@class winbar.component.custom
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "custom"
 ---
---- Condition for this part
+--- Condition for this component
 ---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
 ---
 --- Text to show for this section.

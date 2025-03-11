@@ -33,23 +33,23 @@
 
 
 ---@alias statusline_style
----| statusline.parts.section
----| statusline.parts.ruler
----| statusline.parts.mode
----| statusline.parts.diagnostics
----| statusline.parts.branch
----| statusline.parts.bufname
----| statusline.parts.custom
+---| statusline.components.section
+---| statusline.components.ruler
+---| statusline.components.mode
+---| statusline.components.diagnostics
+---| statusline.components.branch
+---| statusline.components.bufname
+---| statusline.components.custom
 
 -----------------------------------------------------------------------------
 
 --- Shows current git branch.
----@class statusline.parts.branch
+---@class statusline.components.branch
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "branch"
 ---
 --- Delay(in milliseconds) between branch
@@ -64,7 +64,7 @@
 ---@field [string] branch.opts
 
 
---- Git branch part options.
+--- Git branch component options.
 --- Drawn like so,
 ---
 ---```txt
@@ -101,12 +101,12 @@
 -----------------------------------------------------------------------------
 
 --- Shows buffer name.
----@class statusline.parts.bufname
+---@class statusline.components.bufname
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "bufname"
 ---
 --- Maximum name length.
@@ -119,7 +119,7 @@
 ---@field [string] bufname.opts
 
 
---- Buffer name part options.
+--- Buffer name component options.
 --- Drawn like so,
 ---
 ---```txt
@@ -162,17 +162,17 @@
 -----------------------------------------------------------------------------
 
 --- Shows diagnostics count.
----@class statusline.parts.diagnostics
+---@class statusline.components.diagnostics
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "diagnostics"
 ---
---- Should this part be automatically hidden?
+--- Should this component be automatically hidden?
 ---
---- > This part gets hidden if a buffer has
+--- > This component gets hidden if a buffer has
 --- > no client attached to it.
 ---@field auto_hide? boolean
 ---
@@ -214,48 +214,48 @@
 --- Highlight group for the separator.
 ---@field separator_hl? string
 ---
---- Left corner of the part. 
+--- Left corner of the component. 
 ---@field corner_left? string
 ---@field corner_left_hl? string
 ---
---- Left padding of the part. 
+--- Left padding of the component. 
 ---@field padding_left? string
 ---@field padding_left_hl? string
 ---
---- Right padding of the part. 
+--- Right padding of the component. 
 ---@field padding_right? string
 ---@field padding_right_hl? string
 ---
---- Right corner of the part. 
+--- Right corner of the component. 
 ---@field corner_right? string
 ---@field corner_right_hl? string
 ---
---- Primary highlight group for the part
+--- Primary highlight group for the component
 ---@field hl? string
 
 -----------------------------------------------------------------------------
 
 --- Empty space.
----@class statusline.parts.empty
+---@class statusline.components.empty
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "empty"
 ---
---- Highlight group for this part.
+--- Highlight group for this component.
 ---@field hl? string
 
 -----------------------------------------------------------------------------
 
 --- Shows current mode.
----@class statusline.parts.mode
+---@class statusline.components.mode
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "mode"
 ---
 --- Should we show a compact version?
@@ -265,7 +265,7 @@
 ---@field [string] mode.opts
 
 
---- Mode name part options.
+--- Mode name component options.
 --- Drawn like so,
 ---
 ---```txt
@@ -312,12 +312,12 @@
 --- ││└ icon
 --- │└ padding_left
 --- └ corner_left
----@class statusline.parts.section
+---@class statusline.components.section
 ---
---- Condition for this part.
+--- Condition for this component.
 ---@field condition? fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind? "section"
 ---
 --- Reference to a click handler.
@@ -347,12 +347,12 @@
 -----------------------------------------------------------------------------
 
 --- Custom ruler.
----@class statusline.parts.ruler
+---@class statusline.components.ruler
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "ruler"
 ---
 --- Should visual modes be shown
@@ -368,7 +368,7 @@
 ---@field visual ruler.opts
 
 
---- Ruler part options.
+--- Ruler component options.
 --- Drawn like so,
 ---
 ---```txt
@@ -406,15 +406,15 @@
 ---@field hl? string
 
 
---- Custom statusline part.
----@class statusline.parts.custom
+--- Custom statusline component.
+---@class statusline.components.custom
 ---
---- Optional condition for this part.
+--- Optional condition for this component.
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
---- What kind of part is this?
+--- What kind of component is this?
 ---@field kind "ruler"
 ---
---- Text to show for this part.
+--- Text to show for this component.
 ---@field value fun(buffer: integer, window: integer): string
 

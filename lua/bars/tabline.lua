@@ -9,7 +9,7 @@ local TBL = "%!v:lua.require('bars.tabline').render()";
 ---@class tabline.config
 tabline.config = {
 	default = {
-		parts = {
+		components = {
 			---|fS
 
 			{ kind = "empty", hl = "Normal" },
@@ -183,8 +183,8 @@ tabline.render = function ()
 
 	local _o = "%#Normal#";
 
-	for _, part in ipairs(config.parts or {}) do
-		_o = _o .. components.get(part.kind, part, _o);
+	for _, component in ipairs(config.components or {}) do
+		_o = _o .. components.get(component.kind, component, _o);
 	end
 
 	return _o;
