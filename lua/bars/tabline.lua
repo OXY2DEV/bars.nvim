@@ -317,8 +317,6 @@ tabline.setup = function (config)
 	elseif type(config) == "boolean" then
 		tabline.state.enable = config;
 	end
-
-	tabline.update_id();
 end
 
 return tabline;
