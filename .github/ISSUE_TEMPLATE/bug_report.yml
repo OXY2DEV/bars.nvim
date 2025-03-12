@@ -8,7 +8,7 @@ body:
     attributes:
       label: "📜 Issue description:"
       description: "Describe the issue in a *clear* and *concise* way. You should also attach `images`/`gifs` if it's a visual bug."
-      placeholder: ":W doesn't get fixed."
+      placeholder: "Tabline doesn't render"
     validations:
       required: true
 
@@ -37,7 +37,7 @@ body:
         require("lazy.minit").repro({
             spec = {
                 {
-                    "OXY2DEV/oops.nvim",
+                    "OXY2DEV/bars.nvim",
                     lazy = false
                 }
             },
