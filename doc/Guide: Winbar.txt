@@ -1,0 +1,205 @@
+*bars-g.winbar*                                      Winbar: A beginners guide
+
+▌💡 Important
+▌ The `winbar` behaves similar to the `statusline`, so the basics are skipped.
+
+I recommend you try reading `:h 'statusline'` & `:h 'winbar'` first as it
+would help you understand how they work better.
+
+------------------------------------------------------------------------------
+👀 Introduction
+
+The `winbar` can be used to show information regarding the window it's in.
+
+You can also modify it's contents just like the statusline.
+
+>vim
+	:set winbar=Hi!
+<
+
+------------------------------------------------------------------------------
+💥 Creating a winbar module
+
+https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.winbar-node.png
+
+We set the statuscolumn just like the statusline.
+
+▌🎹 Note
+▌ As with the `statusline`, I will be assuming your statuscolumn file exists
+▌ at `~/.config/nvim/lua/winbar.lua`.
+
+>lua
+	local winbar = {};
+
+	--- Helper function for applying
+	--- highlight groups.
+	---@param hl string
+	---@return string
+	local function set_hl (hl)
+		if type(hl) ~= "string" then
+			return "";
+		elseif vim.fn.hlexists(hl) == 0 then
+			return "";
+		else
+			return "%#" .. hl .. "#";
+		end
+	end
+
+	--- Optional, configuration table.
+	--- Add this if you like tinkering.
+	winbar.config = {};
+
+	--- Function to create the winbar.
+	---@return string
+	winbar.render = function ()
+		local _winbar = "";
+
+		--- Window whose winbar we are
+		--- creating.
+		--- No, this is not a typo.
+		---@type integer
+		local window = vim.g.statusline_winid;
+
+		--- Buffer of the window.
+		---@type integer
+		local buffer = vim.api.nvim_win_get_buf(window);
+
+		for _, component in ipairs(winbar.config) do
+			local success, part_text = pcall(winbar[component.kind], buffer, window, component);
+
+			if success then
+				--- Only add text if a function doesn't fail.
+				_winbar = _winbar .. part_text;
+			end
+		end
+
+		return _winbar;
+	end
+
+	--- Optional, setup function.
+	winbar.setup = function (config)
+		if type(config) == "table" then
+			winbar.config = vim.tbl_deep_extend("force", winbar.config, config);
+		end
+
+		vim.o.relativenumber = true;
+		vim.o.numberwidth = 1;
+
+		vim.o.winbar = "%!v:lua.require('winbar').render()";
+	end
+
+	return winbar;
+<
+
+Now, we can use it in our `init.lua`.
+
+>lua
+	--- Change the path to where you created
+	--- `winbar.lua`.
+	require("winbar").setup();
+<
+
+------------------------------------------------------------------------------
+🎁 Components
+
+By default, the `winbar` doesn't have it's own items. So, we have to create
+components to do things for us.
+
+We will only be making a single component(as I couldn't find anything different).
+
+🧩 Node ~
+
+https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.winbar-node.png
+
+Shows the tree-sitter node(and it's parents) under the cursor.
+
+▌ Technically, you can do this via `LSP` but they are slow and a lot of
+▌ languages don't have a dedicated LSP server.
+▌
+▌ So, this has been implemented via `tree-sitter` instead.
+
+>lua
+	---@class winbar.node
+	---
+	---@field kind "node"
+
+	---@param buffer integer
+	---@param window integer
+	---@param config winbar.node
+	---@return string
+	winbar.node = function (buffer, window, config)
+		---@type boolean, table
+		local parser_available, parser = pcall(vim.treesitter.get_parser, buffer);
+
+		if parser_available == false then
+			--- Couldn't retrieve parser.
+			return "";
+		elseif parser == nil then
+			--- No parser available.
+			return "";
+		end
+
+		local found_node, node;
+
+		--- A buffer can be shown in multiple windows.
+		--- So, we need to get the node for this window.
+		---
+		--- Cursor position must be given when getting
+		--- node from windows that aren't the current
+		--- window.
+		vim.api.nvim_win_call(window, function ()
+			---@type [ integer, integer ]
+			local cureor = vim.api.nvim_win_get_cursor(window);
+
+			found_node, node = pcall(vim.treesitter.get_node, {
+				buffer = buffer,
+
+				--- The row we receive in `nvim_win_get_cursor()`
+				--- is 1-indexed. We need it to be 0-indexed.
+				pos = { cursor[1] - 1, cursor[2] },
+
+				ignore_injections = false
+			})
+		end);
+
+		local _o = "";
+
+		while node do
+			_o = node:type() .. (_o ~= "" and " → " or "") .. _o;
+			node = node:parent();
+		end
+
+		return _o;
+	end
+<
+
+We can now add it to the config.
+
+>lua
+	winbar.config = {
+		{ kind = "node" }
+	};
+<
+
+------------------------------------------------------------------------------
+🔥 More example
+
+You can check more complex examples, per-window configuration, click
+handling etc. in the source file.
+
++ https://github.com/OXY2DEV/bars.nvim/blob/main/plugin/bars.lua#L37-L100
+  Shows how to set up per-window winbar.
+
++ https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/winbar.lua
+  Shows how to manage per-window configuration, set & reset the statusline
+  of a window and rendering winbar.
+
++ https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/winbar.lua
+  Shows how various components are made.
+
+--------------------
+
++ https://github.com/OXY2DEV/bars.nvim/blob/main/lua/definitions/winbar.lua
+  Shows type definitions for the winbar.
+
+vim:ft=help:tw=78:colorcolumn=78:

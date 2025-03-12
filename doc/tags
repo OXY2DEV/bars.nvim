@@ -1,0 +1,9 @@
+bars-g.statusline	Guide: Statusline.txt	/*bars-g.statusline*
+bars-g.tabline	Guide: Tabline.txt	/*bars-g.tabline*
+bars-g.winbar	Guide: Winbar.txt	/*bars-g.winbar*
+bars.g-statuscolumn	Guide: Statuscolumn.txt	/*bars.g-statuscolumn*
+bars.nvim	bars.txt	/*bars.nvim*
+bars.nvim-guides	bars.txt	/*bars.nvim-guides*
+bars.nvim-usage	bars.txt	/*bars.nvim-usage*
+before	Guide: Statuscolumn.txt	/*before*
+colors	Guide: Statuscolumn.txt	/*colors*

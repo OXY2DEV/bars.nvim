@@ -1,4 +1,4 @@
-*bars.g.-statuscolumn*                        Statuscolumn: A beginners guide.
+*bars.g-statuscolumn*                         Statuscolumn: A beginners guide.
 
 ▌💡 Important
 ▌ As `statuscolumn` functions mostly the same as `statusline`, I will be
@@ -57,13 +57,15 @@ You can get a functional statuscolumn quite easily using these items,
 
 Let's break it down,
 
-| Part | Description                                        |
-| ---- | -------------------------------------------------- |
-|  %s  | The sign column.                                   |
-|  %C  | The fold column.                                   |
-|  %3l | The line number. It has a width of 3 columns.      |
-|  \   | Space.                                             |
-|  ▍   | Border to separate the statuscolumn from the text. |
+╭──────┬────────────────────────────────────────────────────╮
+│ Part │ Description                                        │
+├──────┼────────────────────────────────────────────────────┤
+│  %s  │ The sign column.                                   │
+│  %C  │ The fold column.                                   │
+│  %3l │ The line number. It has a width of 3 columns.      │
+│  \   │ Space.                                             │
+│  ▍   │ Border to separate the statuscolumn from the text. │
+╰──────┴────────────────────────────────────────────────────╯
 
 ------------------------------------------------------------------------------
 🎨 Colors
@@ -210,10 +212,10 @@ things.
 
 So, we will try making some simple components such as,
 
-• Line number
-• Fold
-• Signs
-• Separator
+	• Line number
+	• Fold
+	• Signs
+	• Separator
 
 🧩 Line number ~
 
@@ -282,7 +284,7 @@ Let's add this component to the configuration.
 	};
 <
 
-### 🧩 Folds
+🧩 Folds ~
 
 https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.statuscolumn-folds.png
 
@@ -479,7 +481,7 @@ Let's add this component to the configuration.
 	};
 <
 
-### 🧩 Signs
+🧩 Signs ~
 
 https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.statuscolumn-signs.png
 
@@ -509,7 +511,7 @@ We add it *before* the fold column.
 	};
 <
 
-### 🧩 Separator
+🧩 Separator ~
 
 Finally, we will create a Separator between different columns.
 
@@ -585,20 +587,20 @@ And we are done!
 You can check more complex components, per-window configuration, click
 handling etc. in the source file.
 
-• https://github.com/OXY2DEV/bars.nvim/blob/main/plugin/bars.lua#L37-L100
-  Shows how to set up per-window statuscolumn.
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/plugin/bars.lua#L37-L100
+	  Shows how to set up per-window statuscolumn.
 
-• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/statuscolumn.lua
-  Shows how to manage per-window configuration, set & reset the statusline
-  of a window and rendering statuscolumn.
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/statuscolumn.lua
+	  Shows how to manage per-window configuration, set & reset the statusline
+	  of a window and rendering statuscolumn.
 
-• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/statuscolumn.lua
-  Shows how various components are made.
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/statuscolumn.lua
+	  Shows how various components are made.
 
 --------------------
 
-• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/definitions/statuscolumn.lua
-  Shows type definitions for the statuscolumn.
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/definitions/statuscolumn.lua
+	  Shows type definitions for the statuscolumn.
 
 --------------------
 

@@ -1,0 +1,224 @@
+*bars-g.tabline*                                    Tabline: A beginners guide
+
+▌💡 Important
+▌ As `tabline` functions similar to `statusline`, I will be skipping over the
+▌ basics. So, check that out first if you are new.
+
+I recommend you try reading `:h 'statusline'` & `:h 'tabline'` first as it
+would help you understand how they work better.
+
+------------------------------------------------------------------------------
+👀 Introduction
+
+https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.tabline-default.png
+
+The tabline is the bar at the top of Neovim. It typically shows opened tabs.
+
+So, we will keep it simple.
+
+▌ It also doesn't have anything similar to `statusline items`.
+
+------------------------------------------------------------------------------
+💥 Creating a tabline module
+
+https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.tabline-tabs.png
+
+Let's create a `tabline.lua` file with the following contents,
+
+▌🎹 Note
+▌ Like the other bars, I will be assuming that you are using
+▌ `~/.config/nvim/lua/tabline.lua`
+
+>lua
+	local tabline = {};
+
+	--- Helper function for applying
+	--- highlight groups.
+	---@param hl string
+	---@return string
+	local function set_hl (hl)
+		if type(hl) ~= "string" then
+			return "";
+		elseif vim.fn.hlexists(hl) == 0 then
+			return "";
+		else
+			return "%#" .. hl .. "#";
+		end
+	end
+
+	--- Optional, configuration table.
+	--- Add this if you like tinkering.
+	tabline.config = {};
+
+	--- Function to create the tabline.
+	---@return string
+	tabline.render = function ()
+		local _tabline = "";
+
+		for _, component in ipairs(tabline.config) do
+			local success, part_text = pcall(tabline[component.kind], component);
+
+			if success then
+				--- Only add text if a function doesn't fail.
+				_tabline = _tabline .. part_text;
+			end
+		end
+
+		return _tabline;
+	end
+
+	--- Optional, setup function.
+	tabline.setup = function (config)
+		if type(config) == "table" then
+			tabline.config = vim.tbl_deep_extend("force", tabline.config, config);
+		end
+
+		vim.o.tabline = "%!v:lua.require('tabline').render()";
+	end
+
+	return tabline;
+<
+
+------------------------------------------------------------------------------
+🎁 Components
+
+As the `tabline` doesn't provide items like the other bars, we have to create
+our own `components` that do what we need.
+
+So, we will try making some simple components such as,
+
+	• Tab list
+	• Separator
+
+🧩 Tabs ~
+
+https://github.com/OXY2DEV/bars.nvim/blob/images/v2/wiki/bars.tabline-tabs.png
+
+To keep things simple, we will just show the tab number and make it *clickable*.
+
+▌🎹 Note
+▌ For listing other things, you can use `nvim_list_bufs()`(for buffers) or
+▌ `nvim_list_wins()`(for windows).
+▌
+▌ The general idea is the same. To prevent overflowing outside the screen,
+▌ you can limit the number of entries shown.
+
+>lua
+	---@class tabline.tabs
+	---
+	--- Highlight group for current tab.
+	---@field active_hl? string
+	---
+	--- Highlight group for other tab(s).
+	---@field inactive_hl? string
+
+
+	--- Shows a list of tabs.
+	---@param config tabline.tabs
+	---@return string
+	tabline.tabs = function (config)
+		local _o = "";
+		---@type integer[]
+		local tabs = vim.api.nvim_list_tabpages();
+		---@type integer
+		local current = vim.api.nvim_get_current_tabpage();
+
+		for t, tab in ipairs(tabs) do
+			if tab == current then
+				--- Bug, Double clicking on the current tab
+				--- will create a new tab. So, we don't
+				--- add a click handler for this tab.
+				_o = table.concat({
+					_o,
+
+					set_hl(config.active_hl),
+					" ",
+					tab,
+					" "
+				});
+			else
+				_o = table.concat({
+					_o,
+
+					"%" .. t .. "T",
+					set_hl(config.inactive_hl),
+					" ",
+					tab,
+					" ",
+					"%X"
+				});
+			end
+
+			if t ~= #tabs then
+				_o = _o .. "%#Normal# ";
+			end
+		end
+
+		return _o;
+	end
+<
+
+We can now add it to our config.
+
+>lua
+	tabline.config = {
+		{
+			kind = "tabs",
+
+			active_hl = "DiffAdd",
+			inactive_hl = "Folded"
+		},
+	};
+<
+
+🧩 Separator ~
+
+We will use separators to center the tab list.
+
+>lua
+	---@class tabline.separator
+	---
+	---@field hl? string
+
+	---@param config tabline.separator
+	tabline.separator = function (config)
+		return set_hl(config.hl) .. "%=";
+	end
+<
+
+We can now finalize our config.
+
+>lua
+	tabline.config = {
+		{ kind = "separator", hl = "Normal" },
+		{
+			kind = "tabs",
+
+			active_hl = "DiffAdd",
+			inactive_hl = "Folded"
+		},
+		{ kind = "separator", hl = "Normal" },
+	};
+<
+
+------------------------------------------------------------------------------
+🔥 More example
+
+You can check more complex components, per-window configuration, click
+handling etc. in the source file.
+
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/plugin/bars.lua#L37-L100
+	  Shows how to set up per-window tabline.
+
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/tabline.lua
+	  Shows how to set up the tabline.
+
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/tabline.lua
+	  Shows how various components are made.
+
+------------------------------------------------------------------------------
+
+	• https://github.com/OXY2DEV/bars.nvim/blob/main/lua/definitions/tabline.lua
+	  Shows type definitions for the tabline.
+
+vim:ft=help:tw=78:colorcolumn=78:
