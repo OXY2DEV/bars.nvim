@@ -1,0 +1,32 @@
+name: ✨ Feature Request
+description: "Request a new feature."
+title: "✨ Feature: "
+labels: [ "enhancement" ]
+body:
+  - type: textarea
+    id: feat-desc
+    attributes:
+      label: "🔖 Feature description:"
+      description: "Briefly describe what the feature does."
+      placeholder: "We should have a way to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solutions
+    attributes:
+      label: "📂 Possible solutions:"
+      description: "Describe the solutions you have thought of on how to add this."
+      placeholder: "We should probably add..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: feat-ref
+    attributes:
+      label: "🧾 Feature reference:"
+      description: "Reference features similar to what you wanted(if applicable)."
+      placeholder: "This feature is available in..."
+    validations:
+      required: false
+

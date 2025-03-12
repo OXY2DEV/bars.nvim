@@ -1,0 +1,66 @@
+name: 🐞 Bug report
+description: "Report a bug in oops."
+title: "🐞 Bug: "
+labels: [ "bug" ]
+body:
+  - type: textarea
+    id: desc
+    attributes:
+      label: "📜 Issue description:"
+      description: "Describe the issue in a *clear* and *concise* way. You should also attach `images`/`gifs` if it's a visual bug."
+      placeholder: ":W doesn't get fixed."
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: "📑 Reproduction steps:"
+      description: "Give step by step instructions on how to recreate the issue using the `minimal init`."
+      placeholder: "1. Open Neovim."
+    validations:
+      required: true
+
+  - type: textarea
+    id: minit
+    attributes:
+      label: "💻 Minimal init:"
+      description: |
+        The minimal config file to reproduce the issue.
+
+        Put this in a file(e.g. `minit.lua`) and do `nvim -u minit.lua` to run it.
+      value: |
+        ```lua
+        vim.env.LAZY_STDPATH = ".repro"
+        load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua"))()
+
+        require("lazy.minit").repro({
+            spec = {
+                {
+                    "OXY2DEV/oops.nvim",
+                    lazy = false
+                }
+            },
+        });
+        ```
+    validations:
+      required: true
+
+  - type: input
+    id: nvim-ver
+    attributes:
+      label: "Neovim version:"
+      description: "Neovim version."
+      placeholder: "nvim -v"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ Expected behavior:"
+      description: "The expected behavior."
+      placeholder: "Oops should..."
+    validations:
+      required: true
+
