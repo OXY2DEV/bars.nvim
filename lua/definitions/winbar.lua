@@ -36,6 +36,7 @@
 ---| winbar.component.path
 
 
+--- Shows the current node's hierarchy.
 ---@class winbar.component.node
 ---
 ---@field kind "node"

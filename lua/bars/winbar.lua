@@ -11,16 +11,6 @@ winbar.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
-	-- condition = function (buffer)
-	-- 	-- local check_parsers, parsers = pcall(vim.treesitter.get_parser, buffer);
-	-- 	--
-	-- 	-- if check_parsers == false then
-	-- 	-- 	return false;
-	-- 	-- elseif parsers == nil then
-	-- 	-- 	return false;
-	-- 	-- end
-	-- end,
-
 	default = {
 		components = {
 			---|fS

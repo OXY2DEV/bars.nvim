@@ -10,6 +10,7 @@
 --- Is the custom tabline attached?
 ---@field attached boolean
 
+----------------------------------------------------------------------
 
 --- Configuration table for the tabline.
 ---@class tabline.config
@@ -56,6 +57,7 @@
 ---@field hl? string
 
 
+--- List of tabs.
 ---@class tabline.components.tabs
 ---
 --- Condition for this component.
@@ -155,6 +157,7 @@
 ---@field corner_right_hl? string
 
 
+--- List of buffers.
 ---@class tabline.components.bufs
 ---
 --- Condition for this component.

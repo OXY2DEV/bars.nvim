@@ -304,7 +304,6 @@
 --- Custom section for the statusline.
 --- Drawn like so,
 ---
----```txt
 --- abc-de
 --- │││││└ corner_right
 --- ││││└ padding_right

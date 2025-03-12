@@ -92,7 +92,7 @@
 ---@field hl? string | string[] | fun(buffer: integer, window: integer): ( string | string[] )
 
 
---- Empty section.
+--- Empty component.
 ---@class statuscolumn.components.empty
 ---
 --- Condition for this component.
@@ -192,6 +192,7 @@
 ---@field fill_hl? string
 
 
+--- Custom signcolumn.
 ---@class statuscolumn.components.signs
 ---
 --- Condition for this component.
