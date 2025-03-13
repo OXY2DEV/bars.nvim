@@ -272,18 +272,29 @@ highlights.get_nfg = function (lumen)
 
 	---@type integer, integer, integer
 	local bR, bG, bB = highlights.num_to_rgb(
-		highlights.get_attr({ "Normal" }, "fg") or
-		highlights.get_attr({ "Cursor" }, "bg") or
+		highlights.get_attr({ "Normal" }, "bg") or
+		highlights.get_attr({ "Cursor" }, "fg") or
 		highlights.theme_value(
 			tonumber("1e1e2e", 16),
 			tonumber("1e1e2e", 16)
 		)
 	);
 
+	local fLumen = highlights.rgb_to_lumen(fR, fG, fB);
+	local bLumen = highlights.rgb_to_lumen(bR, bG, bB);
+
 	if lumen > 0.5 then
-		return bR, bG, bB;
+		if fLumen < bLumen then
+			return fR, fG, fB;
+		else
+			return bR, bG, bB;
+		end
 	else
-		return fR, fG, fB;
+		if fLumen > bLumen then
+			return fR, fG, fB;
+		else
+			return bR, bG, bB;
+		end
 	end
 
 	---|fE
@@ -343,13 +354,15 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose1",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen1",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 			};
@@ -390,13 +403,15 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose2",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen2",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 			};
@@ -437,13 +452,15 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose3",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen3",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 			};
@@ -484,13 +501,24 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose4",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen4",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
+					}
+				},
+				{
+					group = "BarsRuler",
+					value = {
+						bg = highlights.rgb_to_hex(fR, fG, fB),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(fR, fB, fG))
+						)
 					}
 				},
 			};
@@ -531,13 +559,15 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose5",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen5",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 			};
@@ -578,13 +608,30 @@ highlights.groups = {
 				{
 					group = "BarsFoldClose6",
 					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB)
+						fg = highlights.rgb_to_hex(fR, fG, fB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
 					}
 				},
 				{
 					group = "BarsFoldOpen6",
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(bR, bG, bB)
+					}
+				},
+				{
+					group = "BarsRulerVisual",
+					value = {
+						bg = highlights.rgb_to_hex(fR, fG, fB),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(fR, fB, fG))
+						)
+					}
+				},
+				{
+					group = "BarsGit",
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
 					}
 				},
 			};
@@ -593,52 +640,6 @@ highlights.groups = {
 		end
 	},
 
-	g1 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
-				highlights.theme_value(
-					tonumber("D20F39", 16),
-					tonumber("F38BA8", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local GRADIENT = {};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(GRADIENT, {
-					group = string.format("BarsGradient1_%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
-					}
-				});
-			end
-
-			return GRADIENT;
-
-			---|fE
-		end
-	},
 	g2 = {
 		value = function ()
 			---|fS
@@ -654,7 +655,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
 				highlights.theme_value(
 					tonumber("CDD6F4", 16),
 					tonumber("1E1E2E", 16)
@@ -675,53 +676,8 @@ highlights.groups = {
 				table.insert(GRADIENT, {
 					group = string.format("BarsGradient2_%d", i + 1),
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
-					}
-				});
-			end
-
-			return GRADIENT;
-
-			---|fE
-		end
-	},
-	g3 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color3", "@markup.heading.3.markdown" }, "fg") or
-				highlights.theme_value(
-					tonumber("DF8E1D", 16),
-					tonumber("F9E2AF", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local GRADIENT = {};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(GRADIENT, {
-					group = string.format("BarsGradient3_%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
 					}
 				});
 			end
@@ -746,7 +702,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
 				highlights.theme_value(
 					tonumber("CDD6F4", 16),
 					tonumber("1E1E2E", 16)
@@ -767,7 +723,8 @@ highlights.groups = {
 				table.insert(GRADIENT, {
 					group = string.format("BarsGradient4_%d", i + 1),
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
 					}
 				});
 			end
@@ -777,98 +734,443 @@ highlights.groups = {
 			---|fE
 		end
 	},
-	g5 = {
+
+	normal = {
 		value = function ()
 			---|fS
 
 			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color5", "@markup.heading.5.markdown" }, "fg") or
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "Function", "@diff.delta" }, "fg") or
 				highlights.theme_value(
-					tonumber("209FB5", 16),
-					tonumber("74C7EC", 16)
+					tonumber("1E66F5", 16),
+					tonumber("89B4FA", 16)
 				)
 			);
 
 			---@type integer, integer, integer
 			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
 				highlights.theme_value(
 					tonumber("CDD6F4", 16),
 					tonumber("1E1E2E", 16)
 				)
 			);
 
-			local GRADIENT = {};
+			local COLORS = {
+				{
+					group = "BarsNormal",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
 			local MAX = 10;
 
 			for i = 0, MAX - 1 do
 				---@type integer, integer, integer
 				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
+					R, G, B,
 					tR, tG, tB,
 					i / (MAX - 1)
 				);
 
-				table.insert(GRADIENT, {
-					group = string.format("BarsGradient5_%d", i + 1),
+				table.insert(COLORS, {
+					group = string.format("BarsNormal%d", i + 1),
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
 					}
 				});
 			end
 
-			return GRADIENT;
+			return COLORS;
 
 			---|fE
 		end
 	},
-	g6 = {
+	insert = {
 		value = function ()
 			---|fS
 
 			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color5", "@markup.heading.6.markdown" }, "fg") or
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "fg") or
 				highlights.theme_value(
-					tonumber("7287FD", 16),
-					tonumber("B4BEFE", 16)
+					tonumber("4C4F69", 16),
+					tonumber("CDD6F4", 16)
 				)
 			);
 
 			---@type integer, integer, integer
 			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
 				highlights.theme_value(
 					tonumber("CDD6F4", 16),
 					tonumber("1E1E2E", 16)
 				)
 			);
 
-			local GRADIENT = {};
+			local COLORS = {
+				{
+					group = "BarsInsert",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
 			local MAX = 10;
 
 			for i = 0, MAX - 1 do
 				---@type integer, integer, integer
 				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
+					R, G, B,
 					tR, tG, tB,
 					i / (MAX - 1)
 				);
 
-				table.insert(GRADIENT, {
-					group = string.format("BarsGradient6_%d", i + 1),
+				table.insert(COLORS, {
+					group = string.format("BarsInsert%d", i + 1),
 					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB)
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
 					}
 				});
 			end
 
-			return GRADIENT;
+			return COLORS;
 
 			---|fE
 		end
 	},
+
+	visual = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "@character.special", "Special" }, "fg") or
+				highlights.theme_value(
+					tonumber("EA76CB", 16),
+					tonumber("F5C2E7", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {
+				{
+					group = "BarsVisual",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
+			local MAX = 10;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					R, G, B,
+					tR, tG, tB,
+					i / (MAX - 1)
+				);
+
+				table.insert(COLORS, {
+					group = string.format("BarsVisual%d", i + 1),
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
+	visual_line = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "@conditional", "Conditional" }, "fg") or
+				highlights.theme_value(
+					tonumber("8839EF", 16),
+					tonumber("CBA6F7", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {
+				{
+					group = "BarsVisualLine",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
+			local MAX = 10;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					R, G, B,
+					tR, tG, tB,
+					i / (MAX - 1)
+				);
+
+				table.insert(COLORS, {
+					group = string.format("BarsVisualLine%d", i + 1),
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
+	visual_block = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+				highlights.theme_value(
+					tonumber("FE640B", 16),
+					tonumber("FAB387", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {
+				{
+					group = "BarsVisualBlock",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
+			local MAX = 10;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					R, G, B,
+					tR, tG, tB,
+					i / (MAX - 1)
+				);
+
+				table.insert(COLORS, {
+					group = string.format("BarsVisualBlock%d", i + 1),
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
+
+	command = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+				highlights.theme_value(
+					tonumber("40A02B", 16),
+					tonumber("A6E3A1", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {
+				{
+					group = "BarsCommand",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
+			local MAX = 10;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					R, G, B,
+					tR, tG, tB,
+					i / (MAX - 1)
+				);
+
+				table.insert(COLORS, {
+					group = string.format("BarsCommand%d", i + 1),
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
+
+	file_icons = {
+		value = function ()
+			local BASE = {
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("D20F39", 16),
+						tonumber("F38BA8", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("FE640B", 16),
+						tonumber("FAB387", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color3", "@markup.heading.3.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("DF8E1D", 16),
+						tonumber("F9E2AF", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("40A02B", 16),
+						tonumber("A6E3A1", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color5", "@markup.heading.5.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("209FB5", 16),
+						tonumber("74C7EC", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
+					highlights.get_attr({ "Color5", "@markup.heading.6.markdown" }, "fg") or
+					highlights.theme_value(
+						tonumber("7287FD", 16),
+						tonumber("B4BEFE", 16)
+					)
+				) },
+			};
+
+			---@type number, number, number
+			local bR, bG, bB = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			---@type number, number, number
+			local fR, fG, fB = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "fg") or
+				highlights.theme_value(
+					tonumber("1E1E2E", 16),
+					tonumber("CDD6F4", 16)
+				)
+			);
+
+			local rR, rG, rB = highlights.mix(bR, bG, bB, fR, fG, fB, 0.15);
+			local COLORS = {
+				{
+					group = "BarsFt",
+					value = {
+						bg = highlights.rgb_to_hex(rR, rG, rB),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(rR, rG, rB))
+						)
+					}
+				}
+			};
+
+			for e, entry in ipairs(BASE) do
+				table.insert(COLORS, {
+					group = "BarsFt" .. e,
+					value = {
+						fg = highlights.rgb_to_hex(unpack(entry)),
+						bg = highlights.rgb_to_hex(rR, rG, rB)
+					}
+				})
+			end
+
+			return COLORS;
+		end
+	}
 };
 
 --- Applies highlight groups.

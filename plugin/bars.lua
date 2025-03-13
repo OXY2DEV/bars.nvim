@@ -159,6 +159,13 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 	end
 });
 
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+	callback = function ()
+		hl.apply();
+	end
+});
+
 
 ----------------------------------------------------------------------
 
