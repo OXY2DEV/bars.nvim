@@ -34,7 +34,7 @@ statusline.config = {
 
 					icon = " ",
 
-					hl = "Color8R",
+					hl = "BarsNormal",
 				},
 
 				["^n"] = { text = "Normal" },
@@ -45,56 +45,56 @@ statusline.config = {
 					icon = "󰸿 ",
 					text = "Visual",
 
-					hl = "Color9R",
+					hl = "BarsVisual",
 				},
 				["^V$"]    = {
 					icon = "󰹀 ",
 					text = "Visual",
 
-					hl = "Color7R",
+					hl = "BarsVisualLine",
 				},
 				["^$"]   = {
 					icon = "󰸽 ",
 					text = "Visual",
 
-					hl = "Color2R",
+					hl = "BarsVisualBlock",
 				},
 
 				["^s$"]    = {
 					icon = "󰕠 ",
 					text = "Select",
 
-					hl = "Color9R",
+					hl = "BarsVisual",
 				},
 				["^S$"]    = {
 					icon = "󰕞 ",
 					text = "Select",
 
-					hl = "Color7R",
+					hl = "BarsVisualLine",
 				},
 				["^$"]   = {
 					icon = " ",
 					text = "Select",
 
-					hl = "Color2R",
+					hl = "BarsVisualBlock",
 				},
 
 				["^i$"]    = {
 					icon = " ",
 					text = "Insert",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 				["^ic$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 				["^ix$"]   = {
 					text = "Inser8",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 
 				["^R$"]    = {
@@ -142,24 +142,22 @@ statusline.config = {
 					padding_right = " ",
 
 					icon = "",
-					nomodifiable_icon_hl = "Color1B",
+					nomodifiable_icon_hl = "BarsFt1",
 					nomodifiable_icon = "󰌾 ",
 					icon_hl = {
-						"Color0B",
-						"Color1B", "Color2B", "Color3B",
-						"Color4B", "Color5B", "Color6B",
+						"BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
 					},
 
 					-- corner_left_hl = "Normal",
 					-- corner_right_hl = "Normal",
-					hl = "Layer1"
+					hl = "BarsFt"
 				},
 
 				["^$"] = {
 					icon = "󰂵 ",
 					text = "New file",
 
-					hl = "Layer0"
+					hl = "BarsFt"
 				},
 
 				["^fish"] = {
@@ -205,7 +203,7 @@ statusline.config = {
 					padding_right = " ",
 					icon = "󰊢 ",
 
-					hl = "Color0"
+					hl = "BarsGit"
 				}
 			},
 			{
@@ -224,13 +222,13 @@ statusline.config = {
 
 					separator = "  ",
 
-					hl = "Color1R"
+					hl = "BarsRuler"
 				},
 
 				visual = {
 					icon = " ",
 
-					hl = "Color6R"
+					hl = "BarsRulerVisual"
 				}
 			}
 		}
@@ -267,30 +265,30 @@ statusline.config = {
 					icon = "󰸿 ",
 					text = "Visual",
 
-					hl = "Color9R",
+					hl = "BarsVisual",
 				},
 				["^V$"]    = {
 					icon = "󰹀 ",
 					text = "Visual",
 
-					hl = "Color7R",
+					hl = "BarsVisualLine",
 				},
 				["^$"]   = {
 					icon = "󰸽 ",
 					text = "Visual",
 
-					hl = "Color2R",
+					hl = "BarsVisualBlock",
 				},
 
 				["^s$"]    = {
 					icon = "󰕠 ",
 					text = "Select",
 
-					hl = "Color9R",
+					hl = "BarsVisual",
 				},
 				["^S$"]    = {
 					icon = "󰕞 ",
-					text = "Select",
+					text = "BarsVisualLine",
 
 					hl = "Color4R",
 				},
@@ -298,45 +296,45 @@ statusline.config = {
 					icon = " ",
 					text = "Select",
 
-					hl = "Color9R",
+					hl = "BarsVisualBlock",
 				},
 
 				["^i$"]    = {
 					icon = " ",
 					text = "Insert",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 				["^ic$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 				["^ix$"]   = {
 					text = "Inser8",
 
-					hl = "Color10R",
+					hl = "BarsInsert",
 				},
 
 				["^R$"]    = {
 					icon = " ",
 					text = "Replace",
 
-					hl = "Color8R",
+					hl = "BarsNormal",
 				},
 				["^Rc$"]   = {
 					icon = " ",
 					text = "Completion",
 
-					hl = "Color8R",
+					hl = "BarsNormal",
 				},
 
 				["^c"]    = {
 					icon = " ",
 					text = "Command",
 
-					hl = "Color4R",
+					hl = "BarsCommand",
 				},
 
 				["^r"] = { text = "Prompt" },
@@ -345,7 +343,7 @@ statusline.config = {
 					icon = " ",
 					text = "Shell",
 
-					hl = "Color4R"
+					hl = "BarsCommand"
 				},
 
 				---|fE
@@ -366,7 +364,7 @@ statusline.config = {
 
 					separator = "  ",
 
-					hl = "Color6R"
+					hl = "BarsRuler"
 				},
 
 				visual = {
@@ -386,7 +384,7 @@ statusline.config = {
 					padding_right = " ",
 
 					icon = "",
-					nomodifiable_icon_hl = "Color1B",
+					nomodifiable_icon_hl = "BarsFt1",
 					nomodifiable_icon = "󰌾 ",
 					icon_hl = {
 						"Color0B",

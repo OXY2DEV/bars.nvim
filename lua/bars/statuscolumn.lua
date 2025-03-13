@@ -33,12 +33,12 @@ statuscolumn.config = {
 				kind = "empty",
 				width = 1,
 
-				hl = "Normal"
+				hl = "LineNr"
 			},
 			{
 				kind = "signs",
 				width = 1,
-				hl = "Normal",
+				hl = "LineNr",
 
 				filter = function (buffer, namespaces, _, _, _, details)
 					---@type string
@@ -77,25 +77,26 @@ statuscolumn.config = {
 			{
 				kind = "folds",
 
-				close_text = { "󰌶" },
-				close_hl = "Color0",
-				open_text = { "󱠂" },
-				open_hl = { "Color1", "Color2", "Color3", "Color4", "Color5", "Color6", "Color7" },
+				close_text = { "󱠂" },
+				close_hl = { "BarsFoldClose1", "BarsFoldClose2", "BarsFoldClose3", "BarsFoldClose4", "BarsFoldClose5", "BarsFoldClose6", },
+				open_text = { "󰌶" },
+				open_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
 
 				scope_text = "│",
 				scope_end_text = "╰",
 				scope_merge_text = "├",
 
 				fill_text = " ",
+				fill_hl = "LineNr",
 
-				scope_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
-				scope_end_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
-				scope_merge_hl = { "Gradient1N2", "Gradient2N2", "Gradient3N2", "Gradient4N2", "Gradient5N2", "Gradient6N2", "Gradient7" },
+				scope_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+				scope_end_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+				scope_merge_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
 			},
 			{
 				kind = "empty",
 				width = 1,
-				hl = "Normal"
+				hl = "LineNr"
 			},
 			{
 				kind = "lnum",
@@ -109,29 +110,19 @@ statuscolumn.config = {
 				virt_markers = "│",
 
 				wrap_hl = {
-					"Gradient4N0", "Gradient4N0", "Gradient4N1", "Gradient4N1",
-					"Gradient4N2", "Gradient4N2", "Gradient4N3", "Gradient4N3",
-					"Gradient4N4", "Gradient4N4"
+					"BarsGradient2_1", "BarsGradient2_2", "BarsGradient2_3", "BarsGradient2_4", "BarsGradient2_5",
 				},
 				virt_hl = {
-					"Gradient5N0", "Gradient5N0", "Gradient5N1", "Gradient5N1",
-					"Gradient5N2", "Gradient5N2", "Gradient5N3", "Gradient5N3",
-					"Gradient5N4", "Gradient5N4"
+					"BarsGradient4_1", "BarsGradient4_2", "BarsGradient4_3", "BarsGradient4_4", "BarsGradient4_5",
 				},
 				hl = {
-					"Lnum",
-					"Shadow5", "Shadow4", "Shadow3",
-					"Shadow2", "Shadow1", "Shadow0"
+					"BarsGradient5_1",
+					"BarsGradient5_6",
 				}
 			},
 			{
-				kind = "empty",
-				width = 1,
-				hl = "Normal"
-			},
-			{
 				kind = "border",
-				text = "▎",
+				text = "▕",
 				hl = function (_, window)
 					---|fS "Color matching the mode"
 					if vim.api.nvim_get_current_win() ~= window then
@@ -140,31 +131,31 @@ statuscolumn.config = {
 
 					local _o = {};
 					local gr_map = {
-						default = "Gradient8N%d",
+						default = "BarsNormal%d",
 
-						["v"] = "Gradient9N%d",
-						["V"] = "Gradient7N%d",
-						[""] = "Gradient2N%d",
-
-						["s"] = "Gradient9N%d",
-						["S"] = "Gradient7N%d",
-						[""] = "Gradient2N%d",
-
-						["i"] = "Gradient10N%d",
-						["ic"] = "Gradient10N%d",
-						["ix"] = "Gradient10N%d",
-
-						["R"] = "Gradient8N%d",
-						["Rc"] = "Gradient8N%d",
-
-						["c"] = "Gradient4N%d",
-						["!"] = "Gradient4N%d",
+						["v"] = "BarsGradient2_%d",
+						["V"] = "BarsGradient2_%d",
+						[""] = "BarsGradient2_%d",
+						--
+						-- ["s"] = "Gradient9N%d",
+						-- ["S"] = "Gradient7N%d",
+						-- [""] = "Gradient2N%d",
+						--
+						["i"] = "BarsInsert%d",
+						["ic"] = "BarsInsert%d",
+						["ix"] = "BarsInsert%d",
+						--
+						-- ["R"] = "Gradient8N%d",
+						-- ["Rc"] = "Gradient8N%d",
+						--
+						-- ["c"] = "Gradient4N%d",
+						-- ["!"] = "Gradient4N%d",
 					};
 
 					---@type string
 					local mode = vim.api.nvim_get_mode().mode;
 
-					for g = 0, 4 do
+					for g = 1, 7 do
 						---@type string
 						local hl = gr_map[mode] or gr_map.default;
 
@@ -174,6 +165,11 @@ statuscolumn.config = {
 					return _o;
 					---|fE
 				end
+			},
+			{
+				kind = "empty",
+				width = 1,
+				hl = "Normal"
 			},
 
 			---|fE
