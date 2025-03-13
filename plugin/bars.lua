@@ -1,8 +1,10 @@
 --- Load all the global functions.
 require("bars.global");
 local bars = require("bars");
+local hl = require("bars.highlights");
 
 bars.setup();
+hl.apply();
 
 ---|fS "Cache default values."
 
