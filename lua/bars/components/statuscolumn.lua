@@ -51,6 +51,12 @@ scC.lnum = function (buffer, window, config)
 	end
 
 	if vim.v.virtnum ~= 0 then
+		--- TODO, lines with `virtnum`
+		--- when outside of the screen
+		--- given incorrect values.
+		---
+		--- This should be rare so we won't
+		--- be fixing it.
 		if vim.v.virtnum < 0 then
 			_o = table.concat({
 				_o,
@@ -158,7 +164,19 @@ scC.folds = function (buffer, window, config)
 	local function get (entry, index, ignore)
 		if vim.islist(entry) then
 			local current = vim.api.nvim_get_current_win() == window;
-			local i = utils.clamp(index, 1, #entry);
+			local indexes = {};
+
+			--- TODO, Do we really need to do this?
+			for i = 1, #entry do
+				table.insert(indexes, i);
+			end
+
+			for _ = 2, index do
+				local _tmp = table.remove(indexes, 1);
+				table.insert(indexes, _tmp)
+			end
+
+			local i = indexes[1] or 1 ;
 
 			if ignore == true then
 				return entry[i];
