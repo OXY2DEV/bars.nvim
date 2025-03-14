@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.0...v2.0.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* Changed file names due to character restrictions on Windows(& MacOS) ([3729d8c](https://github.com/OXY2DEV/bars.nvim/commit/3729d8cf218ade8a34cf4d7f018515185329bb90)), closes [#4](https://github.com/OXY2DEV/bars.nvim/issues/4)
+
 ## [2.0.0](https://github.com/OXY2DEV/bars.nvim/compare/v1.0.0...v2.0.0) (2025-03-14)
 
 
