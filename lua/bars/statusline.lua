@@ -137,7 +137,7 @@ local TEMPLATES = {
 			nomodifiable_icon_hl = "BarsFt1",
 			nomodifiable_icon = "󰌾 ",
 			icon_hl = {
-				"BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
+				"BarsFt0", "BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
 			},
 
 			hl = "BarsFt"
