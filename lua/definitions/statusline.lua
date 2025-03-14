@@ -181,11 +181,11 @@
 --- Determines what type of diagnostics are
 --- shown.
 ---@field default_mode?
----| 1 Error
----| 2 Warning
----| 3 Info
----| 4 Hint
----| 5 All of the above
+---|1 Error
+---|2 Warning
+---|3 Info
+---|4 Hint
+---|5 All of the above
 ---
 ---@field error_icon? string
 ---@field error_hl? string
