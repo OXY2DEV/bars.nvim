@@ -125,9 +125,6 @@ statuscolumn.config = {
 				text = "▕",
 				hl = function (_, window)
 					---|fS "Color matching the mode"
-					if vim.api.nvim_get_current_win() ~= window then
-						return "Layer2I";
-					end
 
 					local _o = {};
 					local gr_map = {
@@ -154,12 +151,14 @@ statuscolumn.config = {
 
 					---@type string
 					local mode = vim.api.nvim_get_mode().mode;
+					local USE = gr_map[mode] or gr_map.default
+
+					if vim.api.nvim_get_current_win() ~= window then
+						USE = "BarsNoMode%d";
+					end
 
 					for g = 1, 7 do
-						---@type string
-						local hl = gr_map[mode] or gr_map.default;
-
-						table.insert(_o, string.format(hl, g));
+						table.insert(_o, string.format(USE, g));
 					end
 
 					return _o;

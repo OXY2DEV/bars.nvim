@@ -24,19 +24,19 @@ tabline.config = {
 				separator_hl = "Normal",
 
 				overflow = " ┇ ",
-				overflow_hl = "Layer1I",
+				overflow_hl = "BarsNavOverflow",
 
 				nav_left = "   ",
-				nav_left_hl = "Color0",
+				nav_left_hl = "BarsNav",
 
 				nav_left_locked = "    ",
-				nav_left_locked_hl = "Color1",
+				nav_left_locked_hl = "BarsNavLocked",
 
 				nav_right = "   ",
-				nav_right_hl = "Color0",
+				nav_right_hl = "BarsNav",
 
 				nav_right_locked = " 󰌾  ",
-				nav_right_locked_hl = "Color1",
+				nav_right_locked_hl = "BarsNavLocked",
 
 				active = {
 					padding_left = " ",
@@ -51,7 +51,7 @@ tabline.config = {
 
 					icon = "󰛺 ",
 
-					hl = "Color4R"
+					hl = "BarsTab"
 				},
 				inactive = {
 					padding_left = " ",
@@ -63,7 +63,7 @@ tabline.config = {
 
 					-- bufname = "󰳽 %s",
 
-					hl = "Color0B"
+					hl = "BarsInactive"
 				}
 			},
 			{
@@ -76,19 +76,19 @@ tabline.config = {
 				separator_hl = "Normal",
 
 				overflow = " ┇ ",
-				overflow_hl = "Layer1I",
+				overflow_hl = "BarsNavOverflow",
 
 				nav_left = "   ",
-				nav_left_hl = "Color0",
+				nav_left_hl = "BarsNav",
 
 				nav_left_locked = "    ",
-				nav_left_locked_hl = "Color1",
+				nav_left_locked_hl = "BarsNavLocked",
 
 				nav_right = "   ",
-				nav_right_hl = "Color0",
+				nav_right_hl = "BarsNav",
 
 				nav_right_locked = " 󰌾  ",
-				nav_right_locked_hl = "Color1",
+				nav_right_locked_hl = "BarsNavLocked",
 
 				active = {
 					padding_left = " ",
@@ -107,7 +107,7 @@ tabline.config = {
 
 					icon = "",
 
-					hl = "Color0B",
+					hl = "BarsInactive",
 					max_name_len = 10,
 				}
 			},

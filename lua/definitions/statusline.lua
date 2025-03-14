@@ -26,13 +26,13 @@
 ---@field condition? fun(buffer: integer, window: integer): boolean | nil
 ---
 --- Default style.
----@field default statusline_style
+---@field default statusline_component[]
 ---
 --- Custom style.
----@field [string] statusline_style
+---@field [string] statusline_component[]
 
 
----@alias statusline_style
+---@alias statusline_component
 ---| statusline.components.section
 ---| statusline.components.ruler
 ---| statusline.components.mode
@@ -151,7 +151,9 @@
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
 ---
----@field icon_hl? string
+--- Highlight groups for the icons.
+--- Used by `icon.nvim`
+---@field icon_hl? string[]
 ---
 --- Highlight group for `nomodifiable_icon`
 ---@field nomodifiable_icon_hl? string

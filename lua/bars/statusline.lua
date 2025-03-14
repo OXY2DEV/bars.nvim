@@ -6,6 +6,156 @@ local components = require("bars.components.statusline");
 ---@type string
 local STL = "%!v:lua.require('bars.statusline').render()";
 
+---@type table<string, statusline_component>
+local TEMPLATES = {
+	mode = {
+		---|fS "Mode configuration"
+
+		kind = "mode",
+
+		compact = function (_, window)
+			if window ~= vim.api.nvim_get_current_win() then
+				return true;
+			else
+				return vim.api.nvim_win_get_width(window) < math.ceil(vim.o.columns * 0.5);
+			end
+		end,
+
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+
+			icon = " ",
+
+			hl = "BarsNormal",
+		},
+
+		["^n"] = { text = "Normal" },
+
+		["^t"] = { text = "Terminal" },
+
+		["^v$"] = {
+			icon = "󰸿 ",
+			text = "Visual",
+
+			hl = "BarsVisual",
+		},
+		["^V$"]    = {
+			icon = "󰹀 ",
+			text = "Visual",
+
+			hl = "BarsVisualLine",
+		},
+		["^$"]   = {
+			icon = "󰸽 ",
+			text = "Visual",
+
+			hl = "BarsVisualBlock",
+		},
+
+		["^s$"]    = {
+			icon = "󰕠 ",
+			text = "Select",
+
+			hl = "BarsVisual",
+		},
+		["^S$"]    = {
+			icon = "󰕞 ",
+			text = "Select",
+
+			hl = "BarsVisualLine",
+		},
+		["^$"]   = {
+			icon = " ",
+			text = "Select",
+
+			hl = "BarsVisualBlock",
+		},
+
+		["^i$"]    = {
+			icon = " ",
+			text = "Insert",
+
+			hl = "BarsInsert",
+		},
+		["^ic$"]   = {
+			icon = " ",
+			text = "Completion",
+
+			hl = "BarsInsert",
+		},
+		["^ix$"]   = {
+			text = "Inser8",
+
+			hl = "BarsInsert",
+		},
+
+		["^R$"]    = {
+			icon = " ",
+			text = "Replace",
+
+			hl = "BarsInsert",
+		},
+		["^Rc$"]   = {
+			icon = " ",
+			text = "Completion",
+
+			hl = "BarsInsert",
+		},
+
+		["^c"]    = {
+			icon = " ",
+			text = "Command",
+
+			hl = "BarsCommand",
+		},
+
+		["^r"] = { text = "Prompt" },
+
+		["^%!"] = {
+			icon = " ",
+			text = "Shell",
+
+			hl = "BarsCommand"
+		},
+
+		---|fE
+	},
+	bufname = {
+		kind = "bufname",
+		condition = function (_, win)
+			return vim.api.nvim_win_get_width(win) >= 42;
+		end,
+
+		max_len = 25,
+
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+
+			icon = "",
+			nomodifiable_icon_hl = "BarsFt1",
+			nomodifiable_icon = "󰌾 ",
+			icon_hl = {
+				"BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
+			},
+
+			hl = "BarsFt"
+		},
+
+		["^$"] = {
+			icon = "󰂵 ",
+			text = "New file",
+
+			hl = "BarsFt"
+		},
+
+		["^fish"] = {
+			icon = "󰐂 ",
+		},
+	}
+};
+
 ---@type statusline.config
 statusline.config = {
 	ignore_filetypes = {},
@@ -15,158 +165,9 @@ statusline.config = {
 		---|fS "Default configuration"
 
 		components = {
-			{
-				kind = "mode",
-
-				compact = function (_, window)
-					if window ~= vim.api.nvim_get_current_win() then
-						return true;
-					else
-						return vim.api.nvim_win_get_width(window) < math.ceil(vim.o.columns * 0.5);
-					end
-				end,
-
-				---|fS "Mode configuration"
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-
-					icon = " ",
-
-					hl = "BarsNormal",
-				},
-
-				["^n"] = { text = "Normal" },
-
-				["^t"] = { text = "Terminal" },
-
-				["^v$"] = {
-					icon = "󰸿 ",
-					text = "Visual",
-
-					hl = "BarsVisual",
-				},
-				["^V$"]    = {
-					icon = "󰹀 ",
-					text = "Visual",
-
-					hl = "BarsVisualLine",
-				},
-				["^$"]   = {
-					icon = "󰸽 ",
-					text = "Visual",
-
-					hl = "BarsVisualBlock",
-				},
-
-				["^s$"]    = {
-					icon = "󰕠 ",
-					text = "Select",
-
-					hl = "BarsVisual",
-				},
-				["^S$"]    = {
-					icon = "󰕞 ",
-					text = "Select",
-
-					hl = "BarsVisualLine",
-				},
-				["^$"]   = {
-					icon = " ",
-					text = "Select",
-
-					hl = "BarsVisualBlock",
-				},
-
-				["^i$"]    = {
-					icon = " ",
-					text = "Insert",
-
-					hl = "BarsInsert",
-				},
-				["^ic$"]   = {
-					icon = " ",
-					text = "Completion",
-
-					hl = "BarsInsert",
-				},
-				["^ix$"]   = {
-					text = "Inser8",
-
-					hl = "BarsInsert",
-				},
-
-				["^R$"]    = {
-					icon = " ",
-					text = "Replace",
-
-					hl = "Color8R",
-				},
-				["^Rc$"]   = {
-					icon = " ",
-					text = "Completion",
-
-					hl = "Color8R",
-				},
-
-				["^c"]    = {
-					icon = " ",
-					text = "Command",
-
-					hl = "Color4R",
-				},
-
-				["^r"] = { text = "Prompt" },
-
-				["^%!"] = {
-					icon = " ",
-					text = "Shell",
-
-					hl = "Color4R"
-				},
-
-				---|fE
-			},
+			TEMPLATES.mode,
 			{ kind = "section", hl = "Normal" },
-			{
-				kind = "bufname",
-				condition = function (_, win)
-					return vim.api.nvim_win_get_width(win) >= 42;
-				end,
-
-				max_len = 25,
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-
-					icon = "",
-					nomodifiable_icon_hl = "BarsFt1",
-					nomodifiable_icon = "󰌾 ",
-					icon_hl = {
-						"BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
-					},
-
-					-- corner_left_hl = "Normal",
-					-- corner_right_hl = "Normal",
-					hl = "BarsFt"
-				},
-
-				["^$"] = {
-					icon = "󰂵 ",
-					text = "New file",
-
-					hl = "BarsFt"
-				},
-
-				["^fish"] = {
-					icon = "󰐂 ",
-					-- text = "New file",
-
-					-- hl = "Layer2"
-				},
-			},
+			TEMPLATES.bufname,
 			{ kind = "section", hl = "Normal" },
 			{
 				kind = "diagnostics",
@@ -243,111 +244,7 @@ statusline.config = {
 		end,
 		components = {
 			{ kind = "empty", hl = "Normal" },
-			{
-				kind = "mode",
-
-				---|fS "Mode configuration"
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-
-					icon = " ",
-
-					hl = "Color8R",
-				},
-
-				["^n"] = { text = "Normal" },
-
-				["^t"] = { text = "Terminal" },
-
-				["^v$"] = {
-					icon = "󰸿 ",
-					text = "Visual",
-
-					hl = "BarsVisual",
-				},
-				["^V$"]    = {
-					icon = "󰹀 ",
-					text = "Visual",
-
-					hl = "BarsVisualLine",
-				},
-				["^$"]   = {
-					icon = "󰸽 ",
-					text = "Visual",
-
-					hl = "BarsVisualBlock",
-				},
-
-				["^s$"]    = {
-					icon = "󰕠 ",
-					text = "Select",
-
-					hl = "BarsVisual",
-				},
-				["^S$"]    = {
-					icon = "󰕞 ",
-					text = "BarsVisualLine",
-
-					hl = "Color4R",
-				},
-				["^$"]   = {
-					icon = " ",
-					text = "Select",
-
-					hl = "BarsVisualBlock",
-				},
-
-				["^i$"]    = {
-					icon = " ",
-					text = "Insert",
-
-					hl = "BarsInsert",
-				},
-				["^ic$"]   = {
-					icon = " ",
-					text = "Completion",
-
-					hl = "BarsInsert",
-				},
-				["^ix$"]   = {
-					text = "Inser8",
-
-					hl = "BarsInsert",
-				},
-
-				["^R$"]    = {
-					icon = " ",
-					text = "Replace",
-
-					hl = "BarsNormal",
-				},
-				["^Rc$"]   = {
-					icon = " ",
-					text = "Completion",
-
-					hl = "BarsNormal",
-				},
-
-				["^c"]    = {
-					icon = " ",
-					text = "Command",
-
-					hl = "BarsCommand",
-				},
-
-				["^r"] = { text = "Prompt" },
-
-				["^%!"] = {
-					icon = " ",
-					text = "Shell",
-
-					hl = "BarsCommand"
-				},
-
-				---|fE
-			},
+			TEMPLATES.mode,
 			{
 				kind = "ruler",
 				condition = function ()
@@ -373,44 +270,7 @@ statusline.config = {
 					hl = "Color6R"
 				}
 			},
-			{
-				kind = "bufname",
-				condition = function (_, win)
-					return vim.api.nvim_win_get_width(win) >= 42;
-				end,
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-
-					icon = "",
-					nomodifiable_icon_hl = "BarsFt1",
-					nomodifiable_icon = "󰌾 ",
-					icon_hl = {
-						"Color0B",
-						"Color1B", "Color2B", "Color3B",
-						"Color4B", "Color5B", "Color6B",
-					},
-
-					-- corner_left_hl = "Normal",
-					-- corner_right_hl = "Normal",
-					hl = "Layer1"
-				},
-
-				["^$"] = {
-					icon = "󰂵 ",
-					text = "New file",
-
-					hl = "Layer0"
-				},
-
-				["^fish"] = {
-					icon = "󰐂 ",
-					-- text = "New file",
-
-					-- hl = "Layer2"
-				},
-			},
+			TEMPLATES.bufname,
 			{ kind = "empty", hl = "Normal" },
 		}
 

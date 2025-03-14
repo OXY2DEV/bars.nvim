@@ -735,6 +735,64 @@ highlights.groups = {
 		end
 	},
 
+	default = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "@comment", "Comment" }, "fg") or
+				highlights.theme_value(
+					tonumber("7C7F93", 16),
+					tonumber("9399B2", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {
+				{
+					group = "BarsNoMode",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
+				}
+			};
+			local MAX = 10;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					tR, tG, tB,
+					R, G, B,
+					i / (MAX - 1)
+				);
+
+				table.insert(COLORS, {
+					group = string.format("BarsNoMode%d", i + 1),
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+						bg = highlights.rgb_to_hex(tR, tG, tB)
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
+
 	normal = {
 		value = function ()
 			---|fS
@@ -1053,6 +1111,15 @@ highlights.groups = {
 							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
 						)
 					}
+				},
+				{
+					group = "BarsTab",
+					value = {
+						bg = highlights.rgb_to_hex(R, G, B),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
+						)
+					}
 				}
 			};
 			local MAX = 10;
@@ -1082,6 +1149,7 @@ highlights.groups = {
 
 	file_icons = {
 		value = function ()
+			---|fS
 			local BASE = {
 				{ highlights.num_to_rgb(
 					highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
@@ -1169,8 +1237,82 @@ highlights.groups = {
 			end
 
 			return COLORS;
+
+			---|fE
 		end
-	}
+	},
+
+	tabline_nav = {
+		value = function ()
+			---|fS
+
+			---@type number, number, number
+			local bR, bG, bB = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			---@type number, number, number
+			local fR, fG, fB = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "fg") or
+				highlights.theme_value(
+					tonumber("1E1E2E", 16),
+					tonumber("CDD6F4", 16)
+				)
+			);
+
+			---@type number, number, number
+			local mR, mG, mB = highlights.mix(
+				bR, bG, bB,
+				fR, fG, fB,
+				0.15
+			);
+
+			---@type integer, integer, integer
+			local lR, lG, lB = highlights.num_to_rgb(
+				highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
+				highlights.theme_value(
+					tonumber("D20F39", 16),
+					tonumber("F38BA8", 16)
+				)
+			);
+
+			return {
+				{
+					group = "BarsNav",
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+					}
+				},
+				{
+					group = "BarsNavLocked",
+					value = {
+						fg = highlights.rgb_to_hex(lR, lG, lB),
+					}
+				},
+				{
+					group = "BarsNavOverflow",
+					value = {
+						fg = highlights.rgb_to_hex(mR, mG, mB),
+					}
+				},
+				{
+					group = "BarsInactive",
+					value = {
+						bg = highlights.rgb_to_hex(mR, mG, mB),
+						fg = highlights.rgb_to_hex(
+							highlights.get_nfg(highlights.rgb_to_lumen(mR, mG, mB) / 255)
+						)
+					}
+				},
+			};
+
+			---|fE
+		end
+	},
 };
 
 --- Applies highlight groups.

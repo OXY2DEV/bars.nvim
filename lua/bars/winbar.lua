@@ -53,7 +53,7 @@ winbar.config = {
 
 						icon = "󱎓",
 
-						hl = "Color7R"
+						hl = "BarsVisualBlock"
 					},
 
 				},
