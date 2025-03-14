@@ -1,13 +1,13 @@
 # 🚀 bars.nvim
 
-<!--<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-mobile.png">-->
-<!--<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">-->
-
 <div align="center">
     <img alt="Neovim" src="https://img.shields.io/badge/Neovim-000?style=for-the-badge&logo=neovim&logoColor=A6E3A1&color=1E1E2E">
     <img alt="Repo size" src="https://img.shields.io/github/languages/code-size/OXY2DEV/bars.nvim?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggc3Ryb2tlPSIjQ0JBNkY3IiBmaWxsPSIjQ0JBNkY3IiBkPSJNOTYgMEM0MyAwIDAgNDMgMCA5NkwwIDQxNmMwIDUzIDQzIDk2IDk2IDk2bDI4OCAwIDMyIDBjMTcuNyAwIDMyLTE0LjMgMzItMzJzLTE0LjMtMzItMzItMzJsMC02NGMxNy43IDAgMzItMTQuMyAzMi0zMmwwLTMyMGMwLTE3LjctMTQuMy0zMi0zMi0zMkwzODQgMCA5NiAwem0wIDM4NGwyNTYgMCAwIDY0TDk2IDQ0OGMtMTcuNyAwLTMyLTE0LjMtMzItMzJzMTQuMy0zMiAzMi0zMnptMzItMjQwYzAtOC44IDcuMi0xNiAxNi0xNmwxOTIgMGM4LjggMCAxNiA3LjIgMTYgMTZzLTcuMiAxNi0xNiAxNmwtMTkyIDBjLTguOCAwLTE2LTcuMi0xNi0xNnptMTYgNDhsMTkyIDBjOC44IDAgMTYgNy4yIDE2IDE2cy03LjIgMTYtMTYgMTZsLTE5MiAwYy04LjggMC0xNi03LjItMTYtMTZzNy4yLTE2IDE2LTE2eiIvPjwvc3ZnPg%3D%3D&logoColor=CBA6F7&labelColor=1e1e2e&color=B4BEFE">
     <img alt="GitHub Release" src="https://img.shields.io/github/v/release/OXY2DEV/bars.nvim?include_prereleases&sort=semver&display_name=release&style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggZmlsbD0iI0Y1RTBEQyIgc3Ryb2tlPSIjRjVFMERDIiBkPSJNMzQ1IDM5LjFMNDcyLjggMTY4LjRjNTIuNCA1MyA1Mi40IDEzOC4yIDAgMTkxLjJMMzYwLjggNDcyLjljLTkuMyA5LjQtMjQuNSA5LjUtMzMuOSAuMnMtOS41LTI0LjUtLjItMzMuOUw0MzguNiAzMjUuOWMzMy45LTM0LjMgMzMuOS04OS40IDAtMTIzLjdMMzEwLjkgNzIuOWMtOS4zLTkuNC05LjItMjQuNiAuMi0zMy45czI0LjYtOS4yIDMzLjkgLjJ6TTAgMjI5LjVMMCA4MEMwIDUzLjUgMjEuNSAzMiA0OCAzMmwxNDkuNSAwYzE3IDAgMzMuMyA2LjcgNDUuMyAxOC43bDE2OCAxNjhjMjUgMjUgMjUgNjUuNSAwIDkwLjVMMjc3LjMgNDQyLjdjLTI1IDI1LTY1LjUgMjUtOTAuNSAwbC0xNjgtMTY4QzYuNyAyNjIuNyAwIDI0Ni41IDAgMjI5LjV6TTE0NCAxNDRhMzIgMzIgMCAxIDAgLTY0IDAgMzIgMzIgMCAxIDAgNjQgMHoiLz48L3N2Zz4%3D&labelColor=1E1E2E&color=45475A">
 </div>
+
+<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-mobile.png">
+<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">
 
 A starting point/guide for creating custom statusline, statuscolumn, tabline & winbar for Neovim.
 
@@ -189,4 +189,53 @@ You can add any number of windows after the modifier to specify which windows to
 
 >[!TIP]
 > Cmdline completion are provided for all sub-commands/modifiers/windows!
+
+## 🎨 Highlight groups
+
+`bars.nvim` comes with the following highlight groups,
+
+- BarsFoldClose1
+- BarsFoldOpen1
+- BarsFoldClose2
+- BarsFoldOpen2
+- BarsFoldClose3
+- BarsFoldOpen3
+- BarsFoldClose4
+- BarsFoldOpen4
+- BarsFoldClose5
+- BarsFoldOpen5
+- BarsFoldClose6
+- BarsFoldOpen6
+
+- BarsLineNr
+- BarsWrap1<1..10>
+- BarsVirtual2<1..10>
+
+- BarsNormal<1..10>
+- BarsInsert<1..10>
+- BarsVisual<1..10>
+- BarsVisualLine<1..10>
+- BarsVisualBlock<1..10>
+- BarsCommand<1..10>
+
+- BarsNormal
+- BarsInsert
+- BarsVisual
+- BarsVisualLine
+- BarsVisualBlock
+- BarsCommand
+
+- BarsFt
+- BarsFt0
+- BarsFt1
+- BarsFt2
+- BarsFt3
+- BarsFt4
+- BarsFt5
+- BarsFt6
+
+- BarsGit
+
+- BarsRuler
+- BarsRulerVisual
 
