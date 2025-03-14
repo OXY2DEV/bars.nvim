@@ -829,6 +829,7 @@ highlights.groups = {
 					group = "BarsLineNr",
 					value = {
 						fg = highlights.rgb_to_hex(R, G, B),
+						bg = highlights.rgb_to_hex(tR, tG, tB),
 						bold = true
 					}
 				}
