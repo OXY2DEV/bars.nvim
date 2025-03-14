@@ -19,8 +19,8 @@ You can also modify it's contents just like the statusline.
 <
 
 ▌🎹 Note
-▌ Depending on your configuration you statuscolumn might look *weird*.
-▌ So, you should set these options **before** setting the statuscolumn.
+▌ Depending on your configuration you statuscolumn might look weird.
+▌ So, you should set these options before setting the statuscolumn.
 
 >lua
 	--- Use this so that the statuscolumn updates
@@ -70,7 +70,7 @@ Let's break it down,
 ------------------------------------------------------------------------------
 🎨 Colors
 
-Of course just like the `statusline`, we can also add *colors* to the statuscolumn.
+Of course just like the `statusline`, we can also add colors to the statuscolumn.
 
 >vim
 	:set statuscolumn=%#Normal#%s%C%#Special#%3l%#Normal#\ ▍
@@ -500,7 +500,7 @@ For signs, we will not do anything complicated.
 	end
 <
 
-We add it *before* the fold column.
+We add it before the fold column.
 
 >lua
 	statuscolumn.config = {

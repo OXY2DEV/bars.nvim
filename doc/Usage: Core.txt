@@ -1,0 +1,112 @@
+*bars.u-core*                                                      Usage: Core
+
+------------------------------------------------------------------------------
+🧭 Configuration
+
+`Bars.nvim` normally works out-of-the-box. You can use
+`require("bars").setup()` to configure various parts of the plugin.
+
+>lua
+	--- Primary configuration table.
+	---@class bars.config
+	---
+	--- When true, all options are set
+	--- globally.
+	--- Can be used to prevent visible
+	--- changes to the bars & lines when
+	--- opening Neovim or new windows.
+	---@field global? boolean
+	---
+	--- Statusline configuration.
+	---@field statusline? boolean | statusline.config | fun(): (boolean | statusline.config)
+	---
+	--- Statuscolumn configuration.
+	---@field statuscolumn? boolean | statuscolumn.config | fun(): (boolean | statuscolumn.config)
+	---
+	--- Winbar configuration.
+	---@field winbar? boolean | winbar.config | fun(): (boolean | winbar.config)
+	---
+	--- Tabline configuration.
+	---@field tabline? boolean | tabline.config | fun(): (boolean | tabline.config)
+
+
+	require("bars").setup({
+		global = true,
+
+		statuscolumn = true,
+		statusline = true,
+		winbar = false, -- Disables the winbar.
+
+		tabline = true
+	});
+<
+
+▌💥 Tip
+▌ The values can also be functions too! And can also be the configuration
+▌ table for the module.
+
+>lua
+	require("bars").setup({
+		winbar = function ()
+			local TERMUX_VERSION = vim.fn.getenv("TERMUX_APP__APP_VERSION_NAME");
+
+			if TERMUX_VERSION then
+				--- Disable winbar inside Termux.
+				return false;
+			else
+				return {
+					default = {
+						--- Config
+					}
+				};
+			end
+		end
+	});
+<
+
+------------------------------------------------------------------------------
+🧰 Commands
+
+This plugin provides a single command `:Bars` which has sub-commands that
+can be used to do different things.
+
+>txt
+	USAGE,
+		:Bars
+
+		:Bars [sub-command]
+
+		:Bars [sub-command] [modifier]
+
+		:Bars [sub-command] [modifier] [window_1] [window_2] ..
+
+	EXAMPLE,
+		:Bars toggle ? 1000
+<
+
+The sub-commands are given below,
+
+
+
+All the sub-commands support modifier to specify which modules should be
+affected by the command.
+
+▌💥 Tip
+▌ If you want to run a sub-command on the current window then you can ignore
+▌ the modifier.
+
+>vim
+	" Toggles all bars & lines for the current window.
+	:Bars toggle
+<
+
+Modifiers are given below,
+
+You can add any number of windows after the modifier to specify which windows to run the command on.
+
+▌💥 Tip
+▌ Cmdline completion are provided for all sub-commands/modifiers/windows!
+
+
+
+vim:ft=help:tw=78:
