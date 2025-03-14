@@ -1,6 +1,3 @@
-local statusline = require("bars.statusline");
-local utils = require("bars.utils");
-
 --- Goes to clicked line number.
 _G.__goto_lnum = function ()
 	local mousepos = vim.fn.getmousepos();
@@ -12,6 +9,8 @@ end
 --- Changes the type of diagnostic
 --- that are shown on the statusline.
 _G.__change_diagnostic_state = function ()
+	local statusline = require("bars.statusline");
+
 	local mousepos = vim.fn.getmousepos();
 	local window = mousepos.winid
 
@@ -85,6 +84,8 @@ _G.__buf_from_decrease = function ()
 		return;
 	end
 
+	local utils = package.loaded["bars.utils"];
+
 	---@type integer Number of buffers.
 	local bufs = #utils.get_valid_bufs();
 
@@ -105,6 +106,8 @@ _G.__buf_from_increase = function ()
 		vim.g.__bars_buf_from = 1;
 		return;
 	end
+
+	local utils = package.loaded["bars.utils"];
 
 	---@type integer Number of buffers.
 	local bufs = #utils.get_valid_bufs();

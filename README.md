@@ -24,8 +24,8 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 ## ✨ Features
 
 - Actually fast,
-    - Termux: average: `5ms`, lowest: `2ms`.
-    - MacOS: average: `0.5ms`, lowest: `0.2ms`.
+    - Termux: average: `7ms`, lowest: `5ms`.
+    - MacOS: average: `2ms`, lowest: `1.8ms`.
 
 - Fully customisable.
 - Per-window configuration.
@@ -46,12 +46,10 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 
 Guide for creating your own custom statusline, statuscolumn, tabline & winbar are given below,
 
-<!-- Demo here -->
-
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Tabline)
+- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statuscolumn)
+- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statusline)
+- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Winbar)
+- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Tabline)
 
 ## 📐 Installation
 
@@ -130,7 +128,14 @@ require("bars.statusline").setup({
 });
 ```
 
-Check the [wiki]() to learn about all the configuration options!
+Check the [wiki](https://github.com/OXY2DEV/bars.nvim/wiki/Home) to learn about all the configuration options!
+
+Usage instructions for different modules,
+
+- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statuscolumn)
+- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statusline)
+- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Winbar)
+- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Tabline)
 
 ## 🧰 Commands
 

@@ -1,12 +1,12 @@
-bars-g.statusline	Guide: Statusline.txt	/*bars-g.statusline*
-bars-g.tabline	Guide: Tabline.txt	/*bars-g.tabline*
-bars-g.winbar	Guide: Winbar.txt	/*bars-g.winbar*
-bars.g-statuscolumn	Guide: Statuscolumn.txt	/*bars.g-statuscolumn*
+bars-g.statusline	Guide_Statusline.txt	/*bars-g.statusline*
+bars-g.tabline	Guide_Tabline.txt	/*bars-g.tabline*
+bars-g.winbar	Guide_Winbar.txt	/*bars-g.winbar*
+bars.g-statuscolumn	Guide_Statuscolumn.txt	/*bars.g-statuscolumn*
 bars.nvim	bars.txt	/*bars.nvim*
 bars.nvim-guides	bars.txt	/*bars.nvim-guides*
 bars.nvim-usage	bars.txt	/*bars.nvim-usage*
-bars.statusline	Usage: Statusline.txt	/*bars.statusline*
-bars.u-core	Usage: Core.txt	/*bars.u-core*
-bars.u-statuscolumn	Usage: Statuscolumn.txt	/*bars.u-statuscolumn*
-bars.u-tabline	Usage: Tabline.txt	/*bars.u-tabline*
-bars.u-winbar	Usage: Winbar.txt	/*bars.u-winbar*
+bars.statusline	Usage_Statusline.txt	/*bars.statusline*
+bars.u-core	Usage_Core.txt	/*bars.u-core*
+bars.u-statuscolumn	Usage_Statuscolumn.txt	/*bars.u-statuscolumn*
+bars.u-tabline	Usage_Tabline.txt	/*bars.u-tabline*
+bars.u-winbar	Usage_Winbar.txt	/*bars.u-winbar*
