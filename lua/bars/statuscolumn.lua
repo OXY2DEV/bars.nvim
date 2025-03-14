@@ -110,14 +110,14 @@ statuscolumn.config = {
 				virt_markers = "│",
 
 				wrap_hl = {
-					"BarsGradient2_1", "BarsGradient2_2", "BarsGradient2_3", "BarsGradient2_4", "BarsGradient2_5",
+					"BarsWrap1", "BarsWrap2", "BarsWrap3", "BarsWrap4", "BarsWrap5",
 				},
 				virt_hl = {
-					"BarsGradient4_1", "BarsGradient4_2", "BarsGradient4_3", "BarsGradient4_4", "BarsGradient4_5",
+					"BarsVirtual1", "BarsVirtual2", "BarsVirtual3", "BarsVirtual4", "BarsVirtual5",
 				},
 				hl = {
-					"BarsGradient5_1",
-					"BarsGradient5_6",
+					"BarsLineNr",
+					"LineNr",
 				}
 			},
 			{
@@ -130,23 +130,23 @@ statuscolumn.config = {
 					local gr_map = {
 						default = "BarsNormal%d",
 
-						["v"] = "BarsGradient2_%d",
-						["V"] = "BarsGradient2_%d",
-						[""] = "BarsGradient2_%d",
-						--
-						-- ["s"] = "Gradient9N%d",
-						-- ["S"] = "Gradient7N%d",
-						-- [""] = "Gradient2N%d",
-						--
+						["v"] = "BarsVisual%d",
+						["V"] = "BarsVisualLine%d",
+						[""] = "BarsVisualBlock%d",
+
+						["s"] = "BarsVisual%d",
+						["S"] = "BarsVisualLine%d",
+						[""] = "BarsVisualBlock%d",
+
 						["i"] = "BarsInsert%d",
 						["ic"] = "BarsInsert%d",
 						["ix"] = "BarsInsert%d",
-						--
-						-- ["R"] = "Gradient8N%d",
-						-- ["Rc"] = "Gradient8N%d",
-						--
-						-- ["c"] = "Gradient4N%d",
-						-- ["!"] = "Gradient4N%d",
+
+						["R"] = "BarsInsert%d",
+						["Rc"] = "BarsInsert%d",
+
+						["c"] = "BarsCommand%d",
+						["!"] = "BarsCommand%d",
 					};
 
 					---@type string

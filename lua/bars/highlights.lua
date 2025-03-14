@@ -674,7 +674,7 @@ highlights.groups = {
 				);
 
 				table.insert(GRADIENT, {
-					group = string.format("BarsGradient2_%d", i + 1),
+					group = string.format("BarsWrap%d", i + 1),
 					value = {
 						fg = highlights.rgb_to_hex(mR, mG, mB),
 						bg = highlights.rgb_to_hex(tR, tG, tB)
@@ -721,7 +721,7 @@ highlights.groups = {
 				);
 
 				table.insert(GRADIENT, {
-					group = string.format("BarsGradient4_%d", i + 1),
+					group = string.format("BarsVirtual%d", i + 1),
 					value = {
 						fg = highlights.rgb_to_hex(mR, mG, mB),
 						bg = highlights.rgb_to_hex(tR, tG, tB)
@@ -823,6 +823,13 @@ highlights.groups = {
 						fg = highlights.rgb_to_hex(
 							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
 						)
+					}
+				},
+				{
+					group = "BarsLineNr",
+					value = {
+						fg = highlights.rgb_to_hex(R, G, B),
+						bold = true
 					}
 				}
 			};
@@ -1152,6 +1159,13 @@ highlights.groups = {
 			---|fS
 			local BASE = {
 				{ highlights.num_to_rgb(
+					highlights.get_attr({ "@comment", "Comment" }, "fg") or
+					highlights.theme_value(
+						tonumber("7C7F93", 16),
+						tonumber("9399B2", 16)
+					)
+				) },
+				{ highlights.num_to_rgb(
 					highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
 					highlights.theme_value(
 						tonumber("D20F39", 16),
@@ -1228,7 +1242,7 @@ highlights.groups = {
 
 			for e, entry in ipairs(BASE) do
 				table.insert(COLORS, {
-					group = "BarsFt" .. e,
+					group = "BarsFt" .. (e - 1),
 					value = {
 						fg = highlights.rgb_to_hex(unpack(entry)),
 						bg = highlights.rgb_to_hex(rR, rG, rB)
