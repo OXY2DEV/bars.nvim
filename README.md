@@ -48,10 +48,10 @@ Guide for creating your own custom statusline, statuscolumn, tabline & winbar ar
 
 <!-- Demo here -->
 
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Tabline)
+- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Statuscolumn)
+- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Statusline)
+- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Winbar)
+- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide:-Tabline)
 
 ## 📐 Installation
 
