@@ -1,47 +1,12 @@
 --- Load all the global functions.
 require("bars.global");
-local bars = require("bars");
-local hl = require("bars.highlights");
-
-bars.setup();
-hl.apply();
-
----|fS "Cache default values."
-
-vim.g.__statusline = vim.o.statusline;
-
-vim.g.__relativenumber = vim.o.relativenumber;
-vim.g.__numberwidth = vim.o.numberwidth;
-vim.g.__statuscolumn = vim.o.statuscolumn;
-
-vim.g.__winbar = vim.o.winbar;
-vim.g.__tabline = vim.o.tabline;
-
----|fE
-
---- Attach various bars & lines globally if
---- `global = true`.
-if require("bars").config.global == true then
-	require("bars.statuscolumn").global_attach();
-	require("bars.statusline").global_attach();
-	require("bars.winbar").global_attach();
-
-	require("bars.tabline").attach();
-else
-	require("bars.tabline").attach();
-end
 
 --- Attach to new Windows.
 ---
 --- Also rum this when a buffer is displayed
 --- in a window as the filetype/buftype may
 --- could have changed.
----
---- `VimEnter` is used because the other events
---- don't trigger when entering Neovim.
 vim.api.nvim_create_autocmd({
-	"VimEnter",
-
 	"WinNew",
 	"BufWinEnter"
 }, {
@@ -162,19 +127,56 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 	callback = function ()
-		hl.apply();
+		---|fS
+
+		---|fS "Cache default values."
+
+		vim.g.__statusline = vim.o.statusline;
+
+		vim.g.__relativenumber = vim.o.relativenumber;
+		vim.g.__numberwidth = vim.o.numberwidth;
+		vim.g.__statuscolumn = vim.o.statuscolumn;
+
+		vim.g.__winbar = vim.o.winbar;
+		vim.g.__tabline = vim.o.tabline;
+
+		---|fE
+
+		--- Attach various bars & lines globally if
+		--- `global = true`.
+		if require("bars").config.global == true then
+			require("bars.statuscolumn").global_attach();
+			require("bars.statusline").global_attach();
+			require("bars.winbar").global_attach();
+
+			require("bars.tabline").attach();
+		else
+			require("bars.tabline").attach();
+		end
+
+		require("bars.highlights").apply();
+
+		---|fE
+	end
+});
+
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	callback = function ()
+		require("bars.highlights").apply();
 	end
 });
 
 
-----------------------------------------------------------------------
-
+-- ----------------------------------------------------------------------
 
 --- Custom completion for the `?` operator.
 ---@param before string
 ---@return string[]
 _G.__bars_comp = function (before)
 	---|fS
+
+	local bars = require("bars");
 
 	local tokens = vim.split(before, " ", { trimempty = true });
 	local modules = { "statusline", "statuscolumn", "tabline", "winbar" };
@@ -209,6 +211,10 @@ end
 --- `:Bars` command implementation.
 --- Usage `:Bars <action>? <operator> <window> ...`
 vim.api.nvim_create_user_command("Bars", function (data)
+	---|fS
+
+	local bars = require("bars");
+
 	local command = data.fargs[1];
 	local actions = vim.tbl_keys(bars.actions);
 	local windows = {};
@@ -248,11 +254,17 @@ vim.api.nvim_create_user_command("Bars", function (data)
 	else
 		bars.actions[command]({ data.fargs[2] }, windows);
 	end
+
+	---|fE
 end, {
 	desc = "User command for bars.nvim",
 	nargs = "*",
 
 	complete = function (arg_lead, cmdline, cursor_pos)
+		---|fS
+
+		local bars = require("bars");
+
 		---@type string Text before the cursor.
 		local before = string.sub(cmdline, 0, cursor_pos);
 		---@type string[] Tokenized version of @before.
@@ -300,6 +312,8 @@ end, {
 			table.sort(_c);
 			return _c;
 		end
+
+		---|fE
 	end
 });
 
