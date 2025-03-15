@@ -12,6 +12,8 @@
 
 A starting point/guide for creating custom statusline, statuscolumn, tabline & winbar for Neovim.
 
+> `bars.nvim` is NOT a plugin, if it wasn't clear. It's just a reference manual.
+
 ## 📖 Table of contents
 
 - [✨ Features](#-features)
