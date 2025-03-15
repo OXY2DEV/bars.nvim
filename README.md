@@ -66,7 +66,7 @@ Plug "OXY2DEV/bars.nvim"
 ### 💤 lazy.nvim
 
 >[!NOTE]
-> Lazy loading is NOT needed for this plugin!
+> Lazy loading is NOT needed for this!
 
 For `plugins.lua` users,
 
@@ -112,7 +112,7 @@ Tagged releases can be found in the [release page](https://github.com/OXY2DEV/ba
 
 ## 🧭 Configuration
 
-This plugin can be configured in 2 ways,
+`bars.nvim` can be configured in 2 ways,
 
 1. Via the `setup()` function.
 
@@ -141,7 +141,7 @@ Usage instructions for different modules,
 
 ## 🧰 Commands
 
-This plugin provides a single command `:Bars` which has **sub-commands** that can be used to do different things.
+`bars.nvim` provides a single command `:Bars` which has **sub-commands** that can be used to do different things.
 
 ```
 USAGE,
