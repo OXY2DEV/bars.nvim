@@ -142,6 +142,17 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 
 		---|fE
 
+		require("bars.highlights").apply();
+
+		---|fE
+	end
+});
+
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	callback = function ()
+		require("bars.highlights").apply();
+
 		--- Attach various bars & lines globally if
 		--- `global = true`.
 		if require("bars").config.global == true then
@@ -153,17 +164,6 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 		else
 			require("bars.tabline").attach();
 		end
-
-		require("bars.highlights").apply();
-
-		---|fE
-	end
-});
-
---- Update the tab list when opening new windows.
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-	callback = function ()
-		require("bars.highlights").apply();
 	end
 });
 
