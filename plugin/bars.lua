@@ -1,5 +1,4 @@
 --- Load all the global functions.
-require("bars.global");
 
 --- Attach to new Windows.
 ---
@@ -151,6 +150,7 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
+		require("bars.global");
 		require("bars.highlights").apply();
 
 		--- Attach various bars & lines globally if
