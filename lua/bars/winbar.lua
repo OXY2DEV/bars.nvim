@@ -711,29 +711,33 @@ winbar.detach = function (window)
 	---|fS
 
 	vim.schedule(function ()
-		vim.w[window].__wbID = nil;
+		pcall(function ()
+			vim.w[window].__wbID = nil;
 
-		--- Cached winbar.
-		---@type string | nil
-		local _wb = vim.w[window].__winbar or vim.g.__winbar or "";
+			--- Cached winbar.
+			---@type string | nil
+			local _wb = vim.w[window].__winbar or vim.g.__winbar or "";
 
-		if _wb == "" or _wb == nil then
-			--- Reset winbar.
-			vim.api.nvim_win_call(window, function ()
-				vim.cmd("set winbar&");
-			end);
-		else
-			vim.api.nvim_set_option_value(
-				"winbar",
-				_wb,
-				{
-					scope = "local",
-					win = window
-				}
-			);
-		end
+			if _wb == "" or _wb == nil then
+				--- Reset winbar.
+				vim.api.nvim_win_call(window, function ()
+					pcall(function ()
+						vim.cmd("set winbar&");
+					end);
+				end);
+			else
+				pcall(vim.api.nvim_set_option_value,
+					"winbar",
+					_wb,
+					{
+						scope = "local",
+						win = window
+					}
+				);
+			end
 
-		winbar.state.attached_windows[window] = false;
+			winbar.state.attached_windows[window] = false;
+		end)
 	end);
 
 	---|fE
