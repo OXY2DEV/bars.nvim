@@ -470,6 +470,26 @@ slC.ruler = function (_, window, main_config)
 	---|fE
 end
 
+--- Macro recording & executing.
+---@param config statusline.components.macro
+---@return string
+slC.macro = function (_, _, config)
+	---|fS
+
+	local rec = vim.fn.reg_recording();
+	local exe = vim.fn.reg_executing();
+
+	if rec ~= "" then
+		return string.format("%s%s%s", utils.set_hl(config.record_hl), config.record_icon or "", rec);
+	elseif exe ~= "" then
+		return string.format("%s%s%s", utils.set_hl(config.exec_hl), config.exec_icon or "", exe);
+	else
+		return "";
+	end
+
+	---|fE
+end
+
 --- Custom section.
 ---@param config statusline.components.custom
 ---@return string

@@ -40,6 +40,7 @@
 ---| statusline.components.branch
 ---| statusline.components.bufname
 ---| statusline.components.custom
+---| statusline.components.macro
 
 -----------------------------------------------------------------------------
 
@@ -406,6 +407,7 @@
 --- Primary highlight group.
 ---@field hl? string
 
+-----------------------------------------------------------------------------
 
 --- Custom statusline component.
 ---@class statusline.components.custom
@@ -418,4 +420,26 @@
 ---
 --- Text to show for this component.
 ---@field value fun(buffer: integer, window: integer): string
+
+-----------------------------------------------------------------------------
+
+---@class statusline.components.macro
+---
+--- Optional condition for this component.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind "macro"
+---
+--- Icon to show Macros being recorded.
+---@field record_icon string
+---
+--- Highlight group for record icon.
+---@field record_hl? string
+---
+--- Icon to show Macros being executed.
+---@field exec_icon string
+---
+--- Highlight group for exec icon.
+---@field exec_hl? string
 

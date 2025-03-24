@@ -192,6 +192,12 @@ statusline.config = {
 				info_hl = "DiagnosticInfo"
 
 			},
+			{
+				kind = "macro",
+
+				record_icon = "󰦚 ",
+				exec_icon = "󰥠 "
+			},
 			{ kind = "empty", hl = "Normal" },
 			{
 				kind = "branch",
