@@ -11,6 +11,20 @@ winbar.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
+	condition = function ()
+		---|fS
+
+		if _G.is_within_termux then
+			--- Do NOT use this inside Termux.
+			--- Screen space is too precious.
+			return not _G.is_within_termux();
+		end
+
+		return true;
+
+		---|fE
+	end,
+
 	default = {
 		components = {
 			---|fS
@@ -813,6 +827,13 @@ winbar.global_attach = function ()
 
 	if winbar.state.enable == false then
 		return;
+	elseif winbar.config.condition then
+		---@diagnostic disable-next-line
+		local ran_cond, stat = pcall(winbar.config.condition, vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win());
+
+		if ran_cond == false or stat == false then
+			return;
+		end
 	end
 
 	for _, window in ipairs(vim.api.nvim_list_wins()) do
