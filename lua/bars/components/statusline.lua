@@ -244,7 +244,7 @@ slC.diagnostics = function (buffer, window, config)
 	config = config or {};
 
 	local diagnostics_count = vim.diagnostic.count(buffer);
-	local clients = vim.lsp.buf_get_clients(buffer);
+	local clients = vim.fn.has("nvim-0.11") == 1 and vim.lsp.get_clients({ bufnr = buffer }) or vim.lsp.buf_get_clients(buffer);
 
 	if #clients == 0 and config.auto_hide == true then
 		return "";
