@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.1...v2.1.0) (2025-03-25)
+
+
+### Features
+
+* **statusline:** Added Macro preview module ([941f4bf](https://github.com/OXY2DEV/bars.nvim/commit/941f4bf303ab23d457383260f1319a61e31d2023))
+
+
+### Bug Fixes
+
+* **core:** Modules now get loaded globally on VimEnter ([76818e6](https://github.com/OXY2DEV/bars.nvim/commit/76818e6762dd2e58b21cf40092e017ee27d44723))
+* Optimized module imports ([7f18b76](https://github.com/OXY2DEV/bars.nvim/commit/7f18b7640cb08d17e4e4a3c70d61891226a7fb98))
+* **winbar:** Wrapped callback functions for detaching ([7ad7fd1](https://github.com/OXY2DEV/bars.nvim/commit/7ad7fd182f6617a0a1e55772fd56490b582ef842))
+
 ## [2.0.1](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.0...v2.0.1) (2025-03-14)
 
 
