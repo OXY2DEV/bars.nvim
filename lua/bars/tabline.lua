@@ -1,6 +1,5 @@
 --- Custom tabline module
 local tabline = {}
-local components = require("bars.components.tabline");
 
 --- Custom tabline.
 ---@type string
@@ -164,6 +163,8 @@ end
 ---@return string
 tabline.render = function ()
 	---|fS
+
+	local components = require("bars.components.tabline");
 
 	if tabline.state.attached ~= true then
 		return "";

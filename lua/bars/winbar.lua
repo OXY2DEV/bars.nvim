@@ -1,6 +1,5 @@
 --- Custom winbar module.
 local winbar = {};
-local components = require("bars.components.winbar");
 
 --- Custom winbar.
 ---@type string
@@ -657,6 +656,8 @@ end
 ---@return string
 winbar.render = function ()
 	---|fS
+
+	local components = require("bars.components.winbar");
 
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);

@@ -1,6 +1,5 @@
 --- Custom statusline module.
 local statusline = {};
-local components = require("bars.components.statusline");
 
 --- Custom statusline.
 ---@type string
@@ -338,6 +337,8 @@ end
 ---@return string
 statusline.render = function ()
 	---|fS
+
+	local components = require("bars.components.statusline");
 
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
