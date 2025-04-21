@@ -1,5 +1,25 @@
 --- Load all the global functions.
 
+--- Update the tab list when opening new windows.
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	callback = function ()
+		require("bars.global");
+		require("bars.highlights").apply();
+
+		--- Attach various bars & lines globally if
+		--- `global = true`.
+		if require("bars").config.global == true then
+			require("bars.statuscolumn").global_attach();
+			require("bars.statusline").global_attach();
+			require("bars.winbar").global_attach();
+
+			require("bars.tabline").attach();
+		else
+			require("bars.tabline").attach();
+		end
+	end
+});
+
 --- Attach to new Windows.
 ---
 --- Also rum this when a buffer is displayed
@@ -144,26 +164,6 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 		require("bars.highlights").apply();
 
 		---|fE
-	end
-});
-
---- Update the tab list when opening new windows.
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-	callback = function ()
-		require("bars.global");
-		require("bars.highlights").apply();
-
-		--- Attach various bars & lines globally if
-		--- `global = true`.
-		if require("bars").config.global == true then
-			require("bars.statuscolumn").global_attach();
-			require("bars.statusline").global_attach();
-			require("bars.winbar").global_attach();
-
-			require("bars.tabline").attach();
-		else
-			require("bars.tabline").attach();
-		end
 	end
 });
 
