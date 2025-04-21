@@ -526,9 +526,7 @@ statusline.global_attach = function ()
 		local ran_cond, stat = pcall(statusline.config.condition, vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win());
 
 		if ran_cond == false or stat == false then
-			return true;
-		else
-			return false;
+			return;
 		end
 	end
 

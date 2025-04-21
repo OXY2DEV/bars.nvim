@@ -1,6 +1,5 @@
 --- Custom statuscolumn module.
 local statuscolumn = {};
-local components = require("bars.components.statuscolumn");
 
 --- Custom statuscolumn.
 ---@type string
@@ -251,6 +250,8 @@ end
 statuscolumn.render = function ()
 	---|fS
 
+	local components = require("bars.components.statuscolumn");
+
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
@@ -470,9 +471,7 @@ statuscolumn.global_attach = function ()
 		local ran_cond, stat = pcall(statuscolumn.config.condition, vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win());
 
 		if ran_cond == false or stat == false then
-			return true;
-		else
-			return false;
+			return;
 		end
 	end
 
