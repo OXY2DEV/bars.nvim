@@ -26,8 +26,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 --- in a window as the filetype/buftype may
 --- could have changed.
 vim.api.nvim_create_autocmd({
-	"WinNew",
-	"BufWinEnter"
+	"WinNew"
 }, {
 	callback = function ()
 		---|fS
