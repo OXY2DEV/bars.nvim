@@ -32,20 +32,43 @@ vim.api.nvim_create_autocmd({
 	callback = function ()
 		---|fS
 
-		require("bars.statusline").clean();
-		require("bars.statuscolumn").clean();
-		require("bars.winbar").clean();
-		require("bars.tabline").clean();
+		local function callback ()
+			require("bars.statusline").clean();
+			require("bars.statuscolumn").clean();
+			require("bars.winbar").clean();
 
-		vim.schedule(function ()
 			for _, win in ipairs(vim.api.nvim_list_wins()) do
 				require("bars.statusline").attach(win);
 				require("bars.statuscolumn").attach(win);
 				require("bars.winbar").attach(win);
 			end
+		end
 
+		if vim.in_fast_event() then
+			vim.schedule(callback);
+		else
+			callback();
+		end
+
+		---|fE
+	end
+});
+
+--- Handle Tabline differently.
+vim.api.nvim_create_autocmd("TabNew", {
+	callback = function ()
+		---|fS
+
+		local function callback ()
+			require("bars.tabline").clean();
 			require("bars.tabline").attach();
-		end);
+		end
+
+		if vim.in_fast_event() then
+			vim.schedule(callback);
+		else
+			callback();
+		end
 
 		---|fE
 	end
@@ -68,21 +91,23 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 			return;
 		end
 
-		--- Clean up invalid windows.
-		require("bars.statusline").clean();
-		require("bars.statuscolumn").clean();
-		require("bars.winbar").clean();
-		require("bars.tabline").clean();
+		local function callback ()
+			require("bars.statusline").clean();
+			require("bars.statuscolumn").clean();
+			require("bars.winbar").clean();
 
-		vim.schedule(function ()
 			for _, win in ipairs(vim.api.nvim_list_wins()) do
 				require("bars.statusline").attach(win);
 				require("bars.statuscolumn").attach(win);
 				require("bars.winbar").attach(win);
 			end
+		end
 
-			require("bars.tabline").attach();
-		end);
+		if vim.in_fast_event() then
+			vim.schedule(callback);
+		else
+			callback();
+		end
 
 		---|fE
 	end
