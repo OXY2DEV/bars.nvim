@@ -195,7 +195,10 @@ statusline.config = {
 				kind = "macro",
 
 				record_icon = "󰦚 ",
-				exec_icon = "󰥠 "
+				exec_icon = "󰥠 ",
+
+				record_hl = "@constant",
+				exec_hl = "DiagnosticOk",
 			},
 			{ kind = "empty", hl = "Normal" },
 			{
