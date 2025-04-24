@@ -336,6 +336,11 @@ statuscolumn.detach = function (window)
 
 	vim.schedule(function ()
 		if not window or vim.api.nvim_win_is_valid(window) == false then
+			-- Invalid window.
+			return;
+		elseif vim.wo[window].statuscolumn ~= STC then
+			-- Do not attempt to modify window's statuscolumn
+			-- if the statuscolumn isn't the one we set.
 			return;
 		end
 

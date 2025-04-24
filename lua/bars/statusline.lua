@@ -408,6 +408,11 @@ statusline.detach = function (window)
 
 	vim.schedule(function ()
 		if not window or vim.api.nvim_win_is_valid(window) == false then
+			-- Invalid window.
+			return;
+		elseif vim.wo[window].statusline ~= STL then
+			-- Do not attempt to modify window's statusline
+			-- if the statusline isn't the one we set.
 			return;
 		end
 

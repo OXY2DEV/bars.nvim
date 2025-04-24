@@ -726,6 +726,15 @@ winbar.detach = function (window)
 	---|fS
 
 	vim.schedule(function ()
+		if not window or vim.api.nvim_win_is_valid(window) == false then
+			-- Invalid window.
+			return;
+		elseif vim.wo[window].statuscolumn ~= WBR then
+			-- Do not attempt to modify window's winbar
+			-- if the winbar isn't the one we set.
+			return;
+		end
+
 		pcall(function ()
 			vim.w[window].__wbID = nil;
 
