@@ -1,5 +1,3 @@
---- Load all the global functions.
-
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
@@ -20,15 +18,12 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	end
 });
 
---- Attach to new Windows.
----
---- Also rum this when a buffer is displayed
---- in a window as the filetype/buftype may
---- could have changed.
-vim.api.nvim_create_autocmd({
-	"WinNew"
-}, {
-	callback = function ()
+---@type table Timer for the update task.
+local timer = vim.uv.new_timer();
+---@type integer Debounce delay.
+local DELAY = 100;
+
+local function task ()
 		---|fS
 
 		local function callback ()
@@ -50,6 +45,19 @@ vim.api.nvim_create_autocmd({
 		end
 
 		---|fE
+end
+
+--- Attach to new Windows.
+---
+--- Also rum this when a buffer is displayed
+--- in a window as the filetype/buftype may
+--- could have changed.
+vim.api.nvim_create_autocmd({
+	"WinNew"
+}, {
+	callback = function ()
+		timer:stop();
+		timer:start(DELAY, 0, vim.schedule_wrap(task));
 	end
 });
 
@@ -81,8 +89,6 @@ vim.api.nvim_create_autocmd("TabNew", {
 --- with large amount of windows.
 vim.api.nvim_create_autocmd({ "OptionSet" }, {
 	callback = function ()
-		---|fS
-
 		local option = vim.fn.expand("<amatch>");
 		local valid_options = { "filetype", "buftype" };
 
@@ -90,25 +96,8 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 			return;
 		end
 
-		local function callback ()
-			require("bars.statusline").clean();
-			require("bars.statuscolumn").clean();
-			require("bars.winbar").clean();
-
-			for _, win in ipairs(vim.api.nvim_list_wins()) do
-				require("bars.statusline").attach(win);
-				require("bars.statuscolumn").attach(win);
-				require("bars.winbar").attach(win);
-			end
-		end
-
-		if vim.in_fast_event() then
-			vim.schedule(callback);
-		else
-			callback();
-		end
-
-		---|fE
+		timer:stop();
+		timer:start(DELAY, 0, vim.schedule_wrap(task));
 	end
 });
 
