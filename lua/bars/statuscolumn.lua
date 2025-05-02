@@ -8,7 +8,7 @@ local STC = "%!v:lua.require('bars.statuscolumn').render()";
 ---@type statuscolumn.config
 statuscolumn.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
-	ignore_buftypes = { "help" },
+	ignore_buftypes = { "help", "quickfix" },
 
 	condition = function (buffer)
 		local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
