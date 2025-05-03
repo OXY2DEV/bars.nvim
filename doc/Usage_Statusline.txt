@@ -1,5 +1,11 @@
 *bars.statusline*                                              Usage: Statusline
 
+▌💥 Tip
+▌ You can disable this module for a buffer via
+▌ `vim.b[buffer].bars_statusline = false`.
+▌ You can also disable this module for a window via
+▌ `vim.w[buffer].bars_statusline = false`.
+
 Usage guide for the Statusline module.
 
 The relevant files are shown below,

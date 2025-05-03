@@ -1,5 +1,11 @@
 *bars.u-winbar*                                              Usage: Statuscolumn
 
+▌💥 Tip
+▌ You can disable this module for a buffer via
+▌ `vim.b[buffer].bars_winbar = false`.
+▌ You can also disable this module for a window via
+▌ `vim.w[buffer].bars_winbar = false`.
+
 Usage guide for the Statuscolumn module.
 
 The relevant files are shown below,

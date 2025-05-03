@@ -407,7 +407,9 @@ statuscolumn.can_attach = function (win, force)
 	local buffer = vim.api.nvim_win_get_buf(win);
 	local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
 
-	if vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+	if vim.b[buffer].bars_statuscolumn == false or vim.w[win].bars_statuscolumn == false then
+		return false;
+	elseif vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
 		return false;
 	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
 		return false;
