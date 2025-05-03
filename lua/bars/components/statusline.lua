@@ -162,7 +162,7 @@ slC.bufname = function (buffer, _, main_config)
 
 			return string.format(
 				"%s%s%s%s",
-				vim.fn.strcharcomponent(name, 0, math.max(available_len, 2)),
+				vim.fn.strcharpart(name, 0, math.max(available_len, 2)),
 				truncate_symbol,
 				ext ~= "" and "." or "",
 				ext ~= "" and ext or ""

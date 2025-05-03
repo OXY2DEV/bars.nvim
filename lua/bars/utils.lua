@@ -211,9 +211,9 @@ utils.truncate_path = function (path, opts)
 			end
 		elseif _o ~= nil and vim.list_contains(opts.raw_segmants, component) == false then
 			if string.match(component, "^%.") then
-				component = vim.fn.strcharcomponent(component, 0, opts.length + 1);
+				component = vim.fn.strcharpart(component, 0, opts.length + 1);
 			else
-				component = vim.fn.strcharcomponent(component, 0, opts.length);
+				component = vim.fn.strcharpart(component, 0, opts.length);
 			end
 		end
 
