@@ -127,7 +127,7 @@ bars.actions = {
 			end
 
 			for _, window in ipairs(windows) do
-				pcall(module.enable, window);
+				pcall(module.disable, window);
 			end
 
 		    ::continue::
