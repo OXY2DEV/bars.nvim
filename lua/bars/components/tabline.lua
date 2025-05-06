@@ -138,11 +138,14 @@ tlC.tabs = function (config)
 			utils.create_segmant(tab_config.padding_left, tab_config.padding_left_hl or tab_config.hl),
 
 			utils.create_segmant(tab_config.icon, tab_config.icon_hl),
-			utils.create_segmant(tab, tab_config.hl)
+			utils.create_segmant(tostring(tab), tab_config.hl)
 		});
 
 		if type(tab_config.win_count) == "string" then
 			local wins = vim.api.nvim_tabpage_list_wins(tab);
+			wins = vim.tbl_filter(function (win)
+				return vim.api.nvim_win_get_tabpage(win) == tab;
+			end, wins);
 
 			_o = table.concat({
 				_o,
