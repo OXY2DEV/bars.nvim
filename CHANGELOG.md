@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.1...v2.1.0) (2025-05-11)
+
+
+### Features
+
+* Added ability to disable bars per buffer or window ([5ae59c2](https://github.com/OXY2DEV/bars.nvim/commit/5ae59c2e3134b3bbed7500a8afa55dae1e7a64c6))
+* **statusline:** Added Macro preview module ([941f4bf](https://github.com/OXY2DEV/bars.nvim/commit/941f4bf303ab23d457383260f1319a61e31d2023))
+
+
+### Bug Fixes
+
+* **core:** Fixed delays of loading modules in new windows ([1d05806](https://github.com/OXY2DEV/bars.nvim/commit/1d0580654f8908d4d199e63cc217bb5772b24c60))
+* **core:** Modules now get loaded globally on VimEnter ([76818e6](https://github.com/OXY2DEV/bars.nvim/commit/76818e6762dd2e58b21cf40092e017ee27d44723))
+* Fixed a bug that resets special windows bars & lines ([6f37dfb](https://github.com/OXY2DEV/bars.nvim/commit/6f37dfbe80e68cd022ed138fe05fda1bb1ca49d5))
+* Fixed a bug with sub-modules not attaching in `global_attach()` ([eb0b080](https://github.com/OXY2DEV/bars.nvim/commit/eb0b080186c339cf4f4d6d129bd8f8c1a7845061))
+* Fixed command typo ([6dd4c57](https://github.com/OXY2DEV/bars.nvim/commit/6dd4c57be8fb53ca21e8df15069966b7b87c7b0a))
+* Fixed incorrect function names ([55fff14](https://github.com/OXY2DEV/bars.nvim/commit/55fff149e90c7c6131bad9a1c53bf22bace1b54b))
+* **hl:** Fixed an issue with statusline's highlight group not matching with other segments in the statusline ([55231b3](https://github.com/OXY2DEV/bars.nvim/commit/55231b3e3680d008021d8a77031c433ba7528609))
+* Optimized module imports ([7f18b76](https://github.com/OXY2DEV/bars.nvim/commit/7f18b7640cb08d17e4e4a3c70d61891226a7fb98))
+* **tabline:** The `tabs` component now shows windows of the specific tab instead of all tabs ([8e0b8b8](https://github.com/OXY2DEV/bars.nvim/commit/8e0b8b8da786e68b4a86f5565b1d831b9caa4d82))
+* **winbar:** Wrapped callback functions for detaching ([7ad7fd1](https://github.com/OXY2DEV/bars.nvim/commit/7ad7fd182f6617a0a1e55772fd56490b582ef842))
+
 ## [2.0.1](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.0...v2.0.1) (2025-03-14)
 
 
