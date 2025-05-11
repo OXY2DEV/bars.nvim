@@ -1328,6 +1328,11 @@ highlights.groups = {
 			---|fE
 		end
 	},
+
+	new_statusline = {
+		group = "StatusLine",
+		value = { link = "Normal" }
+	},
 };
 
 --- Applies highlight groups.
