@@ -229,7 +229,7 @@ statusline.config = {
 					padding_right = " ",
 					icon = " ",
 
-					separator = "  ",
+					separator = " 󰇛 ",
 
 					hl = "BarsRuler"
 				},
@@ -267,7 +267,7 @@ statusline.config = {
 					padding_right = " ",
 					icon = " ",
 
-					separator = "  ",
+					separator = " 󰇛 ",
 
 					hl = "BarsRuler"
 				},
