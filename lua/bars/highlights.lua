@@ -327,7 +327,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticError" }, "fg") or
 				highlights.theme_value(
 					tonumber("D20F39", 16),
 					tonumber("F38BA8", 16)
@@ -376,7 +376,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+				highlights.get_attr({ "@constant", "Constant" }, "fg") or
 				highlights.theme_value(
 					tonumber("FE640B", 16),
 					tonumber("FAB387", 16)
@@ -425,7 +425,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color3", "@markup.heading.3.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticWarn" }, "fg") or
 				highlights.theme_value(
 					tonumber("DF8E1D", 16),
 					tonumber("F9E2AF", 16)
@@ -474,7 +474,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticOk" }, "fg") or
 				highlights.theme_value(
 					tonumber("40A02B", 16),
 					tonumber("A6E3A1", 16)
@@ -532,7 +532,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color5", "@markup.heading.5.markdown" }, "fg") or
+				highlights.get_attr({ "@function", "Function" }, "fg") or
 				highlights.theme_value(
 					tonumber("209FB5", 16),
 					tonumber("74C7EC", 16)
@@ -581,7 +581,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color5", "@markup.heading.6.markdown" }, "fg") or
+				highlights.get_attr({ "@module", "@property" }, "fg") or
 				highlights.theme_value(
 					tonumber("7287FD", 16),
 					tonumber("B4BEFE", 16)
@@ -646,7 +646,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+				highlights.get_attr({ "@constant", "Constant" }, "fg") or
 				highlights.theme_value(
 					tonumber("FE640B", 16),
 					tonumber("FAB387", 16)
@@ -693,7 +693,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticOk" }, "fg") or
 				highlights.theme_value(
 					tonumber("40A02B", 16),
 					tonumber("A6E3A1", 16)
@@ -1036,7 +1036,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+				highlights.get_attr({ "@constant", "Constant" }, "fg") or
 				highlights.theme_value(
 					tonumber("FE640B", 16),
 					tonumber("FAB387", 16)
@@ -1094,7 +1094,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticOk" }, "fg") or
 				highlights.theme_value(
 					tonumber("40A02B", 16),
 					tonumber("A6E3A1", 16)
@@ -1167,42 +1167,42 @@ highlights.groups = {
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
+					highlights.get_attr({ "DiagnosticError" }, "fg") or
 					highlights.theme_value(
 						tonumber("D20F39", 16),
 						tonumber("F38BA8", 16)
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color2", "@markup.heading.2.markdown" }, "fg") or
+					highlights.get_attr({ "@constant", "Constant" }, "fg") or
 					highlights.theme_value(
 						tonumber("FE640B", 16),
 						tonumber("FAB387", 16)
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color3", "@markup.heading.3.markdown" }, "fg") or
+					highlights.get_attr({ "DiagnosticWarn" }, "fg") or
 					highlights.theme_value(
 						tonumber("DF8E1D", 16),
 						tonumber("F9E2AF", 16)
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color4", "@markup.heading.4.markdown" }, "fg") or
+					highlights.get_attr({ "DiagnosticOk" }, "fg") or
 					highlights.theme_value(
 						tonumber("40A02B", 16),
 						tonumber("A6E3A1", 16)
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color5", "@markup.heading.5.markdown" }, "fg") or
+					highlights.get_attr({ "@function", "Function" }, "fg") or
 					highlights.theme_value(
 						tonumber("209FB5", 16),
 						tonumber("74C7EC", 16)
 					)
 				) },
 				{ highlights.num_to_rgb(
-					highlights.get_attr({ "Color5", "@markup.heading.6.markdown" }, "fg") or
+					highlights.get_attr({ "@module", "@property" }, "fg") or
 					highlights.theme_value(
 						tonumber("7287FD", 16),
 						tonumber("B4BEFE", 16)
@@ -1288,7 +1288,7 @@ highlights.groups = {
 
 			---@type integer, integer, integer
 			local lR, lG, lB = highlights.num_to_rgb(
-				highlights.get_attr({ "Color1", "@markup.heading.1.markdown" }, "fg") or
+				highlights.get_attr({ "DiagnosticError" }, "fg") or
 				highlights.theme_value(
 					tonumber("D20F39", 16),
 					tonumber("F38BA8", 16)
