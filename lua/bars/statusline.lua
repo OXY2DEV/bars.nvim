@@ -311,11 +311,11 @@ statusline.config = {
 				visual = {
 					icon = " ",
 
-					hl = "Color6R"
+					hl = "BarsRuler"
 				}
 			},
 			TEMPLATES.bufname,
-			{ kind = "empty" },
+			{ kind = "empty", hl = "StatusLine" },
 		}
 
 		---|fE
