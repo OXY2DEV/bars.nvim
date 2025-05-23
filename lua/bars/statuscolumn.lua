@@ -152,10 +152,6 @@ statuscolumn.config = {
 					local mode = vim.api.nvim_get_mode().mode;
 					local USE = gr_map[mode] or gr_map.default
 
-					if vim.api.nvim_get_current_win() ~= window then
-						USE = "BarsNoMode%d";
-					end
-
 					for g = 1, 7 do
 						table.insert(_o, string.format(USE, g));
 					end
