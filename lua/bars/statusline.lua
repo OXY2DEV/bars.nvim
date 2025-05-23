@@ -6,7 +6,10 @@ local statusline = {};
 local STL = "%!v:lua.require('bars.statusline').render()";
 
 ---@type table<string, statusline_component>
-local TEMPLATES = {
+local TEMPLATES;
+
+TEMPLATES = {
+	---@type statusline.components.mode
 	mode = {
 		---|fS "Mode configuration"
 
@@ -138,21 +141,78 @@ local TEMPLATES = {
 			icon_hl = {
 				"BarsFt0", "BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
 			},
-
-			hl = "BarsFt"
 		},
 
 		["^$"] = {
 			icon = "󰂵 ",
 			text = "New file",
 
-			hl = "BarsFt"
+			hl = "BarsFt0"
 		},
 
 		["^fish"] = {
 			icon = "󰐂 ",
 		},
-	}
+	},
+	ruler = {
+		kind = "ruler",
+		mode = function ()
+			local mode = vim.api.nvim_get_mode().mode;
+			local visual_modes = { "v", "V", "" };
+
+			return vim.list_contains(visual_modes, mode) and "visual" or "normal";
+		end,
+
+		default = function ()
+			---|fS
+
+			local hl = TEMPLATES.mode.default.hl;
+			local mode = vim.api.nvim_get_mode().mode;
+
+			local ignore = { "default", "min_width", "kind", "condition", "kind" };
+			---@type mode.opts
+			local config = require("bars.utils").match(TEMPLATES.mode, mode, ignore);
+
+			hl = config.hl or hl;
+
+			return {
+				padding_left = " ",
+				padding_right = " ",
+				icon = "󰆤 ",
+
+				separator = " 󰇛 ",
+
+				hl = hl or "BarsRuler"
+			};
+
+			---|fE
+		end,
+
+		visual = function ()
+			---|fS
+
+			local hl = TEMPLATES.mode.default.hl;
+			local mode = vim.api.nvim_get_mode().mode;
+
+			local ignore = { "default", "min_width", "kind", "condition", "kind" };
+			---@type mode.opts
+			local config = require("bars.utils").match(TEMPLATES.mode, mode, ignore);
+
+			hl = config.hl or hl;
+
+			return {
+				padding_left = " ",
+				padding_right = " ",
+				icon = "󰆣 ",
+
+				separator = " 󰇛 ",
+
+				hl = hl or "BarsRuler"
+			};
+
+			---|fE
+		end
+	},
 };
 
 ---@type statusline.config
@@ -165,9 +225,8 @@ statusline.config = {
 
 		components = {
 			TEMPLATES.mode,
-			{ kind = "section", hl = "Normal" },
 			TEMPLATES.bufname,
-			{ kind = "section", hl = "Normal" },
+			{ kind = "section", hl = "StatusLine" },
 			{
 				kind = "diagnostics",
 				default_mode = 5,
@@ -176,7 +235,7 @@ statusline.config = {
 				padding_right = " ",
 
 				empty_icon = "󰂓 ",
-				empty_hl = "Comment",
+				empty_hl = "@comment",
 
 				error_icon = "󰅙 ",
 				error_hl = "DiagnosticError",
@@ -200,7 +259,7 @@ statusline.config = {
 				record_hl = "@constant",
 				exec_hl = "DiagnosticOk",
 			},
-			{ kind = "empty", hl = "Normal" },
+			{ kind = "empty", hl = "StatusLine" },
 			{
 				kind = "branch",
 				condition = function (_, win)
@@ -212,34 +271,10 @@ statusline.config = {
 					padding_right = " ",
 					icon = "󰊢 ",
 
-					hl = "BarsGit"
+					hl = "@comment"
 				}
 			},
-			{
-				kind = "ruler",
-				mode = function ()
-					local mode = vim.api.nvim_get_mode().mode;
-					local visual_modes = { "v", "V", "" };
-
-					return vim.list_contains(visual_modes, mode) and "visual" or "normal";
-				end,
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-					icon = " ",
-
-					separator = " 󰇛 ",
-
-					hl = "BarsRuler"
-				},
-
-				visual = {
-					icon = " ",
-
-					hl = "BarsRulerVisual"
-				}
-			}
+			TEMPLATES.ruler
 		}
 
 		---|fE
@@ -252,7 +287,7 @@ statusline.config = {
 			return vim.bo[buffer].buftype == "help";
 		end,
 		components = {
-			{ kind = "empty", hl = "Normal" },
+			{ kind = "empty" },
 			TEMPLATES.mode,
 			{
 				kind = "ruler",
@@ -280,7 +315,7 @@ statusline.config = {
 				}
 			},
 			TEMPLATES.bufname,
-			{ kind = "empty", hl = "Normal" },
+			{ kind = "empty" },
 		}
 
 		---|fE
@@ -296,7 +331,7 @@ statusline.config = {
 			{
 				kind = "custom",
 				value = function ()
-					local text = "%#BarsQuickfix1#";
+					local text = "%#BarsQuickfix#";
 					text = text .. " 󱌢 Quickfix ";
 
 					for i = 2, 15, 1 do
@@ -307,7 +342,7 @@ statusline.config = {
 					return text;
 				end
 			},
-			{ kind = "empty", hl = "Normal" },
+			{ kind = "empty" },
 			TEMPLATES.mode,
 		}
 
