@@ -1333,6 +1333,70 @@ highlights.groups = {
 		group = "StatusLine",
 		value = { link = "Normal" }
 	},
+
+	quickfix_gradient = {
+		value = function ()
+			---|fS
+
+			---@type integer, integer, integer
+			local R, G, B = highlights.num_to_rgb(
+				highlights.get_attr({ "@conditional", "Conditional" }, "fg") or
+				highlights.theme_value(
+					tonumber("8839EF", 16),
+					tonumber("CBA6F7", 16)
+				)
+			);
+
+			---@type integer, integer, integer
+			local tR, tG, tB = highlights.num_to_rgb(
+				highlights.get_attr({ "Normal" }, "bg") or
+				highlights.theme_value(
+					tonumber("CDD6F4", 16),
+					tonumber("1E1E2E", 16)
+				)
+			);
+
+			local COLORS = {};
+			local MAX = 15;
+
+			for i = 0, MAX - 1 do
+				---@type integer, integer, integer
+				local mR, mG, mB = highlights.mix(
+					R, G, B,
+					tR, tG, tB,
+					i / (MAX - 1)
+				);
+
+				local next_bg;
+
+				if i ~= 0 then
+					next_bg = highlights.rgb_to_hex(
+						highlights.mix(
+							R, G, B,
+							tR, tG, tB,
+							(i - 1) / (MAX - 1)
+						)
+					);
+				end
+
+				table.insert(COLORS, {
+					group = string.format("BarsQuickfix%d", i + 1),
+					value = {
+						bg = highlights.rgb_to_hex(mR, mG, mB),
+						fg = i == 0 and highlights.get_nfg(
+							highlights.rgb_to_lumen(mR, mG, mB)
+						) or next_bg,
+
+						bold = i == 0
+					}
+				});
+			end
+
+			return COLORS;
+
+			---|fE
+		end
+	},
 };
 
 --- Applies highlight groups.

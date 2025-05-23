@@ -244,6 +244,7 @@ statusline.config = {
 
 		---|fE
 	},
+
 	["help"] = {
 		---|fS "Help statusline"
 
@@ -283,7 +284,35 @@ statusline.config = {
 		}
 
 		---|fE
-	}
+	},
+
+	quickfix = {
+		---|fS "Help statusline"
+
+		condition = function (buffer)
+			return vim.bo[buffer].buftype == "quickfix";
+		end,
+		components = {
+			{
+				kind = "custom",
+				value = function ()
+					local text = "%#BarsQuickfix1#";
+					text = text .. " 󱌢 Quickfix ";
+
+					for i = 2, 15, 1 do
+						text = text .. string.format("%%#BarsQuickfix%d#", i);
+						text = text .. "▛";
+					end
+
+					return text;
+				end
+			},
+			{ kind = "empty", hl = "Normal" },
+			TEMPLATES.mode,
+		}
+
+		---|fE
+	},
 };
 
 ---@type statusline.state
