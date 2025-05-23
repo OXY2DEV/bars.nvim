@@ -1,1434 +1,1037 @@
-local highlights = {};
+--- Dynamic highlight groups.
+--- Maintainer: MD. Mouinul Hossain
+local hl = {};
 
---- Turns dynamic values into
---- static values.
----@param val any | fun(): any
----@return any
-local to_static = function (val)
-	---|fS
-
-	if type(val) ~= "function" then
-		return val;
-	end
-
-	local can_eval, eval = pcall(val);
-	return can_eval and eval or nil;
-
-	---|fE
+local function clamp (val, min, max)
+	return math.max(math.min(val, max), min);
 end
 
---- Gets highlight attribute.
----@param groups string[]
+--- Gets attribute from highlight groups.
 ---@param attr string
----@return boolean | integer | nil
-highlights.get_attr = function (groups, attr)
+---@param from string[]
+---@return number | boolean | string | nil
+hl.get_attr = function (attr, from)
 	---|fS
 
-	for _, group in ipairs(groups) do
-		local hl = vim.api.nvim_get_hl(0, {
-			name = group,
+	attr = attr or "bg";
+	from = from or { "Normal" };
 
-			link = false,
-			create = false
+	for _, group in ipairs(from) do
+		---@type table
+		local _hl = vim.api.nvim_get_hl(0, {
+			name = group,
+			link = false, create = false
 		});
 
-		if type(attr) == "string" and hl[attr] then
-			return hl[attr];
+		if _hl[attr] then
+			return _hl[attr];
 		end
 	end
 
 	---|fE
 end
 
---- Gets value based on background.
+--- Chooses a color based on 'background'.
 ---@param light any
 ---@param dark any
 ---@return any
-highlights.theme_value = function (light, dark)
-	return vim.o.background ~= "dark" and light or dark;
+hl.choice = function (light, dark)
+	return vim.o.background == "dark" and dark or light;
 end
 
----|fS
-
----@param num integer
----@return integer, integer, integer
-highlights.num_to_rgb = function (num)
-	local hex = string.format("%06x", num);
-	local xR, xG, xB = string.match(hex, "(%x%x)(%x%x)(%x%x)");
-
-	return tonumber(xR, 16), tonumber(xG, 16), tonumber(xB, 16);
-end
-
----@param r integer
----@param g integer
----@param b integer
+--- Linear-interpolation.
+---@param a number
+---@param b number
+---@param x number
 ---@return number
-highlights.rgb_to_lumen = function (r, g, b)
-	return (math.min(r, g, b) + math.max(r, g, b)) / 2;
+hl.lerp = function (a, b, x)
+	x = x or 0;
+	return a + ((b - a) * x);
 end
 
----@param r integer
----@param g integer
----@param b integer
----@return string
-highlights.rgb_to_hex = function (r, g, b)
-	return string.format("#%02x%02x%02x", r, g, b);
+hl.interpolate = function (f1, f2, f3, t1, t2, t3, y)
+	return hl.lerp(f1, t1, y), hl.lerp(f2, t2, y), hl.lerp(f3, t3, y);
 end
 
+------------------------------------------------------------------------------
+
+--- Turns numeric color code to RGB
+---@param num number
+---@return integer
+---@return integer
+---@return integer
+hl.num_to_rgb = function(num)
+	---|fS
+
+	local hex = string.format("%06x", num)
+	local r, g, b = string.match(hex, "^(%x%x)(%x%x)(%x%x)");
+
+	return tonumber(r, 16), tonumber(g, 16), tonumber(b, 16);
+
+	---|fE
+end
+
+--- Gamma correction.
+---@param c number
+---@return number
+hl.gamma_to_linear = function (c)
+	return c >= 0.04045 and math.pow((c + 0.055) / 1.055, 2.4) or c / 12.92;
+end
+
+--- Reverse gamma correction.
+---@param c number
+---@return number
+hl.linear_to_gamma = function (c)
+	return c >= 0.0031308 and 1.055 * math.pow(c, 1 / 2.4) - 0.055 or 12.92 * c;
+end
+
+--- RGB to OKLab.
 ---@param r number
 ---@param g number
 ---@param b number
 ---@return number
 ---@return number
 ---@return number
-highlights.rgb_to_lab = function (r, g, b)
+hl.rgb_to_oklab = function (r, g, b)
 	---|fS
 
-	---@param _r number
-	---@param _g number
-	---@param _b number
-	---@return number
-	---@return number
-	---@return number
-	local function rgb_to_xyz(_r, _g, _b)
-		---|fS
+	local R, G, B = hl.gamma_to_linear(r / 255), hl.gamma_to_linear(g / 255), hl.gamma_to_linear(b / 255);
 
-		local RGB = {};
+	local L = math.pow(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B, 1 / 3);
+	local M = math.pow(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B, 1 / 3);
+	local S = math.pow(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B, 1 / 3);
 
-		for c, channel in ipairs({ _r, _g, _b }) do
-			RGB[c] = channel / 255;
+	return
+		L *  0.2119034982 + M *  0.7936177850 + S * -0.0040720468,
+		L *  1.9779984951 + M * -2.4285922050 + S *  0.4505937099,
+		L *  0.0259040371 + M *  0.7827717662 + S * -0.8086757660
+	;
 
-			if RGB[c] <= 0.04045 then
-				RGB[c] = RGB[c] / 12.92;
-			else
-				RGB[c] = ((RGB[c] + 0.055) / 1.055) ^ 2.4;
-			end
-		end
-
-		--- Transformation matrix.
-		---@type number[]
-		local matrix = {
-			0.4124504, 0.3575761, 0.1804375,
-			0.2126729, 0.7151522, 0.0721750,
-			0.0193339, 0.1191920, 0.9503041
-		};
-
-		return
-			( RGB[1] * matrix[1] +  RGB[2] * matrix[2] +  RGB[3] * matrix[3] ) * 100,
-			( RGB[1] * matrix[4] +  RGB[2] * matrix[5] +  RGB[3] * matrix[6] ) * 100,
-			( RGB[1] * matrix[7] +  RGB[2] * matrix[8] +  RGB[3] * matrix[9] ) * 100
-		;
-
-		---|fE
-	end
-
-	---@param x number
-	---@param y number
-	---@param z number
-	---@return number
-	---@return number
-	---@return number
-	local function xyz_to_lab(x, y, z)
-		---|fS
-
-		--- Reference white point.
-		---@type number[]
-		local ref = { 95.047, 100, 108.883 };
-
-		---@param val number
-		---@param index integer
-		---@return number
-		local function formula(val, index)
-			local t = val / ref[index];
-
-			if t > (6 / 29) ^ 3 then
-				return t ^ (1 / 3);
-			else
-				return ( (1 / 3) * t * ((6 / 29) ^ -2) ) + (4 / 29);
-			end
-		end
-
-		return
-			-16 + ( 116 * formula(y, 2) ),
-			500 * ( formula(x, 1) - formula(y, 2) ),
-			200 * ( formula(y, 2) - formula(z, 3) )
-		;
-
-		---|fE
-	end
-
-	return xyz_to_lab(rgb_to_xyz(r, g, b));
-
-	---|fE
+  ---|fE
 end
 
+--- OKLab to RGB.
 ---@param l number
 ---@param a number
 ---@param b number
 ---@return number
 ---@return number
 ---@return number
-highlights.lab_to_rgb = function (l, a, b)
+hl.oklab_to_rgb = function (l, a, b)
 	---|fS
 
-	---@param _l number
-	---@param _a number
-	---@param _b number
-	---@return number
-	---@return number
-	---@return number
-	local function lab_to_xyz(_l, _a, _b)
-		---|fS
+	local L = math.pow(l + a *  0.3963377774 + b *  0.2158037573, 3);
+	local M = math.pow(l + a * -0.1055613458 + b * -0.0638541728, 3);
+	local S = math.pow(l + a * -0.0894841775 + b * -1.2914855480, 3);
 
-		--- Reference white point.
-		---@type number[]
-		local ref = { 95.047, 100, 108.883 };
+	local R = L *  4.0767416621 + M * -3.3077115913 + S *  0.2309699292;
+	local G = L * -1.2684380046 + M *  2.6097574011 + S * -0.3413193965;
+	local B = L * -0.0041960863 + M * -0.7034186147 + S *  1.7076147010;
 
-		---@param val number
-		---@return number
-		local function rformula(val)
-			if val > (6 / 29) then
-				return val ^ 3;
-			else
-				return 3 * ( (6 / 29) ^ 2 ) * ( val - (4 / 29) );
-			end
-		end
+	R = clamp(255 * hl.linear_to_gamma(R), 0, 255);
+	G = clamp(255 * hl.linear_to_gamma(G), 0, 255);
+	B = clamp(255 * hl.linear_to_gamma(B), 0, 255);
 
-		local TMP = (_l + 16) / 116;
+  return R, G, B;
 
-		return
-			ref[1] * rformula(TMP + (_a / 500)),
-			ref[2] * rformula(TMP),
-			ref[3] * rformula(TMP - (_b / 200))
-		;
-
-		---|fE
-	end
-
-	---@param x number
-	---@param y number
-	---@param z number
-	---@return number
-	---@return number
-	---@return number
-	local function xyz_to_rgb(x, y, z)
-		---|fS
-
-		local XYZ = { x / 100, y / 100, z / 100 };
-		local matrix = {
-			3.2404542, -1.5371385, -0.4985314,
-			-0.9692660, 1.8760108, 0.0415560,
-			0.0556434, -0.2040259, 1.0572252
-		};
-
-		local RGB = {
-			XYZ[1] * matrix[1] + XYZ[2] * matrix[2] + XYZ[3] * matrix[3],
-			XYZ[1] * matrix[4] + XYZ[2] * matrix[5] + XYZ[3] * matrix[6],
-			XYZ[1] * matrix[7] + XYZ[2] * matrix[8] + XYZ[3] * matrix[9],
-		};
-
-		for c, channel in ipairs(RGB) do
-			if channel <= 0.0031308 then
-				channel = channel * 12.92;
-			else
-				channel = ( 1.055 * ( channel ^ (1 / 2.4) ) ) - 0.055;
-			end
-
-			RGB[c] = math.min(math.max(channel * 255, 0), 255);
-		end
-
-		return RGB[1], RGB[2], RGB[3];
-
-		---|fE
-	end
-
-	return xyz_to_rgb(lab_to_xyz(l, a, b));
-
-	---|fE
+  ---|fE
 end
 
----|fE
+------------------------------------------------------------------------------
 
----@param lumen number
----@return number
----@return number
----@return number
-highlights.get_nfg = function (lumen)
-	---|fS
-
-	if lumen > 1 then
-		lumen = lumen / 255;
-	end
-
-	---@type integer, integer, integer
-	local fR, fG, fB = highlights.num_to_rgb(
-		highlights.get_attr({ "Normal" }, "fg") or
-		highlights.get_attr({ "Cursor" }, "bg") or
-		highlights.theme_value(
-			tonumber("1e1e2e", 16),
-			tonumber("1e1e2e", 16)
+hl.visible_fg = function (lumen)
+	local BL, BA, BB = hl.rgb_to_oklab(
+		hl.num_to_rgb(
+			hl.get_attr("bg", { "Normal" }) or hl.choice(15725045, 1973806)
 		)
 	);
 
-	---@type integer, integer, integer
-	local bR, bG, bB = highlights.num_to_rgb(
-		highlights.get_attr({ "Normal" }, "bg") or
-		highlights.get_attr({ "Cursor" }, "fg") or
-		highlights.theme_value(
-			tonumber("1e1e2e", 16),
-			tonumber("1e1e2e", 16)
+	local FL, FA, FB = hl.rgb_to_oklab(
+		hl.num_to_rgb(
+			hl.get_attr("fg", { "Normal" }) or hl.choice(5001065, 13489908)
 		)
 	);
 
-	local fLumen = highlights.rgb_to_lumen(fR, fG, fB);
-	local bLumen = highlights.rgb_to_lumen(bR, bG, bB);
-
-	if lumen > 0.5 then
-		if fLumen < bLumen then
-			return fR, fG, fB;
+	if lumen < 0.5 then
+		if BL > FL then
+			return BL, BA, BB;
 		else
-			return bR, bG, bB;
+			return FL, FA, FB;
 		end
 	else
-		if fLumen > bLumen then
-			return fR, fG, fB;
+		if BL < FL then
+			return BL, BA, BB;
 		else
-			return bR, bG, bB;
+			return FL, FA, FB;
 		end
 	end
-
-	---|fE
 end
 
----@param r1 number
----@param g1 number
----@param b1 number
----@param r2 number
----@param g2 number
----@param b2 number
----@param y number
----@return number
----@return number
----@return number
-highlights.mix = function (r1, g1, b1, r2, g2, b2, y)
-	y = y > 1 and y / 100 or y;
+local mode_steps = 10;
+local fold_blend = 0.5;
 
-	return
-		r1 + ( (r2 - r1) * y),
-		g1 + ( (g2 - g1) * y),
-		b1 + ( (b2 - b1) * y)
-	;
-end
+---@type table<string, fun(): table[]>
+hl.groups = {
+	fold_1 = function ()
+		---|fS
 
-highlights.groups = {
-	c1 = {
-		value = function ()
-			---|fS
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticError", "Error" }) or hl.choice(13766457, 15961000)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
 
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticError" }, "fg") or
-				highlights.theme_value(
-					tonumber("D20F39", 16),
-					tonumber("F38BA8", 16)
-				)
-			);
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
 
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose1",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen1",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-	c2 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "@constant", "Constant" }, "fg") or
-				highlights.theme_value(
-					tonumber("FE640B", 16),
-					tonumber("FAB387", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose2",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen2",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-	c3 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticWarn" }, "fg") or
-				highlights.theme_value(
-					tonumber("DF8E1D", 16),
-					tonumber("F9E2AF", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose3",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen3",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-	c4 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticOk" }, "fg") or
-				highlights.theme_value(
-					tonumber("40A02B", 16),
-					tonumber("A6E3A1", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose4",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen4",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsRuler",
-					value = {
-						bg = highlights.rgb_to_hex(fR, fG, fB),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(fR, fB, fG))
-						)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-	c5 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "@function", "Function" }, "fg") or
-				highlights.theme_value(
-					tonumber("209FB5", 16),
-					tonumber("74C7EC", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose5",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen5",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-	c6 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "@module", "@property" }, "fg") or
-				highlights.theme_value(
-					tonumber("7287FD", 16),
-					tonumber("B4BEFE", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.5
-			);
-
-			return {
-				{
-					group = "BarsFoldClose6",
-					value = {
-						fg = highlights.rgb_to_hex(fR, fG, fB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsFoldOpen6",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(bR, bG, bB)
-					}
-				},
-				{
-					group = "BarsRulerVisual",
-					value = {
-						bg = highlights.rgb_to_hex(fR, fG, fB),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(fR, fB, fG))
-						)
-					}
-				},
-				{
-					group = "BarsGit",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-
-	g2 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "@constant", "Constant" }, "fg") or
-				highlights.theme_value(
-					tonumber("FE640B", 16),
-					tonumber("FAB387", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local GRADIENT = {};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(GRADIENT, {
-					group = string.format("BarsWrap%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return GRADIENT;
-
-			---|fE
-		end
-	},
-	g4 = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticOk" }, "fg") or
-				highlights.theme_value(
-					tonumber("40A02B", 16),
-					tonumber("A6E3A1", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local GRADIENT = {};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					fR, fG, fB,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(GRADIENT, {
-					group = string.format("BarsVirtual%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return GRADIENT;
-
-			---|fE
-		end
-	},
-
-	default = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "@comment", "Comment" }, "fg") or
-				highlights.theme_value(
-					tonumber("7C7F93", 16),
-					tonumber("9399B2", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsNoMode",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
+		return {
+			{
+				group_name = "BarsFoldClose1",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
 				}
-			};
-			local MAX = 10;
+			},
+			{
+				group_name = "BarsFoldOpen1",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
 
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					tR, tG, tB,
-					R, G, B,
-					i / (MAX - 1)
-				);
+		---|fE
+	end,
 
-				table.insert(COLORS, {
-					group = string.format("BarsNoMode%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
+	fold_2 = function ()
+		---|fS
 
-			return COLORS;
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@function", "Function" }) or hl.choice(1992437, 9024762)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
 
-			---|fE
-		end
-	},
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
 
-	normal = {
-		value = function ()
+		return {
+			{
+				group_name = "BarsFoldClose2",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			},
+			{
+				group_name = "BarsFoldOpen2",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
+
+		---|fE
+	end,
+
+	fold_3 = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticWarn" }) or hl.choice(14650909, 16376495)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
+
+		return {
+			{
+				group_name = "BarsFoldClose3",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			},
+			{
+				group_name = "BarsFoldOpen3",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
+
+		---|fE
+	end,
+
+	fold_4 = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticOk" }) or hl.choice(4235307, 10937249)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
+
+		return {
+			{
+				group_name = "BarsFoldClose4",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			},
+			{
+				group_name = "BarsFoldOpen4",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
+
+		---|fE
+	end,
+
+	fold_5 = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@constant", "Constant" }) or hl.choice(16671755, 16429959)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
+
+		return {
+			{
+				group_name = "BarsFoldClose5",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			},
+			{
+				group_name = "BarsFoldOpen5",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
+
+		---|fE
+	end,
+
+	fold_6 = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@module", "@property" }) or hl.choice(7505917, 11845374)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "LineNr", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local RL, RA, RB = hl.lerp(ML, BL, fold_blend), hl.lerp(MA, BA, fold_blend), hl.lerp(MB, BB, fold_blend);
+
+		return {
+			{
+				group_name = "BarsFoldClose6",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			},
+			{
+				group_name = "BarsFoldOpen6",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(RL, RA, RB)),
+				}
+			},
+		};
+
+		---|fE
+	end,
+
+
+	wrap = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@constant", "Constant" }) or hl.choice(16671755, 16429959)
+			)
+		);
+
+		return {
+			{
+				group_name = "BarsWrap",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			}
+		};
+
+		---|fE
+	end,
+
+	virt_lines = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticOk" }) or hl.choice(4235307, 10937249)
+			)
+		);
+
+		return {
+			{
+				group_name = "BarsVirtual",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+				}
+			}
+		};
+
+		---|fE
+	end,
+
+	ruler = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@function", "Function" }) or hl.choice(1992437, 9024762)
+			)
+		);
+
+		return {
+			{
+				group_name = "BarsRuler",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			}
+		};
+
+		---|fE
+	end,
+
+
+	normal = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@function", "Function" }) or hl.choice(1992437, 9024762)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsNormal",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
 			---|fS
 
 			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "Function", "@diff.delta" }, "fg") or
-				highlights.theme_value(
-					tonumber("1E66F5", 16),
-					tonumber("89B4FA", 16)
-				)
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
 			);
+
+			table.insert(colors, {
+				group_name = "BarsNormal" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+	insert = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "StatusLine", "Normal" }) or hl.choice(5001065, 13489908)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsInsert",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
+			---|fS
 
 			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
 			);
 
-			local COLORS = {
-				{
-					group = "BarsNormal",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
+			table.insert(colors, {
+				group_name = "BarsInsert" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+	visual = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "Special" }) or hl.choice(15365835, 16106215)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsVisual",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
+			---|fS
+
+			---@type integer, integer, integer
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
+			);
+
+			table.insert(colors, {
+				group_name = "BarsVisual" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+	visual_line = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@conditional" }) or hl.choice(8927727, 13346551)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsVisualLine",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
+			---|fS
+
+			---@type integer, integer, integer
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
+			);
+
+			table.insert(colors, {
+				group_name = "BarsVisualLine" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+	visual_block = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@constant", "Constant" }) or hl.choice(16671755, 16429959)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsVisualBlock",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
+			---|fS
+
+			---@type integer, integer, integer
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
+			);
+
+			table.insert(colors, {
+				group_name = "BarsVisualBlock" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+	command = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticOk" }) or hl.choice(4235307, 10937249)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local colors = {
+			{
+				group_name = "BarsCommand",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+				}
+			},
+		};
+
+		for i = 0, mode_steps - 1, 1 do
+			---|fS
+
+			---@type integer, integer, integer
+			local gL, gA, gB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				i / (mode_steps - 1)
+			);
+
+			table.insert(colors, {
+				group_name = "BarsCommand" .. (i + 1),
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(gL, gA, gB)),
+				}
+			});
+
+			---|fE
+		end
+
+		return colors;
+
+		---|fE
+	end,
+
+
+	file_icons = function ()
+		---|fS
+
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		BL = BL * 1.5;
+		BA = BA * 1.5;
+		BB = BB * 1.5;
+
+		return {
+			{
+				group_name = "BarsFt0",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "@comment" }) or hl.choice(8159123, 9673138)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
 				},
-				{
-					group = "BarsLineNr",
-					value = {
-						fg = highlights.rgb_to_hex(R, G, B),
-						bg = highlights.rgb_to_hex(tR, tG, tB),
-						bold = true
-					}
-				}
-			};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(COLORS, {
-					group = string.format("BarsNormal%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-	insert = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "fg") or
-				highlights.theme_value(
-					tonumber("4C4F69", 16),
-					tonumber("CDD6F4", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsInsert",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
-				}
-			};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(COLORS, {
-					group = string.format("BarsInsert%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-
-	visual = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "@character.special", "Special" }, "fg") or
-				highlights.theme_value(
-					tonumber("EA76CB", 16),
-					tonumber("F5C2E7", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsVisual",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
-				}
-			};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(COLORS, {
-					group = string.format("BarsVisual%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-	visual_line = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "@conditional", "Conditional" }, "fg") or
-				highlights.theme_value(
-					tonumber("8839EF", 16),
-					tonumber("CBA6F7", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsVisualLine",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
-				}
-			};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(COLORS, {
-					group = string.format("BarsVisualLine%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-	visual_block = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "@constant", "Constant" }, "fg") or
-				highlights.theme_value(
-					tonumber("FE640B", 16),
-					tonumber("FAB387", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsVisualBlock",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
-				}
-			};
-			local MAX = 10;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
-
-				table.insert(COLORS, {
-					group = string.format("BarsVisualBlock%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-
-	command = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticOk" }, "fg") or
-				highlights.theme_value(
-					tonumber("40A02B", 16),
-					tonumber("A6E3A1", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "LineNr", "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {
-				{
-					group = "BarsCommand",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
+			},
+			{
+				group_name = "BarsFt1",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "DiagnosticError", "Error" }) or hl.choice(13766457, 15961000)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
 				},
-				{
-					group = "BarsTab",
-					value = {
-						bg = highlights.rgb_to_hex(R, G, B),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(R, G, B) / 255)
-						)
-					}
+			},
+			{
+				group_name = "BarsFt2",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "@constant", "Constant" }) or hl.choice(16671755, 16429959)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				},
+			},
+			{
+				group_name = "BarsFt3",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "DiagnosticWarn" }) or hl.choice(14650909, 16376495)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				},
+			},
+			{
+				group_name = "BarsFt4",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "DiagnosticOk" }) or hl.choice(4235307, 10937249)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				},
+			},
+			{
+				group_name = "BarsFt5",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "@function", "Function" }) or hl.choice(1992437, 9024762)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				},
+			},
+			{
+				group_name = "BarsFt6",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
+						hl.get_attr("fg", { "@module", "@property" }) or hl.choice(7505917, 11845374)
+					)),
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				},
+			},
+		};
+
+		---|fE
+	end,
+
+	tabline_tabs = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local FL, FA, FB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "StatusLine", "Normal" }) or hl.choice(5001065, 13489908)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		---@type number, number, number Tab background color.
+		local TL, TA, TB = hl.interpolate(
+			BL, BA, BB,
+			FL, FA, FB,
+			0.15
+		);
+
+		return {
+			{
+				group_name = "BarsNav",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(TL, TA, TB)),
 				}
-			};
-			local MAX = 10;
+			},
+			{
+				group_name = "BarsNavLocked",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+				}
+			},
+			{
+				group_name = "BarsNavOverflow",
+				value = {
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(TL, TA, TB)),
+				}
+			},
+			{
+				group_name = "BarsInactive",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(TL, TA, TB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(TL)
+					)),
+				}
+			},
+		};
 
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
-				);
+		---|fE
+	end,
 
-				table.insert(COLORS, {
-					group = string.format("BarsCommand%d", i + 1),
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-						bg = highlights.rgb_to_hex(tR, tG, tB)
-					}
-				});
-			end
+	tabline_current = function ()
+		---|fS
 
-			return COLORS;
+		---@type number, number, number Main color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "DiagnosticOk" }) or hl.choice(4235307, 10937249)
+			)
+		);
 
-			---|fE
-		end
-	},
+		return {
+			{
+				group_name = "BarsTab",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(BL)
+					)),
+				}
+			},
+		};
 
-	file_icons = {
-		value = function ()
+		---|fE
+	end,
+
+
+	qf_gradient = function ()
+		---|fS
+
+		---@type number, number, number Main color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("fg", { "@constant", "Constant" }) or hl.choice(16671755, 16429959)
+			)
+		);
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local gradient = {};
+		local qf_steps = 15;
+
+		for s = 0, qf_steps - 1, 1 do
 			---|fS
-			local BASE = {
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "@comment", "Comment" }, "fg") or
-					highlights.theme_value(
-						tonumber("7C7F93", 16),
-						tonumber("9399B2", 16)
+
+			local GL, GA, GB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				s / (qf_steps - 1)
+			);
+
+			local next_color;
+
+			if s ~= 0 then
+				next_color = string.format(
+					"#%02x%02x%02x",
+					hl.oklab_to_rgb(
+						hl.interpolate(
+							ML, MA, MB,
+							BL, BA, BB,
+							(s - 1) / (qf_steps - 1)
+						)
 					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "DiagnosticError" }, "fg") or
-					highlights.theme_value(
-						tonumber("D20F39", 16),
-						tonumber("F38BA8", 16)
-					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "@constant", "Constant" }, "fg") or
-					highlights.theme_value(
-						tonumber("FE640B", 16),
-						tonumber("FAB387", 16)
-					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "DiagnosticWarn" }, "fg") or
-					highlights.theme_value(
-						tonumber("DF8E1D", 16),
-						tonumber("F9E2AF", 16)
-					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "DiagnosticOk" }, "fg") or
-					highlights.theme_value(
-						tonumber("40A02B", 16),
-						tonumber("A6E3A1", 16)
-					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "@function", "Function" }, "fg") or
-					highlights.theme_value(
-						tonumber("209FB5", 16),
-						tonumber("74C7EC", 16)
-					)
-				) },
-				{ highlights.num_to_rgb(
-					highlights.get_attr({ "@module", "@property" }, "fg") or
-					highlights.theme_value(
-						tonumber("7287FD", 16),
-						tonumber("B4BEFE", 16)
-					)
-				) },
-			};
-
-			---@type number, number, number
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type number, number, number
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "fg") or
-				highlights.theme_value(
-					tonumber("1E1E2E", 16),
-					tonumber("CDD6F4", 16)
-				)
-			);
-
-			local rR, rG, rB = highlights.mix(bR, bG, bB, fR, fG, fB, 0.15);
-			local COLORS = {
-				{
-					group = "BarsFt",
-					value = {
-						bg = highlights.rgb_to_hex(rR, rG, rB),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(rR, rG, rB))
-						)
-					}
-				}
-			};
-
-			for e, entry in ipairs(BASE) do
-				table.insert(COLORS, {
-					group = "BarsFt" .. (e - 1),
-					value = {
-						fg = highlights.rgb_to_hex(unpack(entry)),
-						bg = highlights.rgb_to_hex(rR, rG, rB)
-					}
-				})
-			end
-
-			return COLORS;
-
-			---|fE
-		end
-	},
-
-	tabline_nav = {
-		value = function ()
-			---|fS
-
-			---@type number, number, number
-			local bR, bG, bB = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			---@type number, number, number
-			local fR, fG, fB = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "fg") or
-				highlights.theme_value(
-					tonumber("1E1E2E", 16),
-					tonumber("CDD6F4", 16)
-				)
-			);
-
-			---@type number, number, number
-			local mR, mG, mB = highlights.mix(
-				bR, bG, bB,
-				fR, fG, fB,
-				0.15
-			);
-
-			---@type integer, integer, integer
-			local lR, lG, lB = highlights.num_to_rgb(
-				highlights.get_attr({ "DiagnosticError" }, "fg") or
-				highlights.theme_value(
-					tonumber("D20F39", 16),
-					tonumber("F38BA8", 16)
-				)
-			);
-
-			return {
-				{
-					group = "BarsNav",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-					}
-				},
-				{
-					group = "BarsNavLocked",
-					value = {
-						fg = highlights.rgb_to_hex(lR, lG, lB),
-					}
-				},
-				{
-					group = "BarsNavOverflow",
-					value = {
-						fg = highlights.rgb_to_hex(mR, mG, mB),
-					}
-				},
-				{
-					group = "BarsInactive",
-					value = {
-						bg = highlights.rgb_to_hex(mR, mG, mB),
-						fg = highlights.rgb_to_hex(
-							highlights.get_nfg(highlights.rgb_to_lumen(mR, mG, mB) / 255)
-						)
-					}
-				},
-			};
-
-			---|fE
-		end
-	},
-
-	new_statusline = {
-		group = "StatusLine",
-		value = { link = "Normal" }
-	},
-
-	quickfix_gradient = {
-		value = function ()
-			---|fS
-
-			---@type integer, integer, integer
-			local R, G, B = highlights.num_to_rgb(
-				highlights.get_attr({ "@conditional", "Conditional" }, "fg") or
-				highlights.theme_value(
-					tonumber("8839EF", 16),
-					tonumber("CBA6F7", 16)
-				)
-			);
-
-			---@type integer, integer, integer
-			local tR, tG, tB = highlights.num_to_rgb(
-				highlights.get_attr({ "Normal" }, "bg") or
-				highlights.theme_value(
-					tonumber("CDD6F4", 16),
-					tonumber("1E1E2E", 16)
-				)
-			);
-
-			local COLORS = {};
-			local MAX = 15;
-
-			for i = 0, MAX - 1 do
-				---@type integer, integer, integer
-				local mR, mG, mB = highlights.mix(
-					R, G, B,
-					tR, tG, tB,
-					i / (MAX - 1)
 				);
-
-				local next_bg;
-
-				if i ~= 0 then
-					next_bg = highlights.rgb_to_hex(
-						highlights.mix(
-							R, G, B,
-							tR, tG, tB,
-							(i - 1) / (MAX - 1)
-						)
-					);
-				end
-
-				table.insert(COLORS, {
-					group = string.format("BarsQuickfix%d", i + 1),
-					value = {
-						bg = highlights.rgb_to_hex(mR, mG, mB),
-						fg = i == 0 and highlights.get_nfg(
-							highlights.rgb_to_lumen(mR, mG, mB)
-						) or next_bg,
-
-						bold = i == 0
-					}
-				});
 			end
 
-			return COLORS;
+			table.insert(gradient, {
+				group_name = "BarsQuickfix" .. (s + 1),
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(GL, GA, GB)),
+					fg = next_color
+				}
+			});
 
 			---|fE
 		end
-	},
+
+		return vim.list_extend(gradient, {
+			{
+				group_name = "BarsQuickfix",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+
+					bold = true
+				}
+			}
+		});
+
+		---|fE
+	end,
 };
 
---- Applies highlight groups.
-highlights.apply = function ()
-	---|fS
+hl.setup = function ()
+	for _, entry in pairs(hl.groups) do
+		---@type boolean, table[]?
+		local can_call, val = pcall(entry);
 
-	local keys = vim.tbl_keys(highlights.groups);
-	table.sort(keys)
+		if can_call and val then
+			for _, _hl in ipairs(val) do
+				local can_set, err = pcall(vim.api.nvim_set_hl, 0, _hl.group_name, _hl.value);
 
-	for _, key in ipairs(keys) do
-		local hl = highlights.groups[key];
-
-		if hl.group and hl.value then
-			vim.api.nvim_set_hl(
-				0,
-				hl.group,
-				to_static(hl.value)
-			);
-		elseif hl.value then
-			local value = to_static(hl.value);
-
-			if vim.islist(value) then
-				for _, entry in ipairs(value) do
-					vim.api.nvim_set_hl(0, entry.group, entry.value);
+				if err then
+					vim.print(_hl);
 				end
-			elseif type(value) == "table" then
-				vim.api.nvim_set_hl(0, value.group, value.value);
 			end
+		elseif val then
+			vim.print(val);
 		end
 	end
-
-	---|fE
 end
 
-return highlights;
+return hl;

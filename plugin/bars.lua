@@ -2,7 +2,7 @@
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
 		require("bars.global");
-		require("bars.highlights").apply();
+		require("bars.highlights").setup();
 
 		--- Attach various bars & lines globally if
 		--- `global = true`.
@@ -174,7 +174,7 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 
 		---|fE
 
-		require("bars.highlights").apply();
+		require("bars.highlights").setup();
 
 		---|fE
 	end
