@@ -218,7 +218,7 @@ slC.bufname = function (buffer, _, main_config)
 	end
 
 	return table.concat({
-		utils.set_hl(config.hl),
+		utils.set_hl(config.hl or config.icon_hl),
 
 		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),
 		string.format("%s%s", utils.set_hl(config.padding_left_hl), config.padding_left or ""),
