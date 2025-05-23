@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.1.0...v2.2.0) (2025-05-23)
+
+
+### Features
+
+* **statusline:** Added custom statusline for the quickfix menu ([1ec73ce](https://github.com/OXY2DEV/bars.nvim/commit/1ec73cec7db5166f6c4ebb6ae64abc58bfc3399c))
+
 ## [2.1.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.1...v2.1.0) (2025-05-11)
 
 
