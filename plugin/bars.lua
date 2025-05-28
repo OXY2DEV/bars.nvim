@@ -1,3 +1,5 @@
+---@diagnostic disable: undefined-field
+
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
@@ -180,16 +182,13 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 	end
 });
 
-
--- ----------------------------------------------------------------------
+----------------------------------------------------------------------
 
 --- Custom completion for the `?` operator.
 ---@param before string
 ---@return string[]
 _G.__bars_comp = function (before)
 	---|fS
-
-	local bars = require("bars");
 
 	local tokens = vim.split(before, " ", { trimempty = true });
 	local modules = { "statusline", "statuscolumn", "tabline", "winbar" };
@@ -318,12 +317,90 @@ end, {
 				return vim.list_contains(tokens, tostring(val)) == false and string.match(tostring(val), arg_lead) ~= nil;
 			end, vim.tbl_keys(module.state.attached_windows));
 
-			table.foreach(_c, function (key, value)
-				_c[key] = tostring(value);
-			end)
+			for k, v in pairs(_c) do
+				_c[k] = tostring(v);
+			end
 
 			table.sort(_c);
 			return _c;
+		end
+
+		---|fE
+	end
+});
+
+----------------------------------------------------------------------
+
+vim.api.nvim_create_autocmd("LspProgress", {
+	callback = function (event)
+		---|fS
+
+		local kind = event.data.params.value.kind;
+		local attached = vim.lsp.get_buffers_by_client_id(event.data.client_id);
+
+		--- Sets buffer state
+		---@param state "start" | "progress" | "finish" | nil
+		local function set_state (state)
+			---|fS
+
+			for _, buf in ipairs(attached) do
+				vim.b[buf].lsp_loader_state = state;
+			end
+
+			---|fE
+		end
+
+		--- Gets the general state.
+		---@return "start" | "progress" | "finish" | nil
+		local function get_state ()
+			---|fS
+
+			local states = {};
+
+			for _, buf in ipairs(attached) do
+				table.insert(states, vim.b[buf].lsp_loader_state);
+			end
+
+			local state = states[1];
+
+			for _, item in ipairs(states) do
+				if item ~= state then
+					return nil;
+				end
+			end
+
+			return state;
+
+			---|fE
+		end
+
+		if kind == "begin" then
+			set_state("start");
+
+			local lsp_timer = vim.uv.new_timer();
+
+			lsp_timer:start(0, 200, vim.schedule_wrap(function ()
+				if get_state() == nil then
+					timer:stop();
+					return;
+				end
+
+				vim.api.nvim__redraw({ statusline = true });
+			end));
+
+			vim.api.nvim__redraw({ statusline = true });
+		elseif kind == "report" then
+			set_state("progress");
+		else
+			set_state("finish");
+
+			vim.defer_fn(function ()
+				if get_state() == "finish" then
+					set_state(nil);
+				end
+
+				vim.api.nvim__redraw({ statusline = true });
+			end, 500);
 		end
 
 		---|fE

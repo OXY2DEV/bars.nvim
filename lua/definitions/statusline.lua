@@ -443,3 +443,26 @@
 --- Highlight group for exec icon.
 ---@field exec_hl? string
 
+-----------------------------------------------------------------------------
+
+---@class statusline.components.progress
+---
+--- Optional condition for this component.
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+---
+--- What kind of component is this?
+---@field kind "progress"
+---
+---@field check? string The variable that holds the progress state, default is "progress_state".
+---
+---@field finish string Text used as the indicator for progress finish.
+---@field finish_hl string Highlight group for the progress finish indicator.
+---
+---@field progress string[] Text used as the indicator for progress.
+---@field progress_hl string[] Highlight group for the progress indicator.
+---
+---@field start string Text used as the indicator for progress start.
+---@field start_hl string Highlight group for the progress start indicator.
+---
+---@field update_delay? integer Delay in milliseconds between state updates.
+

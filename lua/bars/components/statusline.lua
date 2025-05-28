@@ -1,3 +1,5 @@
+---@diagnostic disable: undefined-field
+
 local slC = {};
 local utils = require("bars.utils");
 
@@ -244,6 +246,7 @@ slC.diagnostics = function (buffer, window, config)
 	config = config or {};
 
 	local diagnostics_count = vim.diagnostic.count(buffer);
+	---@diagnostic disable-next-line: deprecated
 	local clients = vim.fn.has("nvim-0.11") == 1 and vim.lsp.get_clients({ bufnr = buffer }) or vim.lsp.buf_get_clients(buffer);
 
 	if #clients == 0 and config.auto_hide == true then
@@ -486,6 +489,104 @@ slC.macro = function (_, _, config)
 	else
 		return "";
 	end
+
+	---|fE
+end
+
+--- Ruler.
+---@param buffer integer
+---@param window integer
+---@param config statusline.components.progress
+---@return string?
+slC.progress = function (buffer, window, config)
+	---|fS
+
+	---@type "start" | "progress" | "finish", "buffer" | "window"
+	local state, src;
+	local state_var = config.check or "progress_state";
+
+	if vim.w[window][state_var] then
+		state = vim.w[window][state_var];
+		src = "window";
+	elseif vim.b[buffer][state_var] then
+		state = vim.b[buffer][state_var];
+		src = "buffer";
+	else
+		return;
+	end
+
+	---@type "start" | "progress" | "finish", "buffer" | "window"
+	local last_frame = src == "buffer" and vim.b[buffer].__loader_last_frame or vim.w[window].__loader_last_frame;
+	last_frame = last_frame or 1;
+
+	---@type integer
+	local last_tick = src == "buffer" and vim.b[buffer].__loader_last_tick or vim.w[window].__loader_last_tick;
+	local now = vim.uv.hrtime() / 1e6; ---@diagnostic disable-line
+
+	--- Gets progress-bar state
+	---@param from? string[]
+	---@return string?
+	local function get_state (from)
+		---|fS
+
+		if not from or not vim.islist(from) then
+			return;
+		end
+
+		return from[last_frame] or from[#from] or "";
+
+		---|fE
+	end
+
+	--- Updates frame count.
+	---@param max integer
+	local function update_frame (max)
+		---|fS
+
+		if last_tick and now - last_tick < (config.update_delay or 250) then
+			-- Not enough time has passed.
+			return;
+		end
+
+		if src == "buffer" then
+			vim.b[buffer].__loader_last_tick = now;
+			vim.b[buffer].__loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
+		else
+			vim.w[window].__loader_last_tick = now;
+			vim.w[window].__loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
+		end
+
+		---|fE
+	end
+
+	local text, hl;
+
+	if state == "start" and config.start then
+		text = config.start;
+		hl = config.start_hl;
+
+		update_frame(1);
+	elseif state == "progress" then
+		text = get_state(config.progress);
+		hl = get_state(config.progress_hl);
+
+		update_frame(
+			vim.islist(config.progress) and #config.progress or 1
+		);
+	else
+		text = config.finish;
+		hl = config.finish_hl;
+
+		update_frame(1);
+	end
+
+	local output = text or "";
+
+	if type(hl) == "string" then
+		output = string.format("%%#%s#", hl) .. output;
+	end
+
+	return output;
 
 	---|fE
 end
