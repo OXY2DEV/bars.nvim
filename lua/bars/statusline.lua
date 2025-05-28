@@ -124,6 +124,8 @@ TEMPLATES = {
 		---|fE
 	},
 	bufname = {
+		---|fS
+
 		kind = "bufname",
 		condition = function (_, win)
 			return vim.api.nvim_win_get_width(win) >= 42;
@@ -153,8 +155,148 @@ TEMPLATES = {
 		["^fish"] = {
 			icon = "󰐂 ",
 		},
+
+		---|fE
 	},
+	diagnostics = {
+		---|fS
+
+		kind = "diagnostics",
+		default_mode = 5,
+
+		padding_left = " ",
+		padding_right = " ",
+
+		empty_icon = "󰂓 ",
+		empty_hl = "@comment",
+
+		error_icon = "󰅙 ",
+		error_hl = "DiagnosticError",
+
+		warn_icon = "󰀦 ",
+		warn_hl = "DiagnosticWarn",
+
+		hint_icon = "󰁨 ",
+		hint_hl = "DiagnosticHint",
+
+		info_icon = "󰁤 ",
+		info_hl = "DiagnosticInfo"
+
+		---|fE
+	},
+	macro = {
+		---|fS
+
+		kind = "macro",
+
+		record_icon = "󰦚 ",
+		exec_icon = "󰥠 ",
+
+		record_hl = "@constant",
+		exec_hl = "DiagnosticOk",
+
+		---|fE
+	},
+	progress = {
+		---|fS
+
+		kind = "progress",
+
+		check = "lsp_loader_state",
+		update_delay = 100,
+
+		start = "󰐌 ",
+		progress = { "󰋙 ", "󰫃 ", "󰫄 ", "󰫅 ", "󰫆 ", "󰫇 ", "󰫈 " },
+		finish = "󰗠 ",
+
+		start_hl = "@comment",
+		progress_hl = {
+			"BarsNormal4",
+			"BarsNormal3",
+			"BarsNormal3",
+			"BarsNormal2",
+			"BarsNormal2",
+			"BarsNormal1",
+			"BarsNormal1",
+		},
+		finish_hl = "DiagnosticOk"
+
+		---|fE
+	},
+	git_branch = {
+		---|fS
+
+		kind = "branch",
+		condition = function (_, win)
+			return win == vim.api.nvim_get_current_win();
+		end,
+
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+			icon = "󰊢 ",
+
+			hl = "@comment"
+		}
+
+		---|fE
+	},
+	lsp = {
+		---|fS
+
+		kind = "custom",
+
+		condition = function (_, window)
+			if window ~= vim.api.nvim_get_current_win() then
+				return true;
+			else
+				return vim.api.nvim_win_get_width(window) > math.ceil(vim.o.columns * 0.5);
+			end
+		end,
+
+		value = function (buffer)
+			local clients = vim.lsp.get_clients({ bufnr = buffer });
+
+			if #clients == 0 or vim.b[buffer].lsp_loader_state then
+				return "";
+			end
+
+			local name_maps = {
+				default = { icon = "󰒋 ", hl = "BarsFt0" },
+				lua_ls = { icon = " ", name = "LuaLS", hl = "BarsFt5" },
+				html = { icon = " ", name = "HTML", hl = "BarsFt2" },
+				emmet_language_server = { icon = "󱡴 ", name = "Emmet", hl = "BarsFt4" },
+			}
+			local output = "";
+
+			for c, client in ipairs(clients) do
+				local name = client.name or "";
+
+				if name_maps[name] then
+					if name_maps[name].hl then
+						output = output .. string.format("%%#%s#", name_maps[name].hl);
+					end
+
+					output = output .. (c > 1 and "" or " ").. name_maps[name].icon .. name_maps[name].name .. " ";
+				else
+					if name_maps.default.hl then
+						output = output .. string.format("%%#%s#", name_maps.default.hl);
+					end
+
+					output = output .. (c > 1 and "" or " ") .. name_maps.default.icon .. name .. " ";
+				end
+			end
+
+			return output;
+		end
+
+		---|fE
+	},
+
+	---@type statusline.components.ruler
 	ruler = {
+		---|fS
+
 		kind = "ruler",
 		mode = function ()
 			local mode = vim.api.nvim_get_mode().mode;
@@ -163,6 +305,10 @@ TEMPLATES = {
 			return vim.list_contains(visual_modes, mode) and "visual" or "normal";
 		end,
 
+		-- Yes, you can turn most options into
+		-- functions, but some may lead to undefined
+		-- behavior.
+		---@diagnostic disable: assign-type-mismatch
 		default = function ()
 			---|fS
 
@@ -212,6 +358,9 @@ TEMPLATES = {
 
 			---|fE
 		end
+		---@diagnostic enable: assign-type-mismatch
+
+		---|fE
 	},
 };
 
@@ -227,53 +376,12 @@ statusline.config = {
 			TEMPLATES.mode,
 			TEMPLATES.bufname,
 			{ kind = "section", hl = "StatusLine" },
-			{
-				kind = "diagnostics",
-				default_mode = 5,
-
-				padding_left = " ",
-				padding_right = " ",
-
-				empty_icon = "󰂓 ",
-				empty_hl = "@comment",
-
-				error_icon = "󰅙 ",
-				error_hl = "DiagnosticError",
-
-				warn_icon = "󰀦 ",
-				warn_hl = "DiagnosticWarn",
-
-				hint_icon = "󰁨 ",
-				hint_hl = "DiagnosticHint",
-
-				info_icon = "󰁤 ",
-				info_hl = "DiagnosticInfo"
-
-			},
-			{
-				kind = "macro",
-
-				record_icon = "󰦚 ",
-				exec_icon = "󰥠 ",
-
-				record_hl = "@constant",
-				exec_hl = "DiagnosticOk",
-			},
+			TEMPLATES.diagnostics,
+			TEMPLATES.macro,
 			{ kind = "empty", hl = "StatusLine" },
-			{
-				kind = "branch",
-				condition = function (_, win)
-					return win == vim.api.nvim_get_current_win();
-				end,
-
-				default = {
-					padding_left = " ",
-					padding_right = " ",
-					icon = "󰊢 ",
-
-					hl = "@comment"
-				}
-			},
+			TEMPLATES.git_branch,
+			TEMPLATES.progress,
+			TEMPLATES.lsp,
 			TEMPLATES.ruler
 		}
 
@@ -385,11 +493,17 @@ statusline.update_id = function (window)
 
 		local tmp = statusline.config[key];
 
+		-- Ignore the warnings here. `tmp` might
+		-- have condition.
+		---@diagnostic disable:undefined-field
+
 		if tmp.condition == true then
 			ID = key;
 		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
 			ID = key;
 		end
+
+		---@diagnostic enable:undefined-field
 
 		::continue::
 	end
@@ -570,7 +684,7 @@ end
 statusline.attach = function (window, force)
 	---|fS
 
-	if statusline.can_attach(window, force) == false then
+	if statusline.can_attach(window, force == true) == false then
 		return;
 	elseif statusline.state.attached_windows[window] == true then
 		if vim.wo[window].statusline == STL then
