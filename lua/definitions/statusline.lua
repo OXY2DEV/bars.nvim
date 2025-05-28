@@ -26,11 +26,19 @@
 ---@field condition? fun(buffer: integer, window: integer): boolean | nil
 ---
 --- Default style.
----@field default statusline_component[]
+---@field default statusline.style
 ---
 --- Custom style.
----@field [string] statusline_component[]
+---@field [string] statusline.style
 
+-----------------------------------------------------------------------------
+
+--- Statusline style
+---@class statusline.style
+---
+---@field condition? boolean | fun(buffer: integer, window: integer): boolean Condition for this style. Unused for `default`.
+---
+---@field components statusline_component[] Statusline components.
 
 ---@alias statusline_component
 ---| statusline.components.section
@@ -39,8 +47,10 @@
 ---| statusline.components.diagnostics
 ---| statusline.components.branch
 ---| statusline.components.bufname
+---| statusline.components.empty
 ---| statusline.components.custom
 ---| statusline.components.macro
+---| statusline.components.progress
 
 -----------------------------------------------------------------------------
 
@@ -416,7 +426,7 @@
 ---@field condition? boolean | fun(buffer: integer, window: integer): boolean
 ---
 --- What kind of component is this?
----@field kind "ruler"
+---@field kind "custom"
 ---
 --- Text to show for this component.
 ---@field value fun(buffer: integer, window: integer): string
