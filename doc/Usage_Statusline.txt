@@ -1101,6 +1101,125 @@ Custom ruler.
 	},
 <
 
+💡 Progress ~
+
+Allows showing progress bars/spinners.
+
+>lua
+	---@class statusline.components.progress
+	---
+	--- Optional condition for this component.
+	---@field condition? boolean | fun(buffer: integer, window: integer): boolean
+	---
+	--- What kind of component is this?
+	---@field kind "progress"
+	---
+	---@field check? string The variable that holds the progress state, default is "progress_state".
+	---
+	---@field finish string Text used as the indicator for progress finish.
+	---@field finish_hl string Highlight group for the progress finish indicator.
+	---
+	---@field progress string[] Text used as the indicator for progress.
+	---@field progress_hl string[] Highlight group for the progress indicator.
+	---
+	---@field start string Text used as the indicator for progress start.
+	---@field start_hl string Highlight group for the progress start indicator.
+	---
+	---@field update_delay? integer Delay in milliseconds between state updates.
+<
+
+>[!NOTE]
+> The following example by itself doesn't do anything!
+
+>lua
+	{
+		kind = "progress",
+
+		check = "lsp_loader_state",
+		update_delay = 250,
+
+		start = " ",
+		progress = { "|", "/", "-", "\\" },
+		finish = "✓ ",
+
+		start_hl = "@comment",
+		progress_hl = "@comment",
+		finish_hl = "DiagnosticOk"
+	}
+<
+
+------------------------------------------------------------------------------
+
+To get it to indicate `LspProgress` you can use this autocmd,
+
+>lua
+	vim.api.nvim_create_autocmd("LspProgress", {
+		callback = function (event)
+			local kind = event.data.params.value.kind;
+			local attached = vim.lsp.get_buffers_by_client_id(event.data.client_id);
+
+			--- Sets buffer state
+			---@param state "start" | "progress" | "finish" | nil
+			local function set_state (state)
+				for _, buf in ipairs(attached) do
+					vim.b[buf].lsp_loader_state = state;
+				end
+			end
+
+			--- Gets the general state.
+			---@return "start" | "progress" | "finish" | nil
+			local function get_state ()
+				local states = {};
+
+				for _, buf in ipairs(attached) do
+					table.insert(states, vim.b[buf].lsp_loader_state);
+				end
+
+				local state = states[1];
+
+				for _, item in ipairs(states) do
+					if item ~= state then
+						return nil;
+					end
+				end
+
+				return state;
+			end
+
+			if kind == "begin" then
+				set_state("start");
+
+				local lsp_timer = vim.uv.new_timer();
+
+				lsp_timer:start(0, 200, vim.schedule_wrap(function ()
+					if get_state() == nil then
+						timer:stop();
+						return;
+					end
+
+					vim.api.nvim__redraw({ statusline = true });
+				end));
+
+				vim.api.nvim__redraw({ statusline = true });
+			elseif kind == "report" then
+				set_state("progress");
+			else
+				set_state("finish");
+
+				-- We defer this so that we can see the finish
+				-- indicator.
+				vim.defer_fn(function ()
+					if get_state() == "finish" then
+						set_state(nil);
+					end
+
+					vim.api.nvim__redraw({ statusline = true });
+				end, 500);
+			end
+		end
+	});
+<
+
 💡 Custom ~
 
 Custom component.

@@ -203,7 +203,7 @@ TEMPLATES = {
 		kind = "progress",
 
 		check = "lsp_loader_state",
-		update_delay = 100,
+		update_delay = 250,
 
 		start = "󰐌 ",
 		progress = { "󰋙 ", "󰫃 ", "󰫄 ", "󰫅 ", "󰫆 ", "󰫇 ", "󰫈 " },
