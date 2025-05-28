@@ -26,27 +26,27 @@ local timer = vim.uv.new_timer();
 local DELAY = 100;
 
 local function task ()
-		---|fS
+	---|fS
 
-		local function callback ()
-			require("bars.statusline").clean();
-			require("bars.statuscolumn").clean();
-			require("bars.winbar").clean();
+	local function callback ()
+		require("bars.statusline").clean();
+		require("bars.statuscolumn").clean();
+		require("bars.winbar").clean();
 
-			for _, win in ipairs(vim.api.nvim_list_wins()) do
-				require("bars.statusline").attach(win);
-				require("bars.statuscolumn").attach(win);
-				require("bars.winbar").attach(win);
-			end
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			require("bars.statusline").attach(win);
+			require("bars.statuscolumn").attach(win);
+			require("bars.winbar").attach(win);
 		end
+	end
 
-		if vim.in_fast_event() then
-			vim.schedule(callback);
-		else
-			callback();
-		end
+	if vim.in_fast_event() then
+		vim.schedule(callback);
+	else
+		callback();
+	end
 
-		---|fE
+	---|fE
 end
 
 --- Attach to new Windows.
@@ -55,7 +55,7 @@ end
 --- in a window as the filetype/buftype may
 --- could have changed.
 vim.api.nvim_create_autocmd({
-	"WinNew"
+	"WinNew", "WinEnter"
 }, {
 	callback = function ()
 		timer:stop();
