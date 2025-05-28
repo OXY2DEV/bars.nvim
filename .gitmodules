@@ -1,3 +1,3 @@
 [submodule "bars.nvim.wiki"]
 	path = bars.nvim.wiki
-	url = https://github.com/OXY2DEV/bars.nvim.wiki.git
+	url = ../bars.nvim.wiki.git
