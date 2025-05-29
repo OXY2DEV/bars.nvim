@@ -186,6 +186,18 @@ statuscolumn.config = {
 		}
 
 		---|fE
+	},
+
+	terminal = {
+		---|fS
+
+		condition = function (buffer)
+			return vim.bo[buffer].bt == "terminal";
+		end,
+
+		components = {}
+
+		---|fE
 	}
 };
 
