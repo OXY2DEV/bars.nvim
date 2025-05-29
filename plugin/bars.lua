@@ -34,10 +34,17 @@ local function task ()
 		require("bars.winbar").clean();
 
 		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			-- vim.print(win);
 			require("bars.statusline").attach(win);
 			require("bars.statuscolumn").attach(win);
 			require("bars.winbar").attach(win);
 		end
+
+		--- Unstable API function.
+		--- Use `pcall()`
+		pcall(vim.api.nvim__redraw, {
+			statuscolumn = true,
+		});
 	end
 
 	if vim.in_fast_event() then
