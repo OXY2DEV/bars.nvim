@@ -6,6 +6,8 @@ vim.g.__statuscolumn = vim.o.statuscolumn;
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
+		require("bars").setup();
+
 		require("bars.global");
 		require("bars.highlights").setup();
 
