@@ -1,22 +1,19 @@
 ---@diagnostic disable: undefined-field
 
+vim.g.__statusline = vim.api.nvim_get_option_value("statusline", { scope = "global" });
+vim.g.__statuscolumn = vim.o.statuscolumn;
+
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
 	callback = function ()
 		require("bars.global");
 		require("bars.highlights").setup();
 
-		--- Attach various bars & lines globally if
-		--- `global = true`.
-		if require("bars").config.global == true then
-			require("bars.statuscolumn").global_attach();
-			require("bars.statusline").global_attach();
-			require("bars.winbar").global_attach();
+		require("bars.statuscolumn").start();
+		require("bars.statusline").start();
+		require("bars.winbar").start();
 
-			require("bars.tabline").attach();
-		else
-			require("bars.tabline").attach();
-		end
+		require("bars.tabline").attach();
 	end
 });
 
@@ -29,12 +26,7 @@ local function task ()
 	---|fS
 
 	local function callback ()
-		require("bars.statusline").clean();
-		require("bars.statuscolumn").clean();
-		require("bars.winbar").clean();
-
 		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			-- vim.print(win);
 			require("bars.statusline").attach(win);
 			require("bars.statuscolumn").attach(win);
 			require("bars.winbar").attach(win);
@@ -62,7 +54,7 @@ end
 --- in a window as the filetype/buftype may
 --- could have changed.
 vim.api.nvim_create_autocmd({
-	"WinNew", "WinEnter"
+	"WinNew"
 }, {
 	callback = function ()
 		timer:stop();
@@ -70,78 +62,39 @@ vim.api.nvim_create_autocmd({
 	end
 });
 
---- Handle Tabline differently.
-vim.api.nvim_create_autocmd("TabNew", {
-	callback = function ()
-		---|fS
 
-		local function callback ()
-			require("bars.tabline").clean();
-			require("bars.tabline").attach();
-		end
-
-		if vim.in_fast_event() then
-			vim.schedule(callback);
-		else
-			callback();
-		end
-
-		---|fE
-	end
-});
-
---- When the 'filetype' or 'buftype' option is set
---- we must clean up any window that has become invalid
---- and update the configuration of existing windows.
----
---- TODO, Check if this causes performance issues
---- with large amount of windows.
-vim.api.nvim_create_autocmd({ "OptionSet" }, {
-	callback = function ()
-		local option = vim.fn.expand("<amatch>");
-		local valid_options = { "filetype", "buftype" };
-
-		if vim.list_contains(valid_options, option) == false then
-			return;
-		end
-
-		timer:stop();
-		timer:start(DELAY, 0, vim.schedule_wrap(task));
-	end
-});
+local mode_timer = vim.uv.new_timer();
 
 --- Update various bars & lines on Vim mode change.
 vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-	callback = function (event)
-		---|fS
+	callback = function ()
+		mode_timer:stop();
 
 		--- We wrap this in `vim.schedule()` so
 		--- that the update happens after doing
 		--- something like,
-		--- 
-		--- ```vim
-		--- :lua vim.g.__bars_tabpage_list_locked = false
-		--- ```
-		---
-		--- We no longer have to redraw the screen
-		--- twice!
-		vim.schedule(function ()
+		mode_timer:start(DELAY, 0, vim.schedule_wrap(function ()
 			--- Unstable API function.
 			--- Use `pcall()`
 			pcall(vim.api.nvim__redraw, {
-				buf = event.buf,
-				flush = true,
-
 				statuscolumn = true,
-				statusline = true,
 				winbar = true,
 				tabline = true
 			});
-		end);
-
-		---|fE
+		end));
 	end
 });
+
+
+
+
+
+
+
+
+
+
+
 
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "TabNew" }, {
