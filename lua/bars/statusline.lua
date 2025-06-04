@@ -484,8 +484,6 @@ statusline.render = function ()
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	statusline.update_id(window);
-
 	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
 		statusline.detach(window);
 		return "";
@@ -496,6 +494,8 @@ statusline.render = function ()
 		statusline.detach(window);
 		return "";
 	end
+
+	statusline.update_id(window);
 
 	local slID = vim.w[window].__slID or "default";
 	local config = statusline.config[slID];
@@ -521,17 +521,6 @@ statusline.start = function ()
 
 	if statusline.state.enable == false then
 		return;
-	elseif statusline.config.condition then
-		---@diagnostic disable-next-line
-		local ran_cond, stat = pcall(statusline.config.condition, vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win());
-
-		if ran_cond == false or stat == false then
-			return;
-		end
-	end
-
-	for _, window in ipairs(vim.api.nvim_list_wins()) do
-		statusline.update_id(window);
 	end
 
 	vim.api.nvim_set_option_value("statusline", STL, { scope = "global" })

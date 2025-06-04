@@ -10,20 +10,6 @@ winbar.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
-	condition = function ()
-		---|fS
-
-		if _G.is_within_termux then
-			--- Do NOT use this inside Termux.
-			--- Screen space is too precious.
-			return not _G.is_within_termux();
-		end
-
-		return true;
-
-		---|fE
-	end,
-
 	default = {
 		components = {
 			---|fS
@@ -627,8 +613,6 @@ winbar.render = function ()
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	winbar.update_id(window);
-
 	if vim.list_contains(winbar.config.ignore_filetypes, vim.bo[buffer].ft) then
 		winbar.detach(window);
 		return "";
@@ -639,6 +623,8 @@ winbar.render = function ()
 		winbar.detach(window);
 		return "";
 	end
+
+	winbar.update_id(window);
 
 	local wbID = vim.w[window].__wbbID or "default";
 	local config = winbar.config[wbID];
@@ -664,17 +650,6 @@ winbar.start = function ()
 
 	if winbar.state.enable == false then
 		return;
-	elseif winbar.config.condition then
-		---@diagnostic disable-next-line
-		local ran_cond, stat = pcall(winbar.config.condition, vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win());
-
-		if ran_cond == false or stat == false then
-			return;
-		end
-	end
-
-	for _, window in ipairs(vim.api.nvim_list_wins()) do
-		winbar.update_id(window);
 	end
 
 	vim.api.nvim_set_option_value("winbar", WBR, { scope = "global" })
@@ -683,6 +658,11 @@ winbar.start = function ()
 end
 
 winbar.attach = function (window)
+	if winbar.state.enable == false then
+		winbar.detach(window);
+		return;
+	end
+
 	local _statusline = vim.api.nvim_get_option_value("winbar", { scope = "local", win = window });
 
 	if _statusline == WBR then
@@ -789,50 +769,6 @@ winbar.update_id = function (window)
 	---|fE
 end
 
---- Updates the configuration ID for {window}.
----@param window integer
----@return string | nil
-winbar.update_id = function (window)
-	---|fS
-
-	if type(window) ~= "number" then
-		return;
-	elseif vim.api.nvim_win_is_valid(window) == false then
-		return;
-	end
-
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	local keys = vim.tbl_keys(winbar.config);
-	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
-	table.sort(keys);
-
-	local ID = "default";
-
-	for _, key in ipairs(keys) do
-		if vim.list_contains(ignore, key) then
-			goto continue;
-		elseif type(winbar.config[key]) ~= "table" then
-			goto continue;
-		end
-
-		local tmp = winbar.config[key];
-
-		if tmp.condition == true then
-			ID = key;
-		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
-			ID = key;
-		end
-
-		::continue::
-	end
-
-	vim.w[window].__wbID = ID;
-	winbar.state.attached_windows[window] = true;
-
-	---|fE
-end
-
 
 --- Sets up the winbar module.
 ---@param config winbar.config | boolean | nil
@@ -843,10 +779,6 @@ winbar.setup = function (config)
 		winbar.config = vim.tbl_extend("force", winbar.config, config);
 	elseif type(config) == "boolean" then
 		winbar.state.enable = config;
-	end
-
-	for window, _ in pairs(winbar.state.attached_windows) do
-		vim.w[window].__wbID = winbar.update_id(window);
 	end
 
 	---|fE

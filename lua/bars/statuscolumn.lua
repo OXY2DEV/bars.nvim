@@ -237,6 +237,8 @@ statuscolumn.render = function ()
 		return "";
 	end
 
+	statuscolumn.update_id(window);
+
 	--- Statuscolumn config ID.
 	---@type string
 	local scID = vim.w[window].__scID or "default";
@@ -284,6 +286,11 @@ statuscolumn.start = function ()
 end
 
 statuscolumn.attach = function (window)
+	if statuscolumn.state.enable == false then
+		statuscolumn.detach(window);
+		return;
+	end
+
 	local _statuscolumn = vim.wo[window].statuscolumn;
 
 	if _statuscolumn == STC then
