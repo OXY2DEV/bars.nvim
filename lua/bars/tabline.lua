@@ -123,12 +123,83 @@ tabline.state = {
 	attached = false
 };
 
---- Updates the configuration ID for the tabline.
----@return string | nil
+tabline.check_condition = function ()
+	if not tabline.config.condition then
+		return true;
+	end
+
+	local can_call, cond = pcall(tabline.config.condition);
+	return can_call and cond;
+end
+
+--- Renders the tabline.
+---@return string
+tabline.render = function ()
+	---|fS
+
+	local components = require("bars.components.tabline");
+
+	if tabline.check_condition() == false then
+		tabline.detach();
+		return "";
+	end
+
+	tabline.update_id();
+
+	local tlID = vim.g.__tlID or "default";
+	local config = tabline.config[tlID];
+
+	if type(config) ~= "table" then
+		return "";
+	end
+
+	local _o = "";
+
+	for _, component in ipairs(config.components or {}) do
+		_o = _o .. components.get(component.kind, component, _o);
+	end
+
+	return _o;
+
+	---|fE
+end
+
+--- Attaches the tabline module.
+tabline.start = function ()
+	---|fS
+
+	if tabline.state.enable == false then
+		return;
+	end
+
+	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
+
+	---|fE
+end
+
+tabline.stop = function ()
+	local _tabline = vim.api.nvim_get_option_value("tabline", { scope = "global" });
+
+	if _tabline ~= TBL and _tabline ~= "" then
+		return;
+	end
+
+	vim.api.nvim_set_option_value(
+		"tabline",
+		vim.g.__tabline or "",
+		{
+			scope = "global"
+		}
+	);
+end
+
+--- Updates the configuration ID for {window}.
 tabline.update_id = function ()
 	---|fS
 
+	---@type string[]
 	local keys = vim.tbl_keys(tabline.config);
+	---@type string[]
 	local ignore = { "default" };
 	table.sort(keys);
 
@@ -141,14 +212,20 @@ tabline.update_id = function ()
 			goto continue;
 		end
 
-		---@type tabline.opts
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
 			ID = key;
-		elseif pcall(tmp.condition --[[ @as fun():boolean ]]) and tmp.condition() == true  then
-			ID = key;
+		elseif type(tmp.condition) == "function" then
+			---@diagnostic disable-next-line
+			local can_eval, val = pcall(tmp.condition, buffer, window);
+
+			if can_eval and val then
+				ID = key;
+			end
 		end
+
+		---@diagnostic enable:undefined-field
 
 		::continue::
 	end
@@ -157,155 +234,6 @@ tabline.update_id = function ()
 	tabline.state.attached = true;
 
 	---|fE
-end
-
---- Renders the tabline.
----@return string
-tabline.render = function ()
-	---|fS
-
-	local components = require("bars.components.tabline");
-
-	if tabline.state.attached ~= true then
-		return "";
-	end
-
-	local tlID = vim.g.__tlID;
-
-	if not tlID then
-		return "";
-	end
-
-	local config = tabline.config[tlID];
-
-	if type(config) ~= "table" then
-		return "";
-	end
-
-	local _o = "%#Normal#";
-
-	for _, component in ipairs(config.components or {}) do
-		_o = _o .. components.get(component.kind, component, _o);
-	end
-
-	return _o;
-
-	---|fE
-end
-
-tabline.can_detach = function ()
-	if not tabline.config.condition then
-		return false;
-	end
-
-	local checked_condition, result = pcall(tabline.config.condition);
-
-	if checked_condition == false then
-		return false;
-	elseif result == false then
-		return true;
-	end
-end
-
-tabline.detach = function ()
-	---|fS
-
-	vim.schedule(function ()
-		tabline.state.attached = false;
-
-		--- Cached tabline.
-		---@type string | nil
-		local _tl = vim.g.__tabline or "";
-
-		if _tl == "" or _tl == nil then
-			--- Reset tabline.
-			vim.cmd("set tabline&");
-		else
-			vim.api.nvim_set_option_value(
-				"tabline",
-				_tl,
-				{
-					scope = "global"
-				}
-			);
-		end
-
-		vim.g.__tlID = nil;
-		vim.g.__tabline = nil;
-	end);
-
-	---|fE
-end
-
-tabline.can_attach = function ()
-	if tabline.state.enable ~= true then
-		return false;
-	elseif tabline.state.attached == true then
-		return false;
-	elseif tabline.config.condition == nil then
-		return true;
-	end
-
-	local checked_condition, result = pcall(tabline.config.condition);
-
-	if checked_condition == false then
-		return true;
-	elseif result == false then
-		return false;
-	end
-end
-
---- Attaches the tabline module.
-tabline.attach = function ()
-	---|fS
-
-	if tabline.can_attach() == false then
-		return;
-	end
-
-	tabline.update_id();
-
-	vim.g.__tabline = vim.o.tabline == TBL and "" or vim.o.tabline;
-	vim.o.tabline = TBL;
-
-	---|fE
-end
-
---- Cleans up invalid buffers and recalculates
---- valid buffers config ID.
-tabline.clean = function ()
-	vim.schedule(function ()
-		if tabline.can_detach() then
-			tabline.detach();
-		end
-	end);
-end
-
-----------------------------------------------------------------------
-
---- Enables *all* attached windows.
-tabline.Enable = function ()
-	tabline.state.enable = true;
-
-	tabline.attach();
-end
-
---- Disables *all* attached windows.
-tabline.Disable = function ()
-	tabline.detach();
-
-	tabline.state.enable = false;
-end
-
-----------------------------------------------------------------------
-
---- Toggles tabline.
-tabline.Toggle = function ()
-	if tabline.state.enable == true then
-		tabline.Disable();
-	else
-		tabline.Enable();
-	end
 end
 
 ----------------------------------------------------------------------

@@ -9,17 +9,17 @@ bars.config = {
 	statuscolumn = true,
 	statusline = true,
 	tabline = true,
-	-- winbar = function ()
-	-- 	if not _G.is_within_termux then
-	-- 		--- The function doesn't
-	-- 		--- exist.
-	-- 		return true;
-	-- 	else
-	-- 		--- Winbar should be disabled
-	-- 		--- while inside Termux.
-	-- 		return _G.is_within_termux() == false;
-	-- 	end
-	-- end,
+	winbar = function ()
+		if not _G.is_within_termux then
+			--- The function doesn't
+			--- exist.
+			return true;
+		else
+			--- Winbar should be disabled
+			--- while inside Termux.
+			return _G.is_within_termux() == false;
+		end
+	end,
 
 	---|fE
 };
