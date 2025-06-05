@@ -5,6 +5,29 @@ local statuscolumn = {};
 ---@type string
 local STC = "%!v:lua.require('bars.statuscolumn').render()";
 
+local gradient_map = {
+	default = "BarsNormal%d",
+
+	["v"] = "BarsVisual%d",
+	["V"] = "BarsVisualLine%d",
+	[""] = "BarsVisualBlock%d",
+
+	["s"] = "BarsVisual%d",
+	["S"] = "BarsVisualLine%d",
+	[""] = "BarsVisualBlock%d",
+
+	["i"] = "BarsInsert%d",
+	["ic"] = "BarsInsert%d",
+	["ix"] = "BarsInsert%d",
+
+	["R"] = "BarsInsert%d",
+	["Rc"] = "BarsInsert%d",
+
+	["c"] = "BarsCommand%d",
+	["!"] = "BarsCommand%d",
+};
+
+
 ---@type statuscolumn.config
 statuscolumn.config = {
 	ignore_filetypes = { "blink-cmp-menu" },
@@ -114,50 +137,31 @@ statuscolumn.config = {
 				virt_hl = {
 					"BarsVirtual1", "BarsVirtual2", "BarsVirtual3", "BarsVirtual4", "BarsVirtual5",
 				},
-				hl = {
-					"BarsLineNr",
-					"LineNr",
-				}
+				hl = function ()
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+					local USE = gradient_map[mode] or gradient_map.default
+
+					return {
+						string.format(USE, 1),
+						"LineNr",
+					};
+				end,
 			},
 			{
 				kind = "border",
 				text = "▕",
-				hl = function (_, window)
-					---|fS "Color matching the mode"
-
+				hl = function ()
 					local _o = {};
-					local gr_map = {
-						default = "BarsNormal%d",
-
-						["v"] = "BarsVisual%d",
-						["V"] = "BarsVisualLine%d",
-						[""] = "BarsVisualBlock%d",
-
-						["s"] = "BarsVisual%d",
-						["S"] = "BarsVisualLine%d",
-						[""] = "BarsVisualBlock%d",
-
-						["i"] = "BarsInsert%d",
-						["ic"] = "BarsInsert%d",
-						["ix"] = "BarsInsert%d",
-
-						["R"] = "BarsInsert%d",
-						["Rc"] = "BarsInsert%d",
-
-						["c"] = "BarsCommand%d",
-						["!"] = "BarsCommand%d",
-					};
-
 					---@type string
 					local mode = vim.api.nvim_get_mode().mode;
-					local USE = gr_map[mode] or gr_map.default
+					local USE = gradient_map[mode] or gradient_map.default
 
 					for g = 1, 7 do
 						table.insert(_o, string.format(USE, g));
 					end
 
 					return _o;
-					---|fE
 				end
 			},
 			{
@@ -392,7 +396,5 @@ statuscolumn.setup = function (config)
 
 	---|fE
 end
-
-local times = {};
 
 return statuscolumn;
