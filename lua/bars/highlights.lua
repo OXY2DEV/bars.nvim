@@ -1013,6 +1013,82 @@ hl.groups = {
 
 		---|fE
 	end,
+
+	help_gradient = function ()
+		---|fS
+
+		---@type number, number, number Background color.
+		local ML, MA, MB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		ML = ML * 1.5;
+		MA = MA * 1.5;
+		MB = MB * 1.5;
+
+		---@type number, number, number Background color.
+		local BL, BA, BB = hl.rgb_to_oklab(
+			hl.num_to_rgb(
+				hl.get_attr("bg", { "StatusLine", "Normal" }) or hl.choice(15725045, 1973806)
+			)
+		);
+
+		local gradient = {};
+		local qf_steps = 15;
+
+		for s = 0, qf_steps - 1, 1 do
+			---|fS
+
+			local GL, GA, GB = hl.interpolate(
+				ML, MA, MB,
+				BL, BA, BB,
+				s / (qf_steps - 1)
+			);
+
+			local next_color;
+
+			if s ~= 0 then
+				next_color = string.format(
+					"#%02x%02x%02x",
+					hl.oklab_to_rgb(
+						hl.interpolate(
+							ML, MA, MB,
+							BL, BA, BB,
+							(s - 1) / (qf_steps - 1)
+						)
+					)
+				);
+			end
+
+			table.insert(gradient, {
+				group_name = "BarsHelp" .. (s + 1),
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(GL, GA, GB)),
+					fg = next_color
+				}
+			});
+
+			---|fE
+		end
+
+		return vim.list_extend(gradient, {
+			{
+				group_name = "BarsHelp",
+				value = {
+					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(ML, MA, MB)),
+					fg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(
+						hl.visible_fg(ML)
+					)),
+
+					bold = true
+				}
+			}
+		});
+
+		---|fE
+	end,
 };
 
 hl.setup = function ()

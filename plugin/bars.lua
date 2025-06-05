@@ -1,7 +1,14 @@
 ---@diagnostic disable: undefined-field
 
+---|fS "chore: Cache default values"
+
 vim.g.__statusline = vim.api.nvim_get_option_value("statusline", { scope = "global" });
 vim.g.__statuscolumn = vim.o.statuscolumn;
+vim.g.__winbar = vim.api.nvim_get_option_value("winbar", { scope = "global" });
+
+vim.g.__tabline = vim.o.tabline;
+
+---|fE
 
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
@@ -15,12 +22,13 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 		require("bars.statusline").start();
 		require("bars.winbar").start();
 
-		require("bars.tabline").attach();
+		require("bars.tabline").start();
 	end
 });
 
 ---@type table Timer for the update task.
 local timer = vim.uv.new_timer();
+
 ---@type integer Debounce delay.
 local DELAY = 100;
 
@@ -64,20 +72,13 @@ vim.api.nvim_create_autocmd({
 	end
 });
 
-
 local mode_timer = vim.uv.new_timer();
 
 --- Update various bars & lines on Vim mode change.
 vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 	callback = function ()
 		mode_timer:stop();
-
-		--- We wrap this in `vim.schedule()` so
-		--- that the update happens after doing
-		--- something like,
 		mode_timer:start(DELAY, 0, vim.schedule_wrap(function ()
-			--- Unstable API function.
-			--- Use `pcall()`
 			pcall(vim.api.nvim__redraw, {
 				statuscolumn = true,
 				winbar = true,
@@ -87,22 +88,9 @@ vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 	end
 });
 
-
-
-
-
-
-
-
-
-
-
-
---- Update the tab list when opening new windows.
+--- Update the tab list when opening new tabs.
 vim.api.nvim_create_autocmd({ "TabNew" }, {
 	callback = function ()
-		---|fS
-
 		local max = vim.g.__tabline_max_tabs or 5;
 		local tabs = #vim.api.nvim_list_tabpages();
 
@@ -116,31 +104,13 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 		end
 
 		vim.g.__bars_tabpage_from = math.max(1, tabs - math.floor(max * 0.25));
-		---|fE
 	end
 });
 
 --- Update the tab list when opening new windows.
 vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 	callback = function ()
-		---|fS
-
-		---|fS "Cache default values."
-
-		vim.g.__statusline = vim.o.statusline;
-
-		vim.g.__relativenumber = vim.o.relativenumber;
-		vim.g.__numberwidth = vim.o.numberwidth;
-		vim.g.__statuscolumn = vim.o.statuscolumn;
-
-		vim.g.__winbar = vim.o.winbar;
-		vim.g.__tabline = vim.o.tabline;
-
-		---|fE
-
 		require("bars.highlights").setup();
-
-		---|fE
 	end
 });
 
@@ -361,7 +331,7 @@ vim.api.nvim_create_autocmd("LspProgress", {
 					set_state(nil);
 				end
 
-				vim.api.nvim__redraw({ statusline = true });
+				vim.cmd("redrawstatus");
 			end, 500);
 		end
 

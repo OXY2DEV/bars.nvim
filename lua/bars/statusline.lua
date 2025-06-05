@@ -395,16 +395,11 @@ statusline.config = {
 			return vim.bo[buffer].buftype == "help";
 		end,
 		components = {
-			{ kind = "empty" },
-			TEMPLATES.mode,
+			vim.tbl_extend("force", TEMPLATES.mode, {
+				compact = true
+			}),
 			{
 				kind = "ruler",
-				condition = function ()
-					local mode = vim.api.nvim_get_mode().mode;
-					local visual_modes = { "v", "V", "" };
-
-					return vim.list_contains(visual_modes, mode);
-				end,
 
 				default = {
 					padding_left = " ",
@@ -413,17 +408,39 @@ statusline.config = {
 
 					separator = " 󰇛 ",
 
-					hl = "BarsRuler"
+					hl = "BarsFt0"
 				},
-
-				visual = {
-					icon = " ",
-
-					hl = "BarsRuler"
-				}
 			},
-			TEMPLATES.bufname,
 			{ kind = "empty", hl = "StatusLine" },
+			{
+				kind = "custom",
+				value = function ()
+					local text = "";
+
+					for i = 15, 2, -1 do
+						text = text .. string.format("%%#BarsHelp%d#", i);
+						text = text .. "▟";
+					end
+
+					return text;
+				end
+			},
+			{
+				kind = "bufname",
+				max_len = 25,
+
+				default = {
+					padding_left = " ",
+					padding_right = " ",
+
+					icon = "",
+					nomodifiable_icon_hl = "BarsFt1",
+					nomodifiable_icon = "󰌾 ",
+					icon_hl = {
+						"BarsFt0", "BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
+					},
+				},
+			},
 		}
 
 		---|fE
@@ -654,4 +671,3 @@ statusline.setup = function (config)
 end
 
 return statusline;
---- vim:foldmethod=markers:
