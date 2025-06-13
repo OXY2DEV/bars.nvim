@@ -380,7 +380,6 @@ statusline.config = {
 			TEMPLATES.macro,
 			{ kind = "empty", hl = "StatusLine" },
 			TEMPLATES.git_branch,
-			TEMPLATES.progress,
 			TEMPLATES.lsp,
 			TEMPLATES.ruler
 		}
