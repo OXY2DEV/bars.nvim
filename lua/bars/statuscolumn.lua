@@ -59,7 +59,6 @@ statuscolumn.config = {
 			},
 			{
 				kind = "signs",
-				width = 1,
 				hl = "LineNr",
 
 				filter = function (buffer, namespaces, _, _, _, details)
@@ -174,18 +173,28 @@ statuscolumn.config = {
 		}
 	},
 
-	query = {
+	inspect_tree = {
 		---|fS
 
-		condition = function (buffer)
-			return vim.bo[buffer].ft == "query" and vim.bo[buffer].bt == "nofile";
+		condition = function (buffer, window)
+			if vim.b[buffer].dev_base then
+				return true;
+			elseif vim.w[window].inspecttree_window then
+				return true;
+			end
+
+			return false;
 		end,
 
 		components = {
 			{
-				kind = "empty",
-				width = 1,
-				hl = "LineNr"
+				kind = "custom",
+				value = function (buffer)
+					local lnums = vim.b[buffer].injections or {};
+					local current = lnums[vim.v.lnum] or "LineNr";
+
+					return "%#" .. current .. "# ";
+				end
 			},
 		}
 
