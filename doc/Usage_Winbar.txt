@@ -1,4 +1,4 @@
-*bars.u-winbar*                                              Usage: Statuscolumn
+*bars.u-winbar*                                            Usage: Statuscolumn
 
 ▌💥 Tip
 ▌ You can disable this module for a buffer via

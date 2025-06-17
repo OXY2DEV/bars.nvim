@@ -1,4 +1,4 @@
-*bars.statusline*                                              Usage: Statusline
+*bars.statusline*                                            Usage: Statusline
 
 ▌💥 Tip
 ▌ You can disable this module for a buffer via

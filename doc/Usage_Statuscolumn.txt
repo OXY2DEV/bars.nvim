@@ -1,4 +1,4 @@
-*bars.u-statuscolumn*                                       Usage: Statuscolumn
+*bars.u-statuscolumn*                                      Usage: Statuscolumn
 
 ▌💥 Tip
 ▌ You can disable this module for a buffer via

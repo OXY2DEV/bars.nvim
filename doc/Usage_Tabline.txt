@@ -1,4 +1,4 @@
-*bars.u-tabline*                                                  Usage: Tabline
+*bars.u-tabline*                                                Usage: Tabline
 
 Usage guide for the tabline module.
 

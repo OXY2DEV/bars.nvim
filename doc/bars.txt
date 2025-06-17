@@ -1,4 +1,4 @@
-*bars.nvim*                 A staring point(& guide) for bars & lines in Neovim.
+*bars.nvim*               A staring point(& guide) for bars & lines in Neovim.
 
 ==============================================================================
 Guides                                                      *bars.nvim-guides*
