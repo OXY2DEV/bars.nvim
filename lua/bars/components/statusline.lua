@@ -263,7 +263,7 @@ slC.diagnostics = function (buffer, window, config)
 	---| 3 Info
 	---| 4 Hint
 	---| 5 All
-	local mode;
+	local mode = 5;
 
 	if type(vim.w[window].__slDiagnostic_mode) ~= "number" then
 		mode = config.default_mode or 1;
@@ -272,67 +272,64 @@ slC.diagnostics = function (buffer, window, config)
 		mode = vim.w[window].__slDiagnostic_mode;
 	end
 
-	local _d;
+	local _d = "";
 	local severity = vim.diagnostic.severity;
 
-	if mode == 1 then
-		_d = table.concat({
+	local types = {
+		[1] = {
 			utils.set_hl(config.error_hl),
 			config.error_icon or "",
 			diagnostics_count[severity.ERROR] or "0"
-		});
-	elseif mode == 2 then
-		_d = table.concat({
+		},
+		[2] = {
 			utils.set_hl(config.warn_hl),
 			config.warn_icon or "",
 			diagnostics_count[severity.WARN] or "0"
-		});
-	elseif mode == 3 then
-		_d = table.concat({
+		},
+		[3] = {
 			utils.set_hl(config.info_hl),
 			config.info_icon or "",
 			diagnostics_count[severity.INFO] or "0"
-		});
-	elseif mode == 4 then
-		_d = table.concat({
+		},
+		[4] = {
 			utils.set_hl(config.hint_hl),
 			config.hint_icon or "",
 			diagnostics_count[severity.HINT] or "0"
+		},
+	};
+
+	if type(mode) == "number" and mode < 5 then
+		_d = table.concat(types[mode] or {});
+	elseif vim.tbl_isempty(diagnostics_count) then
+		_d = table.concat({
+			utils.set_hl(config.empty_hl),
+			config.empty_icon or "",
+			config.empty_text or ""
 		});
+	elseif config.compact then
+		local _k = 0;
+		local _m = #vim.tbl_keys(diagnostics_count);
+
+		for _, v in pairs(types) do
+			if v[3] ~= "0" then
+				_k = _k + 1;
+				_d = _d .. table.concat(v);
+
+				if _k < _m then
+					_d = _d .. utils.set_hl(config.separator_hl) .. (config.separator or " | ");
+				end
+			end
+		end
 	else
-		if vim.tbl_isempty(diagnostics_count) then
-			_d = table.concat({
-				utils.set_hl(config.empty_hl),
-				config.empty_icon or "",
-				config.empty_text or ""
-			});
-		else
-			_d = table.concat({
-				utils.set_hl(config.error_hl),
-				config.error_icon or "",
-				diagnostics_count[severity.ERROR] or "0",
+		local _k = 0;
 
-				utils.set_hl(config.separator_hl),
-				config.separator or " | ",
+		for _, v in pairs(types) do
+			_k = _k + 1;
+			_d = _d .. table.concat(v);
 
-				utils.set_hl(config.warn_hl),
-				config.warn_icon or "",
-				diagnostics_count[severity.WARN] or "0",
-
-				utils.set_hl(config.separator_hl),
-				config.separator or " | ",
-
-				utils.set_hl(config.info_hl),
-				config.info_icon or "",
-				diagnostics_count[severity.INFO] or "0",
-
-				utils.set_hl(config.separator_hl),
-				config.separator or " | ",
-
-				utils.set_hl(config.hint_hl),
-				config.hint_icon or "",
-				diagnostics_count[severity.HINT] or "0"
-			});
+			if _k < 4 then
+				_d = _d .. utils.set_hl(config.separator_hl) .. (config.separator or " | ");
+			end
 		end
 	end
 

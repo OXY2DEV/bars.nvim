@@ -189,6 +189,10 @@
 --- > no client attached to it.
 ---@field auto_hide? boolean
 ---
+--- Should the component be compacted?
+--- This prevents showing empty diagnostics counts.
+---@field compact? boolean
+---
 --- Determines what type of diagnostics are
 --- shown.
 ---@field default_mode?

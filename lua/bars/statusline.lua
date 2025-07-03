@@ -123,6 +123,7 @@ TEMPLATES = {
 
 		---|fE
 	},
+	---@type statusline.components.bufname
 	bufname = {
 		---|fS
 
@@ -158,11 +159,13 @@ TEMPLATES = {
 
 		---|fE
 	},
+	---@type statusline.components.diagnostics
 	diagnostics = {
 		---|fS
 
 		kind = "diagnostics",
 		default_mode = 5,
+		compact = true,
 
 		padding_left = " ",
 		padding_right = " ",
@@ -184,6 +187,7 @@ TEMPLATES = {
 
 		---|fE
 	},
+	---@type statusline.components.macro
 	macro = {
 		---|fS
 
@@ -223,6 +227,7 @@ TEMPLATES = {
 
 		---|fE
 	},
+	---@type statusline.components.branch
 	git_branch = {
 		---|fS
 
@@ -241,6 +246,7 @@ TEMPLATES = {
 
 		---|fE
 	},
+	---@type statusline.components.custom
 	lsp = {
 		---|fS
 
