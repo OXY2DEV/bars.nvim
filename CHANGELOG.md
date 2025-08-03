@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.2.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.1.0...v2.2.0) (2025-07-03)
+
+
+### Features
+
+* **config:** Added custom statuscolumn for terminal windows ([f05d0ea](https://github.com/OXY2DEV/bars.nvim/commit/f05d0ead4e5cb7aa16d9c6d5a3436736969fd2e5))
+* Custom statusline for help files ([d09dbc7](https://github.com/OXY2DEV/bars.nvim/commit/d09dbc78eb816b66353b70d37a970d277c64d02e))
+* **statusline:** Added an option to make diagnostics more compact ([227a7d3](https://github.com/OXY2DEV/bars.nvim/commit/227a7d3d1f464edf62e350838fc6ceb1c74a4103))
+* **statusline:** Added custom statusline for the quickfix menu ([1ec73ce](https://github.com/OXY2DEV/bars.nvim/commit/1ec73cec7db5166f6c4ebb6ae64abc58bfc3399c))
+* **statusline:** Added progress component ([55dc87d](https://github.com/OXY2DEV/bars.nvim/commit/55dc87d18553b04955f0841bd33e105421ea1bc9))
+
+
+### Bug Fixes
+
+* Fixed a bug with default setup fumction not working ([fa288e8](https://github.com/OXY2DEV/bars.nvim/commit/fa288e8bdc39bb0eddc3b167f73af3c9e9c532c4))
+* **statuscolumn:** Fixed a bug with current line number not having correct highlight ([7ed1b16](https://github.com/OXY2DEV/bars.nvim/commit/7ed1b16069f8bc587eba2cccbfd9afc9706e5ba5))
+* **statusline:** Bufname now uses `icon_hl` as fallback ([6c719a3](https://github.com/OXY2DEV/bars.nvim/commit/6c719a3aa8a35bb41f554644468ed0c8bf85b775))
+* **statusline:** Updated help file statusline ([b498c72](https://github.com/OXY2DEV/bars.nvim/commit/b498c7294ab12e01ce471f54306cb88e5f02a3b8))
+
 ## [2.1.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.0.1...v2.1.0) (2025-05-11)
 
 
