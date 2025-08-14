@@ -5,10 +5,13 @@ local statusline = {};
 ---@type string
 local STL = "%!v:lua.require('bars.statusline').render()";
 
+--[[ Reusable configuration templates. ]]
 ---@type table<string, statusline_component>
 local TEMPLATES;
 
 TEMPLATES = {
+	---|fS
+
 	---@type statusline.components.mode
 	mode = {
 		---|fS "Mode configuration"
@@ -368,6 +371,8 @@ TEMPLATES = {
 
 		---|fE
 	},
+
+	---|fE
 };
 
 ---@type statusline.config
@@ -487,13 +492,21 @@ statusline.state = {
 	attached_windows = {}
 };
 
+--[[ Checks if a **buffer** & **window** satisfies **condition**. ]]
+---@param buffer integer
+---@param window integer
+---@return boolean
 statusline.check_condition = function (buffer, window)
+	---|fS
+
 	if not statusline.config.condition then
 		return true;
 	end
 
 	local can_call, cond = pcall(statusline.config.condition, buffer, window);
-	return can_call and cond;
+	return can_call and cond or false;
+
+	---|fE
 end
 
 --- Renders the statusline for a window.
@@ -503,6 +516,7 @@ statusline.render = function ()
 
 	local components = require("bars.components.statusline");
 
+	---@type integer
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
@@ -526,6 +540,7 @@ statusline.render = function ()
 		return "";
 	end
 
+	---@type string Statusline format string.
 	local _o = "";
 
 	for _, component in ipairs(config.components or {}) do
@@ -553,7 +568,16 @@ statusline.start = function ()
 	---|fE
 end
 
+--[[
+Attaches the custom `statusline` to **window**.
+
+Set `ignore_enabled` to **true** to disable module state checker.
+]]
+---@param window integer
+---@param ignore_enabled? boolean
 statusline.attach = function (window, ignore_enabled)
+	---|fS
+
 	if ignore_enabled ~= true and statusline.state.enable == false then
 		-- Do not attach if **this module is disabled**.
 		-- Unless we *explicitly* ignore it.
@@ -587,9 +611,19 @@ statusline.attach = function (window, ignore_enabled)
 
 		statusline.state.attached_windows[window] = true;
 	end
+
+	---|fE
 end
 
+--[[
+Detaches the custom `statusline` from **window**.
+
+NOTE: This will *reset* the statusline for that window.
+]]
+---@param window integer
 statusline.detach = function (window)
+	---|fS
+
 	local _statusline = vim.api.nvim_get_option_value("statusline", { scope = "local", win = window });
 
 	if _statusline ~= STL then
@@ -601,9 +635,11 @@ statusline.detach = function (window)
 	end);
 
 	statusline.state.attached_windows[window] = false;
+
+	---|fE
 end
 
---- Updates the configuration ID for {window}.
+--[[ Updates the used configuration/style ID for `window`. ]]
 ---@param window integer
 statusline.update_id = function (window)
 	---|fS
@@ -665,6 +701,8 @@ end
 
 --[[ Toggles statusline for **all** windows. ]]
 statusline.Toggle = function ()
+	---|fS
+
 	if statusline.state.enable == true then
 		-- When detaching, only loop over **attached windows**.
 		for win, _ in pairs(statusline.state.attached_windows) do
@@ -678,6 +716,62 @@ statusline.Toggle = function ()
 	end
 
 	statusline.state.enable = not statusline.state.enable;
+
+	---|fE
+end
+
+--[[ Enables statusline for **all** windows. ]]
+statusline.Enable = function ()
+	---|fS
+
+	-- When attaching, loop over **all windows**.
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		statusline.attach(win, true);
+	end
+
+	statusline.state.enable = true;
+
+	---|fE
+end
+
+--[[ Disables statusline for **all** windows. ]]
+statusline.Disable = function ()
+	---|fS
+
+	-- When detaching, only loop over **attached windows**.
+	for win, _ in pairs(statusline.state.attached_windows) do
+		statusline.detach(win);
+	end
+
+	statusline.state.enable = false;
+
+	---|fE
+end
+
+--[[ Toggles statusline for `window`. ]]
+---@param window integer
+statusline.toggle = function (window)
+	---|fS
+
+	if statusline.state.attached_windows[window] == true then
+		statusline.detach(window);
+	else
+		statusline.attach(window);
+	end
+
+	---|fE
+end
+
+--[[ Enables statusline for `window`. ]]
+---@param window integer
+statusline.enable = function (window)
+	statusline.attach(window);
+end
+
+--[[ Disables statusline for `window`. ]]
+---@param window integer
+statusline.disable = function (window)
+	statusline.detach(window);
 end
 
 ------------------------------------------------------------------------------
