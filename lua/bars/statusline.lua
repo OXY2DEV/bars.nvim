@@ -547,13 +547,19 @@ statusline.start = function ()
 
 	vim.api.nvim_set_option_value("statusline", STL, { scope = "global" })
 
+	local win = vim.api.nvim_get_current_win();
+	statusline.attach(win);
+
 	---|fE
 end
 
-statusline.attach = function (window)
-	local _statusline = vim.api.nvim_get_option_value("statusline", { scope = "local", win = window });
-
-	if _statusline == STL then
+statusline.attach = function (window, ignore_enabled)
+	if ignore_enabled ~= true and statusline.state.enable == false then
+		-- Do not attach if **this module is disabled**.
+		-- Unless we *explicitly* ignore it.
+		return;
+	elseif statusline.state.attached_windows[window] == true then
+		-- Do not attach if **already attached to a window**.
 		return;
 	end
 
@@ -561,24 +567,26 @@ statusline.attach = function (window)
 	local buffer = vim.api.nvim_win_get_buf(window);
 
 	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
+		-- Do not attach if **filetype is ignored**.
 		statusline.detach(window);
-		return;
 	elseif vim.list_contains(statusline.config.ignore_buftypes, vim.bo[buffer].bt) then
+		-- Do not attach if **buftype is ignored**.
 		statusline.detach(window);
-		return;
 	elseif statusline.check_condition(buffer, window) == false then
+		-- Do not attach if **conditionally ignored**.
 		statusline.detach(window);
-		return "";
-	end
+	else
+		vim.api.nvim_set_option_value(
+			"statusline",
+			STL,
+			{
+				scope = "local",
+				win = window
+			}
+		);
 
-	vim.api.nvim_set_option_value(
-		"statusline",
-		STL,
-		{
-			scope = "local",
-			win = window
-		}
-	);
+		statusline.state.attached_windows[window] = true;
+	end
 end
 
 statusline.detach = function (window)
@@ -588,14 +596,11 @@ statusline.detach = function (window)
 		return;
 	end
 
-	vim.api.nvim_set_option_value(
-		"statusline",
-		vim.g.__statusline or "",
-		{
-			scope = "local",
-			win = window
-		}
-	);
+	vim.api.nvim_win_call(window, function ()
+		vim.cmd("set statusline=" .. (vim.g.__statusline or ""));
+	end);
+
+	statusline.state.attached_windows[window] = false;
 end
 
 --- Updates the configuration ID for {window}.
@@ -652,10 +657,30 @@ statusline.update_id = function (window)
 	end
 
 	vim.w[window].__slID = ID;
-	statusline.state.attached_windows[window] = true;
 
 	---|fE
 end
+
+------------------------------------------------------------------------------
+
+--[[ Toggles statusline for **all** windows. ]]
+statusline.Toggle = function ()
+	if statusline.state.enable == true then
+		-- When detaching, only loop over **attached windows**.
+		for win, _ in pairs(statusline.state.attached_windows) do
+			statusline.detach(win);
+		end
+	else
+		-- When attaching, loop over **all windows**.
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			statusline.attach(win, true);
+		end
+	end
+
+	statusline.state.enable = not statusline.state.enable;
+end
+
+------------------------------------------------------------------------------
 
 --- Sets up the statusline module.
 ---@param config statusline.config | boolean | nil
