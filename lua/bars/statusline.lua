@@ -574,13 +574,11 @@ Attaches the custom `statusline` to **window**.
 Set `ignore_enabled` to **true** to disable module state checker.
 ]]
 ---@param window integer
----@param ignore_enabled? boolean
-statusline.attach = function (window, ignore_enabled)
+statusline.attach = function (window)
 	---|fS
 
-	if ignore_enabled ~= true and statusline.state.enable == false then
+	if statusline.state.enable == false then
 		-- Do not attach if **this module is disabled**.
-		-- Unless we *explicitly* ignore it.
 		return;
 	elseif statusline.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
