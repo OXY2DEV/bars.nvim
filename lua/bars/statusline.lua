@@ -716,6 +716,10 @@ Removes the custom statusline for `window`.
 statusline.remove = function (window)
 	---|fS
 
+	if vim.wo[window].statusline ~= STL then
+		return;
+	end
+
 	vim.api.nvim_win_call(window, function ()
 		vim.cmd("set statusline=" .. (vim.g.__statusline or ""));
 	end);
