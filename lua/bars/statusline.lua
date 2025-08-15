@@ -614,9 +614,9 @@ NOTE: This will *reset* the statusline for that window.
 statusline.detach = function (window)
 	---|fS
 
-	local _statusline = vim.api.nvim_get_option_value("statusline", { scope = "local", win = window });
-
-	if _statusline ~= STL then
+	if statusline.state.attached_windows[window] == false then
+		-- Do not detach from windows whose `state` is **false** as
+		-- they may have a different statuscolumn.
 		return;
 	end
 
@@ -725,34 +725,27 @@ end
 
 ------------------------------------------------------------------------------
 
---[[ Toggles statusline for **all** windows. ]]
+--[[ Toggles `statusline` for **all** windows. ]]
 statusline.Toggle = function ()
 	---|fS
 
 	if statusline.state.enable == true then
-		-- When detaching, only loop over **attached windows**.
-		for win, _ in pairs(statusline.state.attached_windows) do
-			statusline.detach(win);
-		end
+		statusline.Disable();
 	else
-		-- When attaching, loop over **all windows**.
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			statusline.attach(win, true);
-		end
+		statusline.Enable();
 	end
-
-	statusline.state.enable = not statusline.state.enable;
 
 	---|fE
 end
 
---[[ Enables statusline for **all** windows. ]]
+--[[ Enables `statusline` for **all** windows. ]]
 statusline.Enable = function ()
 	---|fS
 
-	-- When attaching, loop over **all windows**.
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		statusline.attach(win, true);
+	for win, state in pairs(statusline.state.attached_windows) do
+		if state == true then
+			statusline.set(win);
+		end
 	end
 
 	statusline.state.enable = true;
@@ -760,13 +753,14 @@ statusline.Enable = function ()
 	---|fE
 end
 
---[[ Disables statusline for **all** windows. ]]
+--[[ Disables `statusline` for **all** windows. ]]
 statusline.Disable = function ()
 	---|fS
 
-	-- When detaching, only loop over **attached windows**.
-	for win, _ in pairs(statusline.state.attached_windows) do
-		statusline.detach(win);
+	for win, state in pairs(statusline.state.attached_windows) do
+		if state == true then
+			statusline.remove(win);
+		end
 	end
 
 	statusline.state.enable = false;
@@ -774,7 +768,7 @@ statusline.Disable = function ()
 	---|fE
 end
 
---[[ Toggles statusline for `window`. ]]
+--[[ Toggles `statusline` for *window*. ]]
 ---@param window integer
 statusline.toggle = function (window)
 	---|fS
@@ -788,13 +782,13 @@ statusline.toggle = function (window)
 	---|fE
 end
 
---[[ Enables statusline for `window`. ]]
+--[[ Enables `statusline` for *window*. ]]
 ---@param window integer
 statusline.enable = function (window)
 	statusline.attach(window);
 end
 
---[[ Disables statusline for `window`. ]]
+--[[ Disables `statusline` for *window*. ]]
 ---@param window integer
 statusline.disable = function (window)
 	statusline.detach(window);
