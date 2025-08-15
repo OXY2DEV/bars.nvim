@@ -182,7 +182,7 @@ tabline.attach = function ()
 		return;
 	end
 
-	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
+	tabline.set();
 	tabline.state.enable = true;
 end
 
@@ -193,13 +193,7 @@ tabline.detach = function ()
 		return;
 	end
 
-	vim.api.nvim_set_option_value(
-		"tabline",
-		vim.g.__tabline or "",
-		{
-			scope = "global"
-		}
-	);
+	tabline.remove();
 	tabline.state.enable = false;
 
 	---|fE
@@ -249,27 +243,51 @@ tabline.update_id = function ()
 	---|fE
 end
 
+--[[ Sets the custom `tabline`. ]]
+tabline.set = function ()
+	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
+end
+
+--[[ Removes the custom `tabline`. ]]
+tabline.remove = function ()
+	---|fS
+
+	if vim.o.tabline ~= TBL then
+		return;
+	end
+
+	vim.api.nvim_set_option_value(
+		"tabline",
+		vim.g.__tabline or "",
+		{
+			scope = "global"
+		}
+	);
+
+	---|fE
+end
+
 ------------------------------------------------------------------------------
 
---[[ Toggles tabline for **all** windows. ]]
+--[[ Toggles tabline. ]]
 tabline.Toggle = function ()
 	---|fS
 
 	if tabline.state.enable == true then
-		tabline.detach();
+		tabline.Disable();
 	else
-		tabline.attach();
+		tabline.Enable();
 	end
 
 	---|fE
 end
 
---[[ Enables tabline for **all** windows. ]]
+--[[ Enables tabline. ]]
 tabline.Enable = function ()
 	tabline.attach();
 end
 
---[[ Disables tabline for **all** windows. ]]
+--[[ Disables tabline. ]]
 tabline.Disable = function ()
 	tabline.detach();
 end
