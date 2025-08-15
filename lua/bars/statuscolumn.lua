@@ -363,8 +363,9 @@ statuscolumn.detach = function (window)
 	vim.api.nvim_win_call(window, function ()
 		vim.cmd("set statuscolumn=" .. (vim.g.__statuscolumn or ""));
 
-		vim.wo[window].numberwidth = vim.g.__numberwidth;
-		vim.wo[window].relativenumber = vim.g.__relativenumber;
+		-- NOTE(@OXY2DEV): We need a better way to restore `numberwidth` & `relativenumber`.
+		-- vim.wo[window].numberwidth = vim.g.__numberwidth;
+		-- vim.wo[window].relativenumber = vim.g.__relativenumber;
 
 		pcall(vim.api.nvim__redraw, {
 			win = window,
