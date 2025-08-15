@@ -34,7 +34,7 @@
 ---@class winbar.opts
 ---
 ---@field condition fun(buffer: integer, window: integer): boolean Condition for a style.
----@field pqrts winbar_component[]
+---@field components winbar_component[]
 
 
 ---@alias winbar_component
