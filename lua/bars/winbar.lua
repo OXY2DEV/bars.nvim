@@ -691,15 +691,7 @@ winbar.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		winbar.detach(window);
 	else
-		vim.api.nvim_set_option_value(
-			"winbar",
-			WBR,
-			{
-				scope = "local",
-				win = window
-			}
-		);
-
+		winbar.set(window);
 		winbar.state.attached_windows[window] = true;
 	end
 
@@ -720,15 +712,7 @@ winbar.detach = function (window)
 		return;
 	end
 
-	vim.api.nvim_set_option_value(
-		"winbar",
-		vim.g.__winbar or "",
-		{
-			scope = "local",
-			win = window
-		}
-	);
-
+	winbar.remove(window);
 	winbar.state.attached_windows[window] = false;
 
 	---|fE
@@ -793,6 +777,43 @@ winbar.update_id = function (window)
 	---|fE
 end
 
+--[[
+Sets the custom statuscolumn for `window`.
+]]
+---@param window integer
+winbar.set = function (window)
+	---|fS
+
+	vim.api.nvim_set_option_value(
+		"winbar",
+		WBR,
+		{
+			scope = "local",
+			win = window
+		}
+	);
+
+	---|fE
+end
+
+--[[
+Removes the custom statuscolumn for `window`.
+]]
+---@param window integer
+winbar.remove = function (window)
+	---|fS
+
+	if vim.wo[window].winbar ~= WBR then
+		return;
+	end
+
+	vim.api.nvim_win_call(window, function ()
+		vim.cmd("set winbar=" .. (vim.g.__winbar or ""));
+	end);
+
+	---|fE
+end
+
 ------------------------------------------------------------------------------
 
 --[[ Toggles `winbar` for **all** windows. ]]
@@ -800,18 +821,10 @@ winbar.Toggle = function ()
 	---|fS
 
 	if winbar.state.enable == true then
-		-- When detaching, only loop over **attached windows**.
-		for win, _ in pairs(winbar.state.attached_windows) do
-			winbar.detach(win);
-		end
+		winbar.Disable();
 	else
-		-- When attaching, loop over **all windows**.
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			winbar.attach(win, true);
-		end
+		winbar.Enable();
 	end
-
-	winbar.state.enable = not winbar.state.enable;
 
 	---|fE
 end
@@ -820,9 +833,10 @@ end
 winbar.Enable = function ()
 	---|fS
 
-	-- When attaching, loop over **all windows**.
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		winbar.attach(win, true);
+	for win, state in pairs(winbar.state.attached_windows) do
+		if state == true then
+			winbar.set(win);
+		end
 	end
 
 	winbar.state.enable = true;
@@ -834,9 +848,10 @@ end
 winbar.Disable = function ()
 	---|fS
 
-	-- When detaching, only loop over **attached windows**.
-	for win, _ in pairs(winbar.state.attached_windows) do
-		winbar.detach(win);
+	for win, state in pairs(winbar.state.attached_windows) do
+		if state == true then
+			winbar.remove(win);
+		end
 	end
 
 	winbar.state.enable = false;

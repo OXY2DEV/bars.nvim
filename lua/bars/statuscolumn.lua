@@ -330,15 +330,7 @@ statuscolumn.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		statuscolumn.detach(window);
 	else
-		vim.api.nvim_set_option_value(
-			"statuscolumn",
-			STC,
-			{
-				scope = "local",
-				win = window
-			}
-		);
-
+		statuscolumn.set(window);
 		statuscolumn.state.attached_windows[window] = true;
 	end
 
@@ -346,35 +338,21 @@ statuscolumn.attach = function (window, ignore_enabled)
 end
 
 --[[
-Detaches the custom `statusline` from **window**.
+Detaches the custom `statuscolumn` from **window**.
 
-NOTE: This will *reset* the statusline for that window.
+NOTE: This will *reset* the statuscolumn for that window.
 ]]
 ---@param window integer
 statuscolumn.detach = function (window)
 	---|fS
 
-	local _statuscolumn = vim.wo[window].statuscolumn;
-
-	if _statuscolumn ~= STC then
+	if statuscolumn.state.attached_windows[window] == false then
+		-- Do not detach from windows whose `state` is **false** as
+		-- they may have a different statuscolumn.
 		return;
 	end
 
-	vim.api.nvim_win_call(window, function ()
-		vim.cmd("set statuscolumn=" .. (vim.g.__statuscolumn or ""));
-
-		-- NOTE(@OXY2DEV): We need a better way to restore `numberwidth` & `relativenumber`.
-		-- vim.wo[window].numberwidth = vim.g.__numberwidth;
-		-- vim.wo[window].relativenumber = vim.g.__relativenumber;
-
-		pcall(vim.api.nvim__redraw, {
-			win = window,
-			flush = true,
-
-			statuscolumn = true,
-		});
-	end);
-
+	statuscolumn.remove(window);
 	statuscolumn.state.attached_windows[window] = false;
 
 	---|fE
@@ -430,6 +408,54 @@ statuscolumn.update_id = function (window)
 	---|fE
 end
 
+--[[
+Sets the custom statuscolumn for `window`.
+]]
+---@param window integer
+statuscolumn.set = function (window)
+	---|fS
+
+	vim.api.nvim_set_option_value(
+		"statuscolumn",
+		STC,
+		{
+			scope = "local",
+			win = window
+		}
+	);
+
+	---|fE
+end
+
+--[[
+Removes the custom statuscolumn for `window`.
+]]
+---@param window integer
+statuscolumn.remove = function (window)
+	---|fS
+
+	if vim.wo[window].statuscolumn ~= STC then
+		return;
+	end
+
+	vim.api.nvim_win_call(window, function ()
+		vim.cmd("set statuscolumn=" .. (vim.g.__statuscolumn or ""));
+
+		-- NOTE(@OXY2DEV): We need a better way to restore `numberwidth` & `relativenumber`.
+		-- vim.wo[window].numberwidth = vim.g.__numberwidth;
+		-- vim.wo[window].relativenumber = vim.g.__relativenumber;
+
+		pcall(vim.api.nvim__redraw, {
+			win = window,
+			flush = true,
+
+			statuscolumn = true,
+		});
+	end);
+
+	---|fE
+end
+
 ------------------------------------------------------------------------------
 
 --[[ Toggles statuscolumn for **all** windows. ]]
@@ -437,18 +463,10 @@ statuscolumn.Toggle = function ()
 	---|fS
 
 	if statuscolumn.state.enable == true then
-		-- When detaching, only loop over **attached windows**.
-		for win, _ in pairs(statuscolumn.state.attached_windows) do
-			statuscolumn.detach(win);
-		end
+		statuscolumn.Disable();
 	else
-		-- When attaching, loop over **all windows**.
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			statuscolumn.attach(win, true);
-		end
+		statuscolumn.Enable();
 	end
-
-	statuscolumn.state.enable = not statuscolumn.state.enable;
 
 	---|fE
 end
@@ -457,9 +475,10 @@ end
 statuscolumn.Enable = function ()
 	---|fS
 
-	-- When attaching, loop over **all windows**.
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		statuscolumn.attach(win, true);
+	for win, state in pairs(statuscolumn.state.attached_windows) do
+		if state == true then
+			statuscolumn.set(win);
+		end
 	end
 
 	statuscolumn.state.enable = true;
@@ -471,9 +490,10 @@ end
 statuscolumn.Disable = function ()
 	---|fS
 
-	-- When detaching, only loop over **attached windows**.
-	for win, _ in pairs(statuscolumn.state.attached_windows) do
-		statuscolumn.detach(win);
+	for win, state in pairs(statuscolumn.state.attached_windows) do
+		if state == true then
+			statuscolumn.remove(win);
+		end
 	end
 
 	statuscolumn.state.enable = false;
