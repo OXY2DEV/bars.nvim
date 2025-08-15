@@ -285,28 +285,35 @@ statuscolumn.start = function ()
 	vim.g.__relativenumber = vim.api.nvim_get_option_value("relativenumber", { scope = "global" });
 	vim.g.__numberwidth = vim.api.nvim_get_option_value("numberwidth", { scope = "global" });
 
+	-- Doesn't work.
+	--- vim.g.__statuscolumn = vim.api.nvim_get_option_value("statuscolumn", { scope = "global" });
+
 	vim.api.nvim_set_option_value("relativenumber", true, { scope = "global" });
 	vim.api.nvim_set_option_value("numberwidth", 1, { scope = "global" });
-
-	-- Doesn't work.
-	-- vim.g.__statuscolumn = vim.api.nvim_get_option_value("statuscolumn", { scope = "global" });
-
-	vim.o.relativenumber = true;
-	vim.o.numberwidth = 1;
 	vim.o.statuscolumn = STC;
+
+	local win = vim.api.nvim_get_current_win();
+	statuscolumn.attach(win);
 
 	---|fE
 end
 
-statuscolumn.attach = function (window)
-	if statuscolumn.state.enable == false then
-		statuscolumn.detach(window);
+--[[
+Attaches the custom `statuscolumn` to **window**.
+
+Set `ignore_enabled` to **true** to disable module state checker.
+]]
+---@param window integer
+---@param ignore_enabled? boolean
+statuscolumn.attach = function (window, ignore_enabled)
+	---|fS
+
+	if ignore_enabled ~= true and statuscolumn.state.enable == false then
+		-- Do not attach if **this module is disabled**.
+		-- Unless we *explicitly* ignore it.
 		return;
-	end
-
-	local _statuscolumn = vim.wo[window].statuscolumn;
-
-	if _statuscolumn == STC then
+	elseif statuscolumn.state.attached_windows[window] == true then
+		-- Do not attach if **already attached to a window**.
 		return;
 	end
 
@@ -314,27 +321,62 @@ statuscolumn.attach = function (window)
 	local buffer = vim.api.nvim_win_get_buf(window);
 
 	if vim.list_contains(statuscolumn.config.ignore_filetypes, vim.bo[buffer].ft) then
+		-- Do not attach if `filetype` is *ignored*.
 		statuscolumn.detach(window);
-		return;
 	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, vim.bo[buffer].bt) then
+		-- Do not attach if `buftype` is *ignored*.
 		statuscolumn.detach(window);
-		return;
 	elseif statuscolumn.check_condition(buffer, window) == false then
+		-- Do not attach if **conditionally ignored**.
 		statuscolumn.detach(window);
-		return "";
+	else
+		vim.api.nvim_set_option_value(
+			"statuscolumn",
+			STC,
+			{
+				scope = "local",
+				win = window
+			}
+		);
+
+		statuscolumn.state.attached_windows[window] = true;
 	end
 
-	vim.wo[window].statuscolumn = STC;
+	---|fE
 end
 
+--[[
+Detaches the custom `statusline` from **window**.
+
+NOTE: This will *reset* the statusline for that window.
+]]
+---@param window integer
 statuscolumn.detach = function (window)
+	---|fS
+
 	local _statuscolumn = vim.wo[window].statuscolumn;
 
 	if _statuscolumn ~= STC then
 		return;
 	end
 
-	vim.wo[window].statuscolumn = vim.g.__statuscolumn or "";
+	vim.api.nvim_win_call(window, function ()
+		vim.cmd("set statuscolumn=" .. (vim.g.__statuscolumn or ""));
+
+		vim.wo[window].numberwidth = vim.g.__numberwidth;
+		vim.wo[window].relativenumber = vim.g.__relativenumber;
+
+		pcall(vim.api.nvim__redraw, {
+			win = window,
+			flush = true,
+
+			statuscolumn = true,
+		});
+	end);
+
+	statuscolumn.state.attached_windows[window] = false;
+
+	---|fE
 end
 
 --- Updates the configuration ID for {window}.
@@ -382,11 +424,89 @@ statuscolumn.update_id = function (window)
 		::continue::
 	end
 
-	statuscolumn.state.attached_windows[window] = true;
 	vim.w[window].__scID = ID;
 
 	---|fE
 end
+
+------------------------------------------------------------------------------
+
+--[[ Toggles statuscolumn for **all** windows. ]]
+statuscolumn.Toggle = function ()
+	---|fS
+
+	if statuscolumn.state.enable == true then
+		-- When detaching, only loop over **attached windows**.
+		for win, _ in pairs(statuscolumn.state.attached_windows) do
+			statuscolumn.detach(win);
+		end
+	else
+		-- When attaching, loop over **all windows**.
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			statuscolumn.attach(win, true);
+		end
+	end
+
+	statuscolumn.state.enable = not statuscolumn.state.enable;
+
+	---|fE
+end
+
+--[[ Enables statuscolumn for **all** windows. ]]
+statuscolumn.Enable = function ()
+	---|fS
+
+	-- When attaching, loop over **all windows**.
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		statuscolumn.attach(win, true);
+	end
+
+	statuscolumn.state.enable = true;
+
+	---|fE
+end
+
+--[[ Disables statuscolumn for **all** windows. ]]
+statuscolumn.Disable = function ()
+	---|fS
+
+	-- When detaching, only loop over **attached windows**.
+	for win, _ in pairs(statuscolumn.state.attached_windows) do
+		statuscolumn.detach(win);
+	end
+
+	statuscolumn.state.enable = false;
+
+	---|fE
+end
+
+--[[ Toggles statuscolumn for `window`. ]]
+---@param window integer
+statuscolumn.toggle = function (window)
+	---|fS
+
+	if statuscolumn.state.attached_windows[window] == true then
+		statuscolumn.detach(window);
+	else
+		statuscolumn.attach(window);
+	end
+
+	---|fE
+end
+
+--[[ Enables statuscolumn for `window`. ]]
+---@param window integer
+statuscolumn.enable = function (window)
+	statuscolumn.attach(window);
+end
+
+--[[ Disables statuscolumn for `window`. ]]
+---@param window integer
+statuscolumn.disable = function (window)
+	statuscolumn.detach(window);
+end
+
+------------------------------------------------------------------------------
 
 --- Sets up the statuscolumn module.
 ---@param config statuscolumn.config | boolean | nil

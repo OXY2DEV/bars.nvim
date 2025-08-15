@@ -591,10 +591,10 @@ statusline.attach = function (window, ignore_enabled)
 	local buffer = vim.api.nvim_win_get_buf(window);
 
 	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
-		-- Do not attach if **filetype is ignored**.
+		-- Do not attach if `filetype` is *ignored*.
 		statusline.detach(window);
 	elseif vim.list_contains(statusline.config.ignore_buftypes, vim.bo[buffer].bt) then
-		-- Do not attach if **buftype is ignored**.
+		-- Do not attach if `buftype` is *ignored*.
 		statusline.detach(window);
 	elseif statusline.check_condition(buffer, window) == false then
 		-- Do not attach if **conditionally ignored**.
