@@ -598,15 +598,7 @@ statusline.attach = function (window)
 		-- Do not attach if **conditionally ignored**.
 		statusline.detach(window);
 	else
-		vim.api.nvim_set_option_value(
-			"statusline",
-			STL,
-			{
-				scope = "local",
-				win = window
-			}
-		);
-
+		statusline.set(window);
 		statusline.state.attached_windows[window] = true;
 	end
 
@@ -632,10 +624,13 @@ statusline.detach = function (window)
 		vim.cmd("set statusline=" .. (vim.g.__statusline or ""));
 	end);
 
+	statusline.remove(window);
 	statusline.state.attached_windows[window] = false;
 
 	---|fE
 end
+
+------------------------------------------------------------------------------
 
 --[[ Updates the used configuration/style ID for `window`. ]]
 ---@param window integer
@@ -691,6 +686,39 @@ statusline.update_id = function (window)
 	end
 
 	vim.w[window].__slID = ID;
+
+	---|fE
+end
+
+--[[
+Sets the custom statusline for `window`.
+]]
+---@param window integer
+statusline.set = function (window)
+	---|fS
+
+	vim.api.nvim_set_option_value(
+		"statusline",
+		STL,
+		{
+			scope = "local",
+			win = window
+		}
+	);
+
+	---|fE
+end
+
+--[[
+Removes the custom statusline for `window`.
+]]
+---@param window integer
+statusline.remove = function (window)
+	---|fS
+
+	vim.api.nvim_win_call(window, function ()
+		vim.cmd("set statusline=" .. (vim.g.__statusline or ""));
+	end);
 
 	---|fE
 end
