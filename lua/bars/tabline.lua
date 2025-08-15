@@ -177,10 +177,19 @@ tabline.start = function ()
 	---|fE
 end
 
-tabline.stop = function ()
-	local _tabline = vim.api.nvim_get_option_value("tabline", { scope = "global" });
+tabline.attach = function ()
+	if tabline.state.enable == true then
+		return;
+	end
 
-	if _tabline ~= TBL and _tabline ~= "" then
+	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
+	tabline.state.enable = true;
+end
+
+tabline.detach = function ()
+	---|fS
+
+	if tabline.state.enable ~= true then
 		return;
 	end
 
@@ -191,6 +200,9 @@ tabline.stop = function ()
 			scope = "global"
 		}
 	);
+	tabline.state.enable = false;
+
+	---|fE
 end
 
 --- Updates the configuration ID for {window}.
@@ -212,6 +224,7 @@ tabline.update_id = function ()
 			goto continue;
 		end
 
+		---@type tabline.opts
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
@@ -236,7 +249,55 @@ tabline.update_id = function ()
 	---|fE
 end
 
-----------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+--[[ Toggles tabline for **all** windows. ]]
+tabline.Toggle = function ()
+	---|fS
+
+	if tabline.state.enable == true then
+		tabline.detach();
+	else
+		tabline.attach();
+	end
+
+	---|fE
+end
+
+--[[ Enables tabline for **all** windows. ]]
+tabline.Enable = function ()
+	tabline.attach();
+end
+
+--[[ Disables tabline for **all** windows. ]]
+tabline.Disable = function ()
+	tabline.detach();
+end
+
+--[[ Toggles tabline. ]]
+tabline.toggle = function ()
+	---|fS
+
+	if tabline.state.enable == true then
+		tabline.detach();
+	else
+		tabline.attach();
+	end
+
+	---|fE
+end
+
+--[[ Enables tabline. ]]
+tabline.enable = function ()
+	tabline.attach();
+end
+
+--[[ Disables tabline. ]]
+tabline.disable = function ()
+	tabline.detach();
+end
+
+------------------------------------------------------------------------------
 
 --- Sets up the tabline module.
 ---@param config tabline.config | boolean | nil
