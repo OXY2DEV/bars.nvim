@@ -676,6 +676,9 @@ winbar.attach = function (window, ignore_enabled)
 	elseif winbar.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
+	elseif vim.wo[window].winbar ~= vim.g.__winbar then
+		-- Do not attach to windows with `custom winbar`.
+		return;
 	end
 
 	---@type integer
