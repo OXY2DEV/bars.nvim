@@ -14,6 +14,8 @@
 --- Configuration for the winbar module.
 ---@class winbar.config
 ---
+---@field force_attach? string[] List of `winbar`s to ignore when attaching.
+---
 --- Filetypes to ignore.
 ---@field ignore_filetypes string[]
 ---

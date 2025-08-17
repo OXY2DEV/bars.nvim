@@ -377,6 +377,11 @@ TEMPLATES = {
 
 ---@type statusline.config
 statusline.config = {
+	force_attach = {
+		-- `Quickfix` window's statusline.
+		"%t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P",
+	},
+
 	ignore_filetypes = {},
 	ignore_buftypes = {},
 
@@ -577,13 +582,27 @@ Set `ignore_enabled` to **true** to disable module state checker.
 statusline.attach = function (window)
 	---|fS
 
+	--[[ Forcefully attach to `window`? ]]
+	---@return boolean
+	local function force_attach ()
+		if
+			statusline.config.force_attach and
+			vim.islist(statusline.config.force_attach) and
+			vim.list_contains(statusline.config.force_attach, vim.wo[window].statusline)
+		then
+			return true;
+		end
+
+		return false;
+	end
+
 	if statusline.state.enable == false then
 		-- Do not attach if **this module is disabled**.
 		return;
 	elseif statusline.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].statusline ~= vim.g.__statusline then
+	elseif vim.wo[window].statusline ~= vim.g.__statusline and force_attach() ~= true then
 		-- Do not attach to windows with `custom statusline`.
 		return;
 	end

@@ -7,6 +7,8 @@ local WBR = "%!v:lua.require('bars.winbar').render()";
 
 ---@class winbar.config
 winbar.config = {
+	force_attach = {},
+
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "nofile", "help" },
 
@@ -670,13 +672,27 @@ Set `ignore_enabled` to **true** to disable module state checker.
 winbar.attach = function (window, ignore_enabled)
 	---|fS
 
+	--[[ Forcefully attach to `window`? ]]
+	---@return boolean
+	local function force_attach ()
+		if
+			winbar.config.force_attach and
+			vim.islist(winbar.config.force_attach) and
+			vim.list_contains(winbar.config.force_attach, vim.wo[window].statusline)
+		then
+			return true;
+		end
+
+		return false;
+	end
+
 	if ignore_enabled ~= true and winbar.state.enable == false then
 		-- Do not attach if **this module is disabled**.
 		return;
 	elseif winbar.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].winbar ~= vim.g.__winbar then
+	elseif vim.wo[window].winbar ~= vim.g.__winbar and force_attach() ~= true then
 		-- Do not attach to windows with `custom winbar`.
 		return;
 	end

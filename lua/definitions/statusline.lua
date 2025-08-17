@@ -17,6 +17,8 @@
 --- Statusline configuration table.
 ---@class statusline.config
 ---
+---@field force_attach? string[] List of `statusline`s to ignore when attaching.
+---
 --- Filetypes to ignore.
 ---@field ignore_filetypes? string[]
 --- Buftypes to ignore.

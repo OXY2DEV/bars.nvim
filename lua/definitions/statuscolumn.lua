@@ -17,6 +17,8 @@
 --- Configuration table for the statuscolumn.
 ---@class statuscolumn.config
 ---
+---@field force_attach? string[] List of `statuscolumns`s to ignore when attaching.
+---
 --- Filetypes to ignore.
 ---@field ignore_filetypes string[]
 --- Buftypes to ignore.

@@ -30,6 +30,8 @@ local gradient_map = {
 
 ---@type statuscolumn.config
 statuscolumn.config = {
+	force_attach = {},
+
 	ignore_filetypes = { "blink-cmp-menu" },
 	ignore_buftypes = { "help", "quickfix" },
 
@@ -308,6 +310,20 @@ Set `ignore_enabled` to **true** to disable module state checker.
 statuscolumn.attach = function (window, ignore_enabled)
 	---|fS
 
+	--[[ Forcefully attach to `window`? ]]
+	---@return boolean
+	local function force_attach ()
+		if
+			statuscolumn.config.force_attach and
+			vim.islist(statuscolumn.config.force_attach) and
+			vim.list_contains(statuscolumn.config.force_attach, vim.wo[window].statusline)
+		then
+			return true;
+		end
+
+		return false;
+	end
+
 	if ignore_enabled ~= true and statuscolumn.state.enable == false then
 		-- Do not attach if **this module is disabled**.
 		-- Unless we *explicitly* ignore it.
@@ -315,7 +331,7 @@ statuscolumn.attach = function (window, ignore_enabled)
 	elseif statuscolumn.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].statuscolumn ~= vim.g.__statuscolumn then
+	elseif vim.wo[window].statuscolumn ~= vim.g.__statuscolumn and force_attach() ~= true then
 		-- Do not attach to windows with `custom statuscolumn`.
 		return;
 	end
