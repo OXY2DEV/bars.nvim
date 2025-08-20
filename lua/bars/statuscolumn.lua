@@ -560,7 +560,7 @@ statuscolumn.setup = function (config)
 	end
 
 	for window, _ in pairs(statuscolumn.state.attached_windows) do
-		vim.w[window].__scID = statuscolumn.update_id(window);
+		 statuscolumn.update_id(window);
 	end
 
 	---|fE
