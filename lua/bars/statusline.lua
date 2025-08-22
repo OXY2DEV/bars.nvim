@@ -604,7 +604,7 @@ statusline.attach = function (window)
 	elseif statusline.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].statusline ~= vim.g.__statusline and force_attach() ~= true then
+	elseif vim.wo[window].statusline ~= STL and vim.wo[window].statusline ~= vim.g.__statusline and force_attach() ~= true then
 		-- Do not attach to windows with `custom statusline`.
 		return;
 	end

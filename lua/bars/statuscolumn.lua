@@ -331,7 +331,7 @@ statuscolumn.attach = function (window, ignore_enabled)
 	elseif statuscolumn.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].statuscolumn ~= vim.g.__statuscolumn and force_attach() ~= true then
+	elseif vim.wo[window].statuscolumn ~= STC and vim.wo[window].statuscolumn ~= vim.g.__statuscolumn and force_attach() ~= true then
 		-- Do not attach to windows with `custom statuscolumn`.
 		return;
 	end
