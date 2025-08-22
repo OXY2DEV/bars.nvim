@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.3.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.2.0...v2.3.0) (2025-08-22)
+
+
+### Features
+
+* **statuscolumn, statusline, winbar:** Added ability to ignore custom values ([c03c3ee](https://github.com/OXY2DEV/bars.nvim/commit/c03c3eeb5629c77a392b1ed5760df60568b84a8a))
+* **statuscolumn:** Added `Toggle`, `Enable`, `Disable` etc. command support ([6079b0d](https://github.com/OXY2DEV/bars.nvim/commit/6079b0dba3726af26baa303b6a6e8056dc802cf4))
+* **statusline:** Added action support ([3588177](https://github.com/OXY2DEV/bars.nvim/commit/3588177eae189079ed5aeba16a2da70852f4a408))
+* **statusline:** Added missing `Toggle` function ([8d8085c](https://github.com/OXY2DEV/bars.nvim/commit/8d8085c9001f4de928e07cdfe53b211bc9b19be2))
+* **tabline:** Added `Toggle`, `Enable`, `Disable` etc. command support ([a8beb06](https://github.com/OXY2DEV/bars.nvim/commit/a8beb066266e204eeac9adbe9b45226ebb56dcb6))
+* **winbar:** Added `Toggle`, `Enable`, `Disable` etc. command support ([4976871](https://github.com/OXY2DEV/bars.nvim/commit/4976871625c35e2e93b0dfabed7d5105649236c5))
+
+
+### Bug Fixes
+
+* **highlights:** Updated `BarsFt6` definition ([06ad70f](https://github.com/OXY2DEV/bars.nvim/commit/06ad70f9fadff10ff1a16864516a6bcd822c47f7))
+* **statuscolumn, statusline, winbar:** Custom values set by user & plugins is now respected ([6f40fa4](https://github.com/OXY2DEV/bars.nvim/commit/6f40fa452b4df8101514add507c4232f5bb47071))
+* **statuscolumn:** Fixed a bug with `setup()` overriding incorrect variable ([6ec55c1](https://github.com/OXY2DEV/bars.nvim/commit/6ec55c1df6c9d7c27e00767016a717b384581664))
+* **statuscolumn:** Reverted a change causing `numberwidth` & `relativenumber` to not be restored correctly ([89e8f63](https://github.com/OXY2DEV/bars.nvim/commit/89e8f63ccea81823389f23b76e54be6c1afb09c4))
+* **statusline, statuscolumn, winbar:** Fixed a bug preventing windows from attaching ([7aa6057](https://github.com/OXY2DEV/bars.nvim/commit/7aa60575e8db3b3003267b616255b8c150ad5225))
+* **statusline:** `remove()` now only works on attached windows ([823ec48](https://github.com/OXY2DEV/bars.nvim/commit/823ec48f1b8bdb9ea40b2cc275450f4789b957dd))
+* **statusline:** Changed behavior of `Enable`, `Disable` & `Toggle` ([56504e4](https://github.com/OXY2DEV/bars.nvim/commit/56504e4aef1dc49d960cc568eda74f3495e49598))
+
 ## [2.2.0](https://github.com/OXY2DEV/bars.nvim/compare/v2.1.0...v2.2.0) (2025-07-03)
 
 
