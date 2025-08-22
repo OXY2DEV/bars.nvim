@@ -156,8 +156,10 @@ TEMPLATES = {
 			hl = "BarsFt0"
 		},
 
-		["^fish"] = {
-			icon = "󰐂 ",
+		["^config"] = {
+			icon = "󰒓 ",
+
+			hl = "BarsFt6"
 		},
 
 		---|fE

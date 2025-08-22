@@ -851,7 +851,7 @@ hl.groups = {
 				group_name = "BarsFt6",
 				value = {
 					fg = string.format("#%02x%02x%02x", hl.num_to_rgb(
-						hl.get_attr("fg", { "@module", "@property" }) or hl.choice(7505917, 11845374)
+						hl.get_attr("fg", { "@markup.link" }) or hl.choice(7505917, 11845374)
 					)),
 					bg = string.format("#%02x%02x%02x", hl.oklab_to_rgb(BL, BA, BB)),
 				},
