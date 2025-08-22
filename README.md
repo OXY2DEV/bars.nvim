@@ -1,59 +1,60 @@
 # 🚀 bars.nvim
 
-<div align="center">
-    <img alt="Neovim" src="https://img.shields.io/badge/Neovim-000?style=for-the-badge&logo=neovim&logoColor=A6E3A1&color=1E1E2E">
-    <img alt="Repo size" src="https://img.shields.io/github/languages/code-size/OXY2DEV/bars.nvim?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggc3Ryb2tlPSIjQ0JBNkY3IiBmaWxsPSIjQ0JBNkY3IiBkPSJNOTYgMEM0MyAwIDAgNDMgMCA5NkwwIDQxNmMwIDUzIDQzIDk2IDk2IDk2bDI4OCAwIDMyIDBjMTcuNyAwIDMyLTE0LjMgMzItMzJzLTE0LjMtMzItMzItMzJsMC02NGMxNy43IDAgMzItMTQuMyAzMi0zMmwwLTMyMGMwLTE3LjctMTQuMy0zMi0zMi0zMkwzODQgMCA5NiAwem0wIDM4NGwyNTYgMCAwIDY0TDk2IDQ0OGMtMTcuNyAwLTMyLTE0LjMtMzItMzJzMTQuMy0zMiAzMi0zMnptMzItMjQwYzAtOC44IDcuMi0xNiAxNi0xNmwxOTIgMGM4LjggMCAxNiA3LjIgMTYgMTZzLTcuMiAxNi0xNiAxNmwtMTkyIDBjLTguOCAwLTE2LTcuMi0xNi0xNnptMTYgNDhsMTkyIDBjOC44IDAgMTYgNy4yIDE2IDE2cy03LjIgMTYtMTYgMTZsLTE5MiAwYy04LjggMC0xNi03LjItMTYtMTZzNy4yLTE2IDE2LTE2eiIvPjwvc3ZnPg%3D%3D&logoColor=CBA6F7&labelColor=1e1e2e&color=B4BEFE">
-    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/OXY2DEV/bars.nvim?include_prereleases&sort=semver&display_name=release&style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggZmlsbD0iI0Y1RTBEQyIgc3Ryb2tlPSIjRjVFMERDIiBkPSJNMzQ1IDM5LjFMNDcyLjggMTY4LjRjNTIuNCA1MyA1Mi40IDEzOC4yIDAgMTkxLjJMMzYwLjggNDcyLjljLTkuMyA5LjQtMjQuNSA5LjUtMzMuOSAuMnMtOS41LTI0LjUtLjItMzMuOUw0MzguNiAzMjUuOWMzMy45LTM0LjMgMzMuOS04OS40IDAtMTIzLjdMMzEwLjkgNzIuOWMtOS4zLTkuNC05LjItMjQuNiAuMi0zMy45czI0LjYtOS4yIDMzLjkgLjJ6TTAgMjI5LjVMMCA4MEMwIDUzLjUgMjEuNSAzMiA0OCAzMmwxNDkuNSAwYzE3IDAgMzMuMyA2LjcgNDUuMyAxOC43bDE2OCAxNjhjMjUgMjUgMjUgNjUuNSAwIDkwLjVMMjc3LjMgNDQyLjdjLTI1IDI1LTY1LjUgMjUtOTAuNSAwbC0xNjgtMTY4QzYuNyAyNjIuNyAwIDI0Ni41IDAgMjI5LjV6TTE0NCAxNDRhMzIgMzIgMCAxIDAgLTY0IDAgMzIgMzIgMCAxIDAgNjQgMHoiLz48L3N2Zz4%3D&labelColor=1E1E2E&color=45475A">
-</div>
+<!-- Images -->
 
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-tokyonight.png">
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-onedark.png">
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">
+<p align="center">
+    <a href="">📚 Wiki</a> | <a href="#-commands">🧰 Commands</a>
+</p>
 
-A starting point/guide for creating custom statusline, statuscolumn, tabline & winbar for Neovim.
+A bare-bones custom `statusline`, `statuscolumn`, `winbar`, `tabline` implementation for `Neovim`.
 
-> `bars.nvim` is NOT a plugin, if it wasn't clear. It's just a reference manual.
+This repository is meant to teach you how to set up your `statusline`, `statuscolumn`, `winbar`, `tabline` without needing to rely on *external plugins*.
 
-## 📖 Table of contents
+## 💡 Core features
 
-- [✨ Features](#-features)
-- [📚 Requirements](#-requirements)
-- [💡 Guide](#-guide)
-- [📐 Installation](#-installation)
-- [🧭 Configuration](#-configuration)
-- [🧰 Commands](#-commands)
+- Easy to configure bars & lines.
+- Dynamic configuration capable of being changed on the fly.
+- Ability to have different bars & lines per window.
+- Ability to toggle various bars & lines through command(`:Bars`) either globally or per window.
+- Respects custom bars & lines values(e.g. from plugins, from `quickfix` etc.).
+- Usable on vertical screens(e.g. in `Termux`).
 
-## ✨ Features
+## 📂 Project structure
 
-- Actually fast,
-    - Termux: average: `7ms`, lowest: `5ms`.
-    - MacOS: average: `2ms`, lowest: `1.8ms`.
+The project is structured as followed,
 
-- Fully customisable.
-- Per-window configuration.
-- Ability to toggle various bars/lines via commands.
+- `plugin/`, to avoid relying on `setup()` and for *caching* certain values.
+- `lua/`
+    + `bars.lua`, contains internal functions, setup function etc.
+    * `definition/`, type definitions.
+        * `statuscolumn.lua`, statuscolumn type definitions.
+        * `statusline.lua`, statusline type definitions.
+        * `tabline.lua`, custom tabline type definitions.
+        * `winbar.lua`, winbar type definitions.
+    + `bars/`
+        * `components/`, reusable sections for various bars & lines.
+            * `statuscolumn.lua`, statuscolumn components.
+            * `statusline.lua`, statusline components.
+            * `tabline.lua`, tabline components.
+            * `winbar.lua`, winbar components.
+        * `global.lua`, click handlers & related functions used in bars & lines.
+        * `highlights.lua`, highlight group definitions.
+        * `statuscolumn.lua`, custom statuscolumn.
+        * `statusline.lua`, custom statusline.
+        * `tabline.lua`, custom tabline.
+        * `winbar.lua`, custom winbar.
+        * `utils.lua`, utility functions.
 
 ## 📚 Requirements
 
-- 0.10.4 or higher recommended.
+- Neovim: `>=0.10.3`
+- Nerd font: `>= 3.0.0`
+- Git(for showing `branch` in statusline)
+- Tree-sitter parser(for showing current `TSNode` in winbar)
 
->[!NOTE]
-> The version requirement varies for different parts of `bars.nvim`.
+## 📦 Installation
 
-- Nerd font >= 3.0.0
-- Git(`branch` in statusline).
-- Tree-sitter parser(`node` in winbar).
-
-## 💡 Guide
-
-Guide for creating your own custom statusline, statuscolumn, tabline & winbar are given below,
-
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Tabline)
-
-## 📐 Installation
+You can install it locally to test it out via your favourite favourite package manager!
 
 ### 🧩 Vim-plug
 
@@ -76,7 +77,7 @@ For `plugins.lua` users,
 },
 ```
 
-For `plugins/bars.lua`,
+For `plugins/bars.lua` users,
 
 ```lua
 return {
@@ -112,138 +113,62 @@ Tagged releases can be found in the [release page](https://github.com/OXY2DEV/ba
 
 ## 🧭 Configuration
 
-`bars.nvim` can be configured in 2 ways,
-
-1. Via the `setup()` function.
+You can call `require("bars").setup()` with your configuration table. It can also be used to disable certain `modules`,
 
 ```lua
 require("bars").setup({
-    global = false
+    -- Disables the `winbar`.
+    winbar = false
 });
 ```
 
-2. Via the modules own setup function.
+You can also configure modules *individually*,
 
 ```lua
 require("bars.statusline").setup({
-    ignore_filwtypes = { "help" }
+    ignore_filetypes = { "query" },
 });
 ```
 
-Check the [wiki](https://github.com/OXY2DEV/bars.nvim/wiki/Home) to learn about all the configuration options!
-
-Usage instructions for different modules,
-
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Tabline)
-
 ## 🧰 Commands
 
-`bars.nvim` provides a single command `:Bars` which has **sub-commands** that can be used to do different things.
-
-```
-USAGE,
-    :Bars
-
-    :Bars [sub-command]
-
-    :Bars [sub-command] [modifier]
-
-    :Bars [sub-command] [modifier] [window_1] [window_2] ..
-
-EXAMPLE,
-    :Bars toggle ? 1000
-```
-
-The sub-commands are given below,
-
-
-| Sub-command | Description                                                       |
-|-------------|-------------------------------------------------------------------|
-| Toggle      | Used to toggle statusline, statuscolumn etc. **globally**.        |
-| Enable      | Used to enable statusline, statuscolumn etc. **globally**.        |
-| Disable     | Used to disable statusline, statuscolumn etc. **globally**.       |
-| toggle      | Used to toggle statusline, statuscolumn etc. of given window(s).  |
-| enable      | Used to enable statusline, statuscolumn etc. of given window(s).  |
-| disable     | Used to disable statusline, statuscolumn etc. of given window(s). |
-| clean       | Cleans up cached values of deleted windows.                       |
-| update      | Updates the module's configuration ID of given window.            |
-
-
-All the sub-commands support **modifier** to specify which modules should be affected by the command.
+This plugin provides a single command `:Bars` with various sub-commands.
 
 >[!TIP]
-> If you want to run a sub-command on the current window then you can ignore the modifier.
->
-> ```vim
-> " Toggles all bars & lines for the current window.
-> :Bars toggle
-> ```
+> Completions are also provided for the `sub-commands`.
 
-Modifiers are given below,
+Usage,
 
-| Modifier     | Description                       |
-|--------------|-----------------------------------|
-| all          | Affects all modules.              |
-| ?            | Prompt which module(s) to affect. |
-| statusline   | Self-explanatory.                 |
-| statuscolumn | Self-explanatory.                 |
-| tabline      | Self-explanatory.                 |
-| winbar       | Self-explanatory.                 |
+```vim
+:Bars                                  "Runs,    :Bars Toggle
+:Bars <sub_command> <act_on>           "Example, :Bars toggle winbar
+:Bars <sub_command> <act_on> <windows> "Example, :Bars toggle all 1000
+```
 
-You can add any number of windows after the modifier to specify which windows to run the command on.
+The available `sub-commands` are,
 
->[!TIP]
-> Cmdline completion are provided for all sub-commands/modifiers/windows!
+| Name    | Description                                                                           |
+|---------|---------------------------------------------------------------------------------------|
+| Toggle  | Toggles different bars & lines globally(toggles all of them when not specified).      |
+| Enable  | Enables different bars & lines globally(enables all of them when not specified).      |
+| Disable | Disables different bars & lines globally(disables all of them when not specified).    |
+| toggle  | Toggles different bars & lines for windows(toggles all of them when not specified).   |
+| enable  | Enables different bars & lines for windows(enables all of them when not specified).   |
+| disable | Disables different bars & lines for windows(disables all of them when not specified). |
 
-## 🎨 Highlight groups
+All the sub-commands allows specifying what(e.g. `statusline`, `statuscolumn` etc.) the command should act on. These can be any of the following,
 
-`bars.nvim` comes with the following highlight groups,
+| Act on       | Description                                          |
+|--------------|------------------------------------------------------|
+| ?            | Prompt the user what to act on(supports completion). |
+| all          | Act on **all** modules.                              |
+| statuscolumn | Only act on the `statuscolumn` module.               |
+| statusline   | Only act on the `statusline` module.                 |
+| tabline      | Only act on the `tabline` module.                    |
+| winbar       | Only act on the `winbar` module.                     |
 
-- BarsFoldClose1
-- BarsFoldOpen1
-- BarsFoldClose2
-- BarsFoldOpen2
-- BarsFoldClose3
-- BarsFoldOpen3
-- BarsFoldClose4
-- BarsFoldOpen4
-- BarsFoldClose5
-- BarsFoldOpen5
-- BarsFoldClose6
-- BarsFoldOpen6
+Lastly, you can add any number of window IDs afterwards to specify which window(s) to run the command on.
 
-- BarsLineNr
-- BarsWrap1<1..10>
-- BarsVirtual2<1..10>
-
-- BarsNormal<1..10>
-- BarsInsert<1..10>
-- BarsVisual<1..10>
-- BarsVisualLine<1..10>
-- BarsVisualBlock<1..10>
-- BarsCommand<1..10>
-
-- BarsNormal
-- BarsInsert
-- BarsVisual
-- BarsVisualLine
-- BarsVisualBlock
-- BarsCommand
-
-- BarsFt
-- BarsFt0
-- BarsFt1
-- BarsFt2
-- BarsFt3
-- BarsFt4
-- BarsFt5
-- BarsFt6
-
-- BarsGit
-
-- BarsRuler
-- BarsRulerVisual
+>[!NOTE]
+> Global commands such as `Toggle`, `Enable`, `Disable` don't allow specifying window IDs!
 
