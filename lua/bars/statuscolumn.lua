@@ -85,10 +85,7 @@ statuscolumn.config = {
 							return true;
 						end
 					else
-						if mode == "n" then
-							--- On normal mode only show LSP signs.
-							return string.match(name, "vim%.lsp%.") ~= nil;
-						elseif vim.list_contains({ "i", "v", "V", "" }, mode) then
+						if vim.list_contains({ "i", "v", "V", "" }, mode) then
 							--- On visual mode only show git signs.
 							return string.match(name, "^gitsigns") ~= nil;
 						end
