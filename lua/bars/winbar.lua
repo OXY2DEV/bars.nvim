@@ -686,10 +686,7 @@ winbar.attach = function (window, ignore_enabled)
 		return false;
 	end
 
-	if ignore_enabled ~= true and winbar.state.enable == false then
-		-- Do not attach if **this module is disabled**.
-		return;
-	elseif winbar.state.attached_windows[window] == true then
+	if winbar.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
 	elseif vim.wo[window].winbar ~= WBR and vim.wo[window].winbar ~= vim.g.__winbar and force_attach() ~= true then
@@ -710,6 +707,12 @@ winbar.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		winbar.detach(window);
 	else
+		if ignore_enabled ~= true and winbar.state.enable == false then
+			-- Do not attach if **this module is disabled**.
+			winbar.state.attached_windows[window] = false;
+			return;
+		end
+
 		winbar.set(window);
 		winbar.state.attached_windows[window] = true;
 	end
@@ -723,7 +726,8 @@ Detaches the custom `statusline` from **window**.
 NOTE: This will *reset* the statusline for that window.
 ]]
 ---@param window integer
-winbar.detach = function (window)
+---@param set_state? boolean
+winbar.detach = function (window, set_state)
 	---|fS
 
 	if winbar.state.attached_windows[window] == false then
@@ -732,7 +736,10 @@ winbar.detach = function (window)
 	end
 
 	winbar.remove(window);
-	winbar.state.attached_windows[window] = false;
+
+	if set_state then
+		winbar.state.attached_windows[window] = false;
+	end
 
 	---|fE
 end
@@ -852,9 +859,10 @@ end
 winbar.Enable = function ()
 	---|fS
 
+	-- vim.print(winbar.state.attached_windows)
 	for win, state in pairs(winbar.state.attached_windows) do
-		if state == true then
-			winbar.set(win);
+		if state == false then
+			winbar.enable(win);
 		end
 	end
 
@@ -869,7 +877,7 @@ winbar.Disable = function ()
 
 	for win, state in pairs(winbar.state.attached_windows) do
 		if state == true then
-			winbar.remove(win);
+			winbar.disable(win);
 		end
 	end
 
@@ -884,9 +892,9 @@ winbar.toggle = function (window)
 	---|fS
 
 	if winbar.state.attached_windows[window] == true then
-		winbar.detach(window);
+		winbar.disable(window);
 	else
-		winbar.attach(window);
+		winbar.enable(window);
 	end
 
 	---|fE
@@ -895,13 +903,15 @@ end
 --[[ Enables `winbar` for `window`. ]]
 ---@param window integer
 winbar.enable = function (window)
-	winbar.attach(window);
+	winbar.set(window);
+	winbar.state.attached_windows[window] = true;
 end
 
 --[[ Disables `winbar` for `window`. ]]
 ---@param window integer
 winbar.disable = function (window)
-	winbar.detach(window);
+	winbar.remove(window);
+	winbar.state.attached_windows[window] = false;
 end
 
 ------------------------------------------------------------------------------

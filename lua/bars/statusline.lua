@@ -581,7 +581,7 @@ Attaches the custom `statusline` to **window**.
 Set `ignore_enabled` to **true** to disable module state checker.
 ]]
 ---@param window integer
-statusline.attach = function (window)
+statusline.attach = function (window, ignore_enabled)
 	---|fS
 
 	--[[ Forcefully attach to `window`? ]]
@@ -598,10 +598,7 @@ statusline.attach = function (window)
 		return false;
 	end
 
-	if statusline.state.enable == false then
-		-- Do not attach if **this module is disabled**.
-		return;
-	elseif statusline.state.attached_windows[window] == true then
+	if statusline.state.attached_windows[window] == true then
 		-- Do not attach if **already attached to a window**.
 		return;
 	elseif vim.wo[window].statusline ~= STL and vim.wo[window].statusline ~= vim.g.__statusline and force_attach() ~= true then
@@ -622,6 +619,12 @@ statusline.attach = function (window)
 		-- Do not attach if **conditionally ignored**.
 		statusline.detach(window);
 	else
+		if ignore_enabled ~= true and statusline.state.enable == false then
+			-- Do not attach if **this module is disabled**.
+			statusline.state.attached_windows[window] = false;
+			return;
+		end
+
 		statusline.set(window);
 		statusline.state.attached_windows[window] = true;
 	end
@@ -635,7 +638,7 @@ Detaches the custom `statusline` from **window**.
 NOTE: This will *reset* the statusline for that window.
 ]]
 ---@param window integer
-statusline.detach = function (window)
+statusline.detach = function (window, set_state)
 	---|fS
 
 	if statusline.state.attached_windows[window] == false then
@@ -649,7 +652,10 @@ statusline.detach = function (window)
 	end);
 
 	statusline.remove(window);
-	statusline.state.attached_windows[window] = false;
+
+	if set_state then
+		statusline.state.attached_windows[window] = false;
+	end
 
 	---|fE
 end
@@ -772,7 +778,7 @@ statusline.Enable = function ()
 
 	for win, state in pairs(statusline.state.attached_windows) do
 		if state == true then
-			statusline.set(win);
+			statusline.enable(win);
 		end
 	end
 
@@ -787,7 +793,7 @@ statusline.Disable = function ()
 
 	for win, state in pairs(statusline.state.attached_windows) do
 		if state == true then
-			statusline.remove(win);
+			statusline.disable(win);
 		end
 	end
 
@@ -802,9 +808,9 @@ statusline.toggle = function (window)
 	---|fS
 
 	if statusline.state.attached_windows[window] == true then
-		statusline.detach(window);
+		statusline.disable(window);
 	else
-		statusline.attach(window);
+		statusline.enable(window);
 	end
 
 	---|fE
@@ -813,13 +819,15 @@ end
 --[[ Enables `statusline` for *window*. ]]
 ---@param window integer
 statusline.enable = function (window)
-	statusline.attach(window);
+	statusline.set(window);
+	statusline.state.attached_windows[window] = true;
 end
 
 --[[ Disables `statusline` for *window*. ]]
 ---@param window integer
 statusline.disable = function (window)
-	statusline.detach(window);
+	statusline.remove(window);
+	statusline.state.attached_windows[window] = false;
 end
 
 ------------------------------------------------------------------------------
