@@ -72,6 +72,19 @@ vim.api.nvim_create_autocmd({
 	end
 });
 
+-- vim.api.nvim_create_autocmd({
+-- 	"OptionSet"
+-- }, {
+-- 	callback = function (event)
+-- 		local valid = { "statusline", "statuscolumn", "tabline", "winbar" };
+--
+-- 		if vim.list_contains(valid, event.match) then
+-- 			timer:stop();
+-- 			timer:start(DELAY, 0, vim.schedule_wrap(task));
+-- 		end
+-- 	end
+-- });
+
 local mode_timer = vim.uv.new_timer();
 
 --- Update various bars & lines on Vim mode change.
