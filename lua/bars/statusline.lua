@@ -619,7 +619,7 @@ statusline.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		statusline.detach(window);
 	else
-		if ignore_enabled ~= true and statusline.state.enable == false then
+		if ignore_enabled ~= true then
 			-- Do not attach if **this module is disabled**.
 			statusline.state.attached_windows[window] = false;
 			return;

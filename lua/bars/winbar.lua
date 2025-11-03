@@ -707,7 +707,7 @@ winbar.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		winbar.detach(window);
 	else
-		if ignore_enabled ~= true and winbar.state.enable == false then
+		if ignore_enabled ~= true then
 			-- Do not attach if **this module is disabled**.
 			winbar.state.attached_windows[window] = false;
 			return;

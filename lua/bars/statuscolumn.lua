@@ -321,7 +321,7 @@ statuscolumn.attach = function (window, ignore_enabled)
 		return false;
 	end
 
-	if ignore_enabled ~= true and statuscolumn.state.enable == false then
+	if statuscolumn.state.enable == false then
 		-- Do not attach if **this module is disabled**.
 		-- Unless we *explicitly* ignore it.
 		return;
@@ -346,6 +346,12 @@ statuscolumn.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		statuscolumn.detach(window);
 	else
+		if ignore_enabled ~= true then
+			-- Do not attach if **this module is disabled**.
+			statuscolumn.state.attached_windows[window] = false;
+			return;
+		end
+
 		statuscolumn.set(window);
 		statuscolumn.state.attached_windows[window] = true;
 	end
