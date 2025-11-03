@@ -694,7 +694,9 @@ winbar.attach = function (window)
 	local state = winbar.get_win_state(window);
 	local current_winbar = vim.wo[window].winbar;
 
-	if state ~= nil then
+	if winbar.state.enable == false then
+		return;
+	elseif state ~= nil then
 		-- Do not attach if **already attached to a window**.
 		return;
 	elseif current_winbar ~= WBR and current_winbar ~= "" and force_attach() == false then
