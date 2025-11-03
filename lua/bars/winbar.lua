@@ -593,8 +593,18 @@ winbar.config = {
 ---@type winbar.state
 winbar.state = {
 	enable = true,
-	attached_windows = {}
+
+	attached_windows = {},
+	win_state = {}
 };
+
+winbar.get_win_state = function (window)
+	return winbar.state.attached_windows[window]
+end
+
+winbar.set_win_state = function (window, state)
+	winbar.state.attached_windows[window] = state;
+end
 
 winbar.check_condition = function (buffer, window)
 	if not winbar.config.condition then
@@ -656,8 +666,9 @@ winbar.start = function ()
 
 	vim.api.nvim_set_option_value("winbar", WBR, { scope = "global" })
 
-	local win = vim.api.nvim_get_current_win();
-	winbar.attach(win);
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		winbar.attach(win);
+	end
 
 	---|fE
 end
@@ -668,29 +679,25 @@ Attaches the custom `statusline` to **window**.
 Set `ignore_enabled` to **true** to disable module state checker.
 ]]
 ---@param window integer
----@param ignore_enabled? boolean
-winbar.attach = function (window, ignore_enabled)
+winbar.attach = function (window)
 	---|fS
 
 	--[[ Forcefully attach to `window`? ]]
 	---@return boolean
 	local function force_attach ()
-		if
-			winbar.config.force_attach and
-			vim.islist(winbar.config.force_attach) and
-			vim.list_contains(winbar.config.force_attach, vim.wo[window].statusline)
-		then
-			return true;
-		end
-
-		return false;
+		return vim.list_contains(
+			winbar.config.force_attach or {},
+			vim.wo[window].winbar
+		);
 	end
 
-	if winbar.state.attached_windows[window] == true then
+	local state = winbar.get_win_state(window);
+	local current_winbar = vim.wo[window].winbar;
+
+	if state ~= nil then
 		-- Do not attach if **already attached to a window**.
 		return;
-	elseif vim.wo[window].winbar ~= WBR and vim.wo[window].winbar ~= vim.g.__winbar and force_attach() ~= true then
-		-- Do not attach to windows with `custom winbar`.
+	elseif current_winbar ~= WBR and current_winbar ~= "" and force_attach() == false then
 		return;
 	end
 
@@ -707,14 +714,11 @@ winbar.attach = function (window, ignore_enabled)
 		-- Do not attach if **conditionally ignored**.
 		winbar.detach(window);
 	else
-		if ignore_enabled ~= true then
-			-- Do not attach if **this module is disabled**.
-			winbar.state.attached_windows[window] = false;
-			return;
-		end
-
 		winbar.set(window);
 		winbar.state.attached_windows[window] = true;
+
+		winbar.set_win_state(window, true);
+
 	end
 
 	---|fE
@@ -730,15 +734,18 @@ NOTE: This will *reset* the statusline for that window.
 winbar.detach = function (window, set_state)
 	---|fS
 
-	if winbar.state.attached_windows[window] == false then
-		-- Do not detach for unattached windows.
+	local state = winbar.get_win_state(window);
+	local current_winbar = vim.wo[window].winbar;
+
+	if state == nil or current_winbar ~= WBR then
+		-- Not attached or changed winbar.
 		return;
 	end
 
 	winbar.remove(window);
 
 	if set_state then
-		winbar.state.attached_windows[window] = false;
+		winbar.set_win_state(window, false);
 	end
 
 	---|fE
@@ -859,7 +866,6 @@ end
 winbar.Enable = function ()
 	---|fS
 
-	-- vim.print(winbar.state.attached_windows)
 	for win, state in pairs(winbar.state.attached_windows) do
 		if state == false then
 			winbar.enable(win);
@@ -891,9 +897,11 @@ end
 winbar.toggle = function (window)
 	---|fS
 
-	if winbar.state.attached_windows[window] == true then
+	local state = winbar.get_win_state(window);
+
+	if state == true then
 		winbar.disable(window);
-	else
+	elseif state == false then
 		winbar.enable(window);
 	end
 
@@ -903,15 +911,15 @@ end
 --[[ Enables `winbar` for `window`. ]]
 ---@param window integer
 winbar.enable = function (window)
+	winbar.set_win_state(window, true);
 	winbar.set(window);
-	winbar.state.attached_windows[window] = true;
 end
 
 --[[ Disables `winbar` for `window`. ]]
 ---@param window integer
 winbar.disable = function (window)
+	winbar.set_win_state(window, false);
 	winbar.remove(window);
-	winbar.state.attached_windows[window] = false;
 end
 
 ------------------------------------------------------------------------------
