@@ -868,13 +868,14 @@ end
 winbar.Enable = function ()
 	---|fS
 
+	winbar.state.enable = true;
+	winbar.start();
+
 	for win, state in pairs(winbar.state.attached_windows) do
 		if state == false then
 			winbar.enable(win);
 		end
 	end
-
-	winbar.state.enable = true;
 
 	---|fE
 end
@@ -883,13 +884,13 @@ end
 winbar.Disable = function ()
 	---|fS
 
+	winbar.state.enable = false;
+
 	for win, state in pairs(winbar.state.attached_windows) do
 		if state == true then
 			winbar.disable(win);
 		end
 	end
-
-	winbar.state.enable = false;
 
 	---|fE
 end
