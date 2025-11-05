@@ -1,8 +1,16 @@
---- Custom statuscolumn module.
-local statuscolumn = {};
+--[[
+Custom statuscolumn from `bars.nvim`.
 
---- Custom statuscolumn.
----@type string
+## Usage
+
+```lua
+require("bars.statuscolumn").Enable();
+```
+]]
+local statuscolumn = {};
+local generic = require("bars.generic");
+
+---@type string Expression that creates the statusline when evaluated.
 local STC = "%!v:lua.require('bars.statuscolumn').render()";
 
 local gradient_map = {
@@ -213,20 +221,11 @@ statuscolumn.config = {
 	}
 };
 
----@type statuscolumn.state
+---@type bars.mod.state
 statuscolumn.state = {
 	enable = true,
 	attached_windows = {}
 };
-
-statuscolumn.check_condition = function (buffer, window)
-	if not statuscolumn.config.condition then
-		return true;
-	end
-
-	local can_call, cond = pcall(statuscolumn.config.condition, buffer, window);
-	return can_call and cond;
-end
 
 --- Renders the statuscolumn for a window.
 ---@return string
@@ -238,30 +237,16 @@ statuscolumn.render = function ()
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	if vim.list_contains(statuscolumn.config.ignore_filetypes, vim.bo[buffer].ft) then
-		statuscolumn.detach(window);
-		return "";
-	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, vim.bo[buffer].bt) then
-		statuscolumn.detach(window);
-		return "";
-	elseif statuscolumn.check_condition(buffer, window) == false then
-		statuscolumn.detach(window);
-		return "";
-	end
+	statuscolumn.update_style(window);
 
-	statuscolumn.update_id(window);
-
-	--- Statuscolumn config ID.
-	---@type string
-	local scID = vim.w[window].__scID or "default";
-
-	local config = statuscolumn.config[scID];
+	local style = vim.w[window].bars_statuscolumn_style or "default";
+	local config = statuscolumn.config[style];
 
 	if type(config) ~= "table" then
 		return "";
 	end
 
-	local _o = "%#Normal#";
+	local _o = "";
 
 	for _, component in ipairs(config.components or {}) do
 		_o = _o .. components.get(component.kind, buffer, window, component, _o);
@@ -291,69 +276,34 @@ statuscolumn.start = function ()
 	vim.api.nvim_set_option_value("numberwidth", 1, { scope = "global" });
 	vim.o.statuscolumn = STC;
 
-	local win = vim.api.nvim_get_current_win();
-	statuscolumn.attach(win);
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		statuscolumn.attach(win);
+	end
 
 	---|fE
 end
 
 --[[
 Attaches the custom `statuscolumn` to **window**.
-
-Set `ignore_enabled` to **true** to disable module state checker.
 ]]
 ---@param window integer
----@param ignore_enabled? boolean
-statuscolumn.attach = function (window, ignore_enabled)
+statuscolumn.attach = function (window)
 	---|fS
 
-	--[[ Forcefully attach to `window`? ]]
-	---@return boolean
-	local function force_attach ()
-		if
-			statuscolumn.config.force_attach and
-			vim.islist(statuscolumn.config.force_attach) and
-			vim.list_contains(statuscolumn.config.force_attach, vim.wo[window].statusline)
-		then
-			return true;
-		end
+	local current = vim.wo[window].statuscolumn;
+	local should_attach = generic.should_attach(
+		statuscolumn.state,
+		statuscolumn.config,
+		current,
+		STC,
+		window
+	);
 
-		return false;
-	end
-
-	if statuscolumn.state.enable == false then
-		-- Do not attach if **this module is disabled**.
-		-- Unless we *explicitly* ignore it.
-		return;
-	elseif statuscolumn.state.attached_windows[window] == true then
-		-- Do not attach if **already attached to a window**.
-		return;
-	elseif vim.wo[window].statuscolumn ~= STC and vim.wo[window].statuscolumn ~= vim.g.__statuscolumn and force_attach() ~= true then
-		-- Do not attach to windows with `custom statuscolumn`.
-		return;
-	end
-
-	---@type integer
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	if vim.list_contains(statuscolumn.config.ignore_filetypes, vim.bo[buffer].ft) then
-		-- Do not attach if `filetype` is *ignored*.
-		statuscolumn.detach(window);
-	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, vim.bo[buffer].bt) then
-		-- Do not attach if `buftype` is *ignored*.
-		statuscolumn.detach(window);
-	elseif statuscolumn.check_condition(buffer, window) == false then
-		-- Do not attach if **conditionally ignored**.
-		statuscolumn.detach(window);
-	else
-		if ignore_enabled ~= true then
-			-- Do not attach if **this module is disabled**.
-			statuscolumn.state.attached_windows[window] = false;
-			return;
-		end
-
+	if should_attach then
 		statuscolumn.set(window);
-		statuscolumn.state.attached_windows[window] = true;
+		generic.set_win_state(statuscolumn.state, window, true);
+	elseif generic.get_win_state(statuscolumn.state, window) and current ~= STC then
+		statuscolumn.detach(window);
 	end
 
 	---|fE
@@ -368,42 +318,47 @@ NOTE: This will *reset* the statuscolumn for that window.
 statuscolumn.detach = function (window)
 	---|fS
 
-	if statuscolumn.state.attached_windows[window] == false then
-		-- Do not detach from windows whose `state` is **false** as
-		-- they may have a different statuscolumn.
-		return;
+	if generic.get_win_state(statuscolumn.state, window) then
+		statuscolumn.remove(window);
+		generic.set_win_state(statuscolumn.state, window, false);
 	end
 
-	statuscolumn.remove(window);
-	statuscolumn.state.attached_windows[window] = false;
 
 	---|fE
 end
 
---- Updates the configuration ID for {window}.
+--[[ Updates the statusline style for `window`. ]]
 ---@param window integer
-statuscolumn.update_id = function (window)
+statuscolumn.update_style = function (window)
 	---|fS
 
 	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
 		return;
 	end
 
-	local buffer = vim.api.nvim_win_get_buf(window);
+	local current = vim.wo[window].statuscolumn;
+	local should_detach = generic.should_detach(
+		statuscolumn.state,
+		statuscolumn.config,
+		current,
+		STC,
+		window
+	);
 
-	if vim.list_contains(statuscolumn.config.ignore_filetypes, vim.bo[buffer].ft) then
+	if should_detach then
 		statuscolumn.detach(window);
-		return true;
-	elseif vim.list_contains(statuscolumn.config.ignore_buftypes, vim.bo[buffer].bt) then
-		statuscolumn.detach(window);
-		return true;
 	end
 
+	---@type integer
+	local buffer = vim.api.nvim_win_get_buf(window);
+
+	---@type string[]
 	local keys = vim.tbl_keys(statuscolumn.config);
+	---@type string[]
 	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
 	table.sort(keys);
 
-	local ID = "default";
+	local style = "default";
 
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
@@ -415,17 +370,22 @@ statuscolumn.update_id = function (window)
 		local tmp = statuscolumn.config[key];
 
 		if tmp.condition == true then
-			ID = key;
-			break;
-		elseif pcall(tmp.condition --[[ @as function ]], buffer, window) and tmp.condition(buffer, window) == true  then
-			ID = key;
-			break;
+			style = key;
+		elseif type(tmp.condition) == "function" then
+			---@diagnostic disable-next-line
+			local can_eval, val = pcall(tmp.condition, buffer, window);
+
+			if can_eval and val then
+				style = key;
+			end
 		end
+
+		---@diagnostic enable:undefined-field
 
 		::continue::
 	end
 
-	vim.w[window].__scID = ID;
+	vim.w[window].bars_statuscolumn_style = style;
 
 	---|fE
 end
@@ -480,15 +440,45 @@ end
 
 ------------------------------------------------------------------------------
 
+statuscolumn.Start = function ()
+	---|fS
+
+	statuscolumn.state.enable = true;
+
+	for win in ipairs(vim.api.nvim_list_wins()) do
+		statuscolumn.attach(win)
+	end
+
+	statuscolumn.Enable();
+
+	---|fE
+end
+
+statuscolumn.Stop = function ()
+	---|fS
+
+	statuscolumn.state.enable = true;
+
+	for win, _ in pairs(statuscolumn.state.attached_windows) do
+		statuscolumn.detach(win);
+	end
+
+	---|fE
+end
+
 --[[ Toggles statuscolumn for **all** windows. ]]
 statuscolumn.Toggle = function ()
 	---|fS
 
-	if statuscolumn.state.enable == true then
-		statuscolumn.Disable();
-	else
-		statuscolumn.Enable();
+	for win, state in pairs(statuscolumn.state.attached_windows) do
+		if state == false then
+			statuscolumn.enable(win);
+		else
+			statuscolumn.disable(win);
+		end
 	end
+
+	statuscolumn.state.enable = not statuscolumn.state.enable;
 
 	---|fE
 end
@@ -498,8 +488,8 @@ statuscolumn.Enable = function ()
 	---|fS
 
 	for win, state in pairs(statuscolumn.state.attached_windows) do
-		if state == true then
-			statuscolumn.set(win);
+		if state == false then
+			statuscolumn.enable(win);
 		end
 	end
 
@@ -514,7 +504,7 @@ statuscolumn.Disable = function ()
 
 	for win, state in pairs(statuscolumn.state.attached_windows) do
 		if state == true then
-			statuscolumn.remove(win);
+			statuscolumn.disable(win);
 		end
 	end
 
@@ -529,9 +519,9 @@ statuscolumn.toggle = function (window)
 	---|fS
 
 	if statuscolumn.state.attached_windows[window] == true then
-		statuscolumn.detach(window);
+		statuscolumn.disable(window);
 	else
-		statuscolumn.attach(window);
+		statuscolumn.enable(window);
 	end
 
 	---|fE
@@ -540,13 +530,15 @@ end
 --[[ Enables statuscolumn for `window`. ]]
 ---@param window integer
 statuscolumn.enable = function (window)
-	statuscolumn.attach(window);
+	generic.set_win_state(statuscolumn.state, window, true);
+	statuscolumn.set(window);
 end
 
 --[[ Disables statuscolumn for `window`. ]]
 ---@param window integer
 statuscolumn.disable = function (window)
-	statuscolumn.detach(window);
+	generic.set_win_state(statuscolumn.state, window, false);
+	statuscolumn.remove(window);
 end
 
 ------------------------------------------------------------------------------
