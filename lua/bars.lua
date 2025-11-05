@@ -160,7 +160,7 @@ bars.actions = {
 			end
 
 			for _, window in ipairs(windows) do
-				pcall(module.update_id, window);
+				pcall(module.update_style or module.update_id, window);
 			end
 
 		    ::continue::

@@ -1,8 +1,16 @@
---- Custom winbar module.
-local winbar = {};
+--[[
+Custom winbar from `bars.nvim`.
 
---- Custom winbar.
----@type string
+## Usage
+
+```lua
+require("bars.winbar").Enable();
+```
+]]
+local winbar = {};
+local generic = require("bars.generic");
+
+---@type string Expression that creates the winbar when evaluated.
 local WBR = "%!v:lua.require('bars.winbar').render()";
 
 ---@class winbar.config
@@ -590,30 +598,11 @@ winbar.config = {
 	}
 };
 
----@type winbar.state
+---@class bars.mod.state
 winbar.state = {
 	enable = true,
-
-	attached_windows = {},
-	win_state = {}
+	attached_windows = {}
 };
-
-winbar.get_win_state = function (window)
-	return winbar.state.attached_windows[window]
-end
-
-winbar.set_win_state = function (window, state)
-	winbar.state.attached_windows[window] = state;
-end
-
-winbar.check_condition = function (buffer, window)
-	if not winbar.config.condition then
-		return true;
-	end
-
-	local can_call, cond = pcall(winbar.config.condition, buffer, window);
-	return can_call and cond;
-end
 
 --- Renders the winbar for a window.
 ---@return string
@@ -625,20 +614,9 @@ winbar.render = function ()
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	if vim.list_contains(winbar.config.ignore_filetypes, vim.bo[buffer].ft) then
-		winbar.detach(window);
-		return "";
-	elseif vim.list_contains(winbar.config.ignore_buftypes, vim.bo[buffer].bt) then
-		winbar.detach(window);
-		return "";
-	elseif winbar.check_condition(buffer, window) == false then
-		winbar.detach(window);
-		return "";
-	end
+	winbar.update_style(window);
 
-	winbar.update_id(window);
-
-	local wbID = vim.w[window].__wbbID or "default";
+	local wbID = vim.w[window].bars_winbar_style or "default";
 	local config = winbar.config[wbID];
 
 	if type(config) ~= "table" then
@@ -674,88 +652,62 @@ winbar.start = function ()
 end
 
 --[[
-Attaches the custom `statusline` to **window**.
-
-Set `ignore_enabled` to **true** to disable module state checker.
+Attaches the custom `winbar` to **window**.
 ]]
 ---@param window integer
 winbar.attach = function (window)
 	---|fS
 
-	--[[ Forcefully attach to `window`? ]]
-	---@return boolean
-	local function force_attach ()
-		return vim.list_contains(
-			winbar.config.force_attach or {},
-			vim.wo[window].winbar
-		);
-	end
+	local current = vim.wo[window].winbar;
+	local should_attach = generic.should_attach(
+		winbar.state,
+		winbar.config,
+		current,
+		WBR,
+		window
+	);
 
-	local state = winbar.get_win_state(window);
-	local current_winbar = vim.wo[window].winbar;
-
-	if winbar.state.enable == false then
-		return;
-	elseif state ~= nil then
-		-- Do not attach if **already attached to a window**.
-		return;
-	elseif current_winbar ~= WBR and current_winbar ~= "" and force_attach() == false then
-		return;
-	end
-
-	---@type integer
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	if vim.list_contains(winbar.config.ignore_filetypes, vim.bo[buffer].ft) then
-		-- Do not attach if `filetype` is *ignored*.
-		winbar.detach(window);
-	elseif vim.list_contains(winbar.config.ignore_buftypes, vim.bo[buffer].bt) then
-		-- Do not attach if `buftype` is *ignored*.
-		winbar.detach(window);
-	elseif winbar.check_condition(buffer, window) == false then
-		-- Do not attach if **conditionally ignored**.
-		winbar.detach(window);
-	else
+	if should_attach then
 		winbar.set(window);
 		winbar.state.attached_windows[window] = true;
 
-		winbar.set_win_state(window, true);
-
+		generic.set_win_state(winbar.state, window, true);
+	elseif generic.get_win_state(winbar.state, window) and current ~= WBR then
+		winbar.detach(window);
 	end
 
 	---|fE
 end
 
 --[[
-Detaches the custom `statusline` from **window**.
+Detaches the custom `winbar` from **window**.
 
 NOTE: This will *reset* the statusline for that window.
 ]]
 ---@param window integer
----@param set_state? boolean
-winbar.detach = function (window, set_state)
+winbar.detach = function (window)
 	---|fS
 
-	local state = winbar.get_win_state(window);
-	local current_winbar = vim.wo[window].winbar;
+	local current = vim.wo[window].winbar;
+	local should_detach = generic.should_detach(
+		winbar.state,
+		winbar.config,
+		current,
+		WBR,
+		window
+	);
 
-	if state == nil or current_winbar ~= WBR then
-		-- Not attached or changed winbar.
-		return;
-	end
-
-	winbar.remove(window);
-
-	if set_state then
-		winbar.set_win_state(window, false);
+	if should_detach then
+		winbar.remove(window);
+		generic.set_win_state(winbar.config, window, false);
 	end
 
 	---|fE
 end
 
---[[ Updates the configuration ID for `window`. ]]
+--[[ Updates the configuration style for `window`. ]]
 ---@param window integer
-winbar.update_id = function (window)
+winbar.update_style = function (window)
 	---|fS
 
 	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
@@ -765,21 +717,13 @@ winbar.update_id = function (window)
 	---@type integer
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	if vim.list_contains(winbar.config.ignore_filetypes, vim.bo[buffer].ft) then
-		winbar.detach(window);
-		return true;
-	elseif vim.list_contains(winbar.config.ignore_buftypes, vim.bo[buffer].bt) then
-		winbar.detach(window);
-		return true;
-	end
-
 	---@type string[]
 	local keys = vim.tbl_keys(winbar.config);
 	---@type string[]
 	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
 	table.sort(keys);
 
-	local ID = "default";
+	local style = "default";
 
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
@@ -792,13 +736,13 @@ winbar.update_id = function (window)
 		local tmp = winbar.config[key];
 
 		if tmp.condition == true then
-			ID = key;
+			style = key;
 		elseif type(tmp.condition) == "function" then
 			---@diagnostic disable-next-line
 			local can_eval, val = pcall(tmp.condition, buffer, window);
 
 			if can_eval and val then
-				ID = key;
+				style = key;
 			end
 		end
 
@@ -807,7 +751,7 @@ winbar.update_id = function (window)
 		::continue::
 	end
 
-	vim.w[window].__slID = ID;
+	vim.w[window].bars_winbar_style = style;
 
 	---|fE
 end
@@ -900,7 +844,7 @@ end
 winbar.toggle = function (window)
 	---|fS
 
-	local state = winbar.get_win_state(window);
+	local state = generic.get_win_state(generic.state, window);
 
 	if state == true then
 		winbar.disable(window);
@@ -914,14 +858,14 @@ end
 --[[ Enables `winbar` for `window`. ]]
 ---@param window integer
 winbar.enable = function (window)
-	winbar.set_win_state(window, true);
+	generic.set_win_state(winbar.state, window, true);
 	winbar.set(window);
 end
 
 --[[ Disables `winbar` for `window`. ]]
 ---@param window integer
 winbar.disable = function (window)
-	winbar.set_win_state(window, false);
+	generic.set_win_state(winbar.state, window, false);
 	winbar.remove(window);
 end
 
