@@ -21,3 +21,11 @@
 ---
 --- Tabline configuration.
 ---@field tabline? boolean | tabline.config | fun(): (boolean | tabline.config)
+
+
+--- State of a `module`.
+---@class bars.mod.state
+---
+---@field enable boolean Should this module listen to Autocmds?
+---@field attached_windows table<integer, boolean> Maps window state to it's ID. State is `true` when the module is in use for that window.
+
