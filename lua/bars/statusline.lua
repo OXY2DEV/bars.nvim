@@ -1,8 +1,16 @@
---- Custom statusline module.
-local statusline = {};
+--[[
+Custom statusline from `bars.nvim`.
 
---- Custom statusline.
----@type string
+## Usage
+
+```lua
+require("bars.statusline").Enable();
+```
+]]
+local statusline = {};
+local generic = require("bars.generic");
+
+---@type string Expression that creates the statusline when evaluated.
 local STL = "%!v:lua.require('bars.statusline').render()";
 
 --[[ Reusable configuration templates. ]]
@@ -493,28 +501,11 @@ statusline.config = {
 	},
 };
 
----@type statusline.state
+---@type bars.mod.state
 statusline.state = {
 	enable = true,
 	attached_windows = {}
 };
-
---[[ Checks if a **buffer** & **window** satisfies **condition**. ]]
----@param buffer integer
----@param window integer
----@return boolean
-statusline.check_condition = function (buffer, window)
-	---|fS
-
-	if not statusline.config.condition then
-		return true;
-	end
-
-	local can_call, cond = pcall(statusline.config.condition, buffer, window);
-	return can_call and cond or false;
-
-	---|fE
-end
 
 --- Renders the statusline for a window.
 ---@return string
@@ -523,31 +514,18 @@ statusline.render = function ()
 
 	local components = require("bars.components.statusline");
 
-	---@type integer
 	local window = vim.g.statusline_winid;
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
-		statusline.detach(window);
-		return "";
-	elseif vim.list_contains(statusline.config.ignore_buftypes, vim.bo[buffer].bt) then
-		statusline.detach(window);
-		return "";
-	elseif statusline.check_condition(buffer, window) == false then
-		statusline.detach(window);
-		return "";
-	end
+	statusline.update_style(window);
 
-	statusline.update_id(window);
-
-	local slID = vim.w[window].__slID or "default";
-	local config = statusline.config[slID];
+	local style = vim.w[window].bars_statusline_style or "default";
+	local config = statusline.config[style];
 
 	if type(config) ~= "table" then
 		return "";
 	end
 
-	---@type string Statusline format string.
 	local _o = "";
 
 	for _, component in ipairs(config.components or {}) do
@@ -569,64 +547,36 @@ statusline.start = function ()
 
 	vim.api.nvim_set_option_value("statusline", STL, { scope = "global" })
 
-	local win = vim.api.nvim_get_current_win();
-	statusline.attach(win);
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		statusline.attach(win);
+	end
 
 	---|fE
 end
 
 --[[
 Attaches the custom `statusline` to **window**.
-
-Set `ignore_enabled` to **true** to disable module state checker.
 ]]
 ---@param window integer
-statusline.attach = function (window, ignore_enabled)
+statusline.attach = function (window)
 	---|fS
 
-	--[[ Forcefully attach to `window`? ]]
-	---@return boolean
-	local function force_attach ()
-		if
-			statusline.config.force_attach and
-			vim.islist(statusline.config.force_attach) and
-			vim.list_contains(statusline.config.force_attach, vim.wo[window].statusline)
-		then
-			return true;
-		end
+	local current = vim.wo[window].statusline;
+	local should_attach = generic.should_attach(
+		statusline.state,
+		statusline.config,
+		current,
+		STL,
+		window
+	);
 
-		return false;
-	end
-
-	if statusline.state.attached_windows[window] == true then
-		-- Do not attach if **already attached to a window**.
-		return;
-	elseif vim.wo[window].statusline ~= STL and vim.wo[window].statusline ~= vim.g.__statusline and force_attach() ~= true then
-		-- Do not attach to windows with `custom statusline`.
-		return;
-	end
-
-	---@type integer
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
-		-- Do not attach if `filetype` is *ignored*.
-		statusline.detach(window);
-	elseif vim.list_contains(statusline.config.ignore_buftypes, vim.bo[buffer].bt) then
-		-- Do not attach if `buftype` is *ignored*.
-		statusline.detach(window);
-	elseif statusline.check_condition(buffer, window) == false then
-		-- Do not attach if **conditionally ignored**.
-		statusline.detach(window);
-	else
-		if ignore_enabled ~= true then
-			-- Do not attach if **this module is disabled**.
-			statusline.state.attached_windows[window] = false;
-			return;
-		end
-
+	if should_attach then
 		statusline.set(window);
 		statusline.state.attached_windows[window] = true;
+
+		generic.set_win_state(statusline.state, window, true);
+	elseif generic.get_win_state(statusline.state, window) and current ~= STL then
+		statusline.detach(window);
 	end
 
 	---|fE
@@ -638,23 +588,21 @@ Detaches the custom `statusline` from **window**.
 NOTE: This will *reset* the statusline for that window.
 ]]
 ---@param window integer
-statusline.detach = function (window, set_state)
+statusline.detach = function (window)
 	---|fS
 
-	if statusline.state.attached_windows[window] == false then
-		-- Do not detach from windows whose `state` is **false** as
-		-- they may have a different statuscolumn.
-		return;
-	end
+	local current = vim.wo[window].statusline;
+	local should_detach = generic.should_detach(
+		statusline.state,
+		statusline.config,
+		current,
+		STL,
+		window
+	);
 
-	vim.api.nvim_win_call(window, function ()
-		vim.cmd("set statusline=" .. (vim.g.__statusline or ""));
-	end);
-
-	statusline.remove(window);
-
-	if set_state then
-		statusline.state.attached_windows[window] = false;
+	if should_detach then
+		statusline.remove(window);
+		generic.set_win_state(statusline.config, window, false);
 	end
 
 	---|fE
@@ -662,9 +610,9 @@ end
 
 ------------------------------------------------------------------------------
 
---[[ Updates the used configuration/style ID for `window`. ]]
+--[[ Updates the statusline style for `window`. ]]
 ---@param window integer
-statusline.update_id = function (window)
+statusline.update_style = function (window)
 	---|fS
 
 	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
@@ -674,21 +622,13 @@ statusline.update_id = function (window)
 	---@type integer
 	local buffer = vim.api.nvim_win_get_buf(window);
 
-	if vim.list_contains(statusline.config.ignore_filetypes, vim.bo[buffer].ft) then
-		statusline.detach(window);
-		return true;
-	elseif vim.list_contains(statusline.config.ignore_buftypes, vim.bo[buffer].bt) then
-		statusline.detach(window);
-		return true;
-	end
-
 	---@type string[]
 	local keys = vim.tbl_keys(statusline.config);
 	---@type string[]
 	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
 	table.sort(keys);
 
-	local ID = "default";
+	local style = "default";
 
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
@@ -700,13 +640,13 @@ statusline.update_id = function (window)
 		local tmp = statusline.config[key];
 
 		if tmp.condition == true then
-			ID = key;
+			style = key;
 		elseif type(tmp.condition) == "function" then
 			---@diagnostic disable-next-line
 			local can_eval, val = pcall(tmp.condition, buffer, window);
 
 			if can_eval and val then
-				ID = key;
+				style = key;
 			end
 		end
 
@@ -715,7 +655,7 @@ statusline.update_id = function (window)
 		::continue::
 	end
 
-	vim.w[window].__slID = ID;
+	vim.w[window].bars_statusline_style = style;
 
 	---|fE
 end
@@ -819,15 +759,15 @@ end
 --[[ Enables `statusline` for *window*. ]]
 ---@param window integer
 statusline.enable = function (window)
+	generic.set_win_state(statusline.state, window, true);
 	statusline.set(window);
-	statusline.state.attached_windows[window] = true;
 end
 
 --[[ Disables `statusline` for *window*. ]]
 ---@param window integer
 statusline.disable = function (window)
+	generic.set_win_state(statusline.state, window, false);
 	statusline.remove(window);
-	statusline.state.attached_windows[window] = false;
 end
 
 ------------------------------------------------------------------------------
@@ -844,7 +784,7 @@ statusline.setup = function (config)
 	end
 
 	for window, _ in pairs(statusline.state.attached_windows) do
-		statusline.update_id(window);
+		statusline.update_style(window);
 	end
 
 	---|fE
