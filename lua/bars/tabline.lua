@@ -269,6 +269,14 @@ end
 
 ------------------------------------------------------------------------------
 
+tabline.Start = function ()
+	tabline.attach();
+end
+
+tabline.Stop = function ()
+	tabline.detach();
+end
+
 --[[ Toggles tabline. ]]
 tabline.Toggle = function ()
 	---|fS
@@ -284,12 +292,12 @@ end
 
 --[[ Enables tabline. ]]
 tabline.Enable = function ()
-	tabline.attach();
+	tabline.Start();
 end
 
 --[[ Disables tabline. ]]
 tabline.Disable = function ()
-	tabline.detach();
+	tabline.Stop();
 end
 
 --[[ Toggles tabline. ]]
@@ -307,12 +315,12 @@ end
 
 --[[ Enables tabline. ]]
 tabline.enable = function ()
-	tabline.attach();
+	tabline.Start();
 end
 
 --[[ Disables tabline. ]]
 tabline.disable = function ()
-	tabline.detach();
+	tabline.Stop();
 end
 
 ------------------------------------------------------------------------------

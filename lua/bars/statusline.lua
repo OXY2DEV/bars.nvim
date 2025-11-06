@@ -591,18 +591,9 @@ NOTE: This will *reset* the statusline for that window.
 statusline.detach = function (window)
 	---|fS
 
-	local current = vim.wo[window].statusline;
-	local should_detach = generic.should_detach(
-		statusline.state,
-		statusline.config,
-		current,
-		STL,
-		window
-	);
-
-	if should_detach then
+	if generic.get_win_state(statusline.state, window) then
 		statusline.remove(window);
-		generic.set_win_state(statusline.config, window, false);
+		generic.set_win_state(statusline.state, window, false);
 	end
 
 	---|fE
@@ -617,6 +608,19 @@ statusline.update_style = function (window)
 
 	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
 		return;
+	end
+
+	local current = vim.wo[window].statuscolumn;
+	local should_detach = generic.should_detach(
+		statusline.state,
+		statusline.config,
+		current,
+		STL,
+		window
+	);
+
+	if should_detach then
+		statusline.detach(window);
 	end
 
 	---@type integer
@@ -699,14 +703,35 @@ end
 
 ------------------------------------------------------------------------------
 
+statusline.Start = function ()
+	---|fS
+
+	statusline.state.enable = true;
+	statusline.start();
+
+	statusline.Enable();
+
+	---|fE
+end
+
+statusline.Stop = function ()
+	---|fS
+
+	statusline.state.enable = false;
+
+	for win, _ in pairs(statusline.state.attached_windows) do
+		statusline.detach(win);
+	end
+
+	---|fE
+end
+
 --[[ Toggles `statusline` for **all** windows. ]]
 statusline.Toggle = function ()
 	---|fS
 
-	if statusline.state.enable == true then
-		statusline.Disable();
-	else
-		statusline.Enable();
+	for win, _ in pairs(statusline.state.attached_windows) do
+		statusline.toggle(win);
 	end
 
 	---|fE
@@ -717,12 +742,10 @@ statusline.Enable = function ()
 	---|fS
 
 	for win, state in pairs(statusline.state.attached_windows) do
-		if state == true then
+		if state == false then
 			statusline.enable(win);
 		end
 	end
-
-	statusline.state.enable = true;
 
 	---|fE
 end
@@ -736,8 +759,6 @@ statusline.Disable = function ()
 			statusline.disable(win);
 		end
 	end
-
-	statusline.state.enable = false;
 
 	---|fE
 end

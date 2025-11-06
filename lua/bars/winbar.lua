@@ -688,18 +688,9 @@ NOTE: This will *reset* the statusline for that window.
 winbar.detach = function (window)
 	---|fS
 
-	local current = vim.wo[window].winbar;
-	local should_detach = generic.should_detach(
-		winbar.state,
-		winbar.config,
-		current,
-		WBR,
-		window
-	);
-
-	if should_detach then
+	if generic.get_win_state(winbar.state, window) then
 		winbar.remove(window);
-		generic.set_win_state(winbar.config, window, false);
+		generic.set_win_state(winbar.state, window, false);
 	end
 
 	---|fE
@@ -712,6 +703,19 @@ winbar.update_style = function (window)
 
 	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
 		return;
+	end
+
+	local current = vim.wo[window].statuscolumn;
+	local should_detach = generic.should_detach(
+		winbar.state,
+		winbar.config,
+		current,
+		WBR,
+		window
+	);
+
+	if should_detach then
+		winbar.detach(window);
 	end
 
 	---@type integer
@@ -795,14 +799,35 @@ end
 
 ------------------------------------------------------------------------------
 
+winbar.Start = function ()
+	---|fS
+
+	winbar.state.enable = true;
+	winbar.start();
+
+	winbar.Enable();
+
+	---|fE
+end
+
+winbar.Stop = function ()
+	---|fS
+
+	winbar.state.enable = false;
+
+	for win, _ in pairs(winbar.state.attached_windows) do
+		winbar.detach(win);
+	end
+
+	---|fE
+end
+
 --[[ Toggles `winbar` for **all** windows. ]]
 winbar.Toggle = function ()
 	---|fS
 
-	if winbar.state.enable == true then
-		winbar.Disable();
-	else
-		winbar.Enable();
+	for win, _ in pairs(winbar.state.attached_windows) do
+		winbar.toggle(win);
 	end
 
 	---|fE

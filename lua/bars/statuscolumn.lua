@@ -347,6 +347,7 @@ statuscolumn.update_style = function (window)
 
 	if should_detach then
 		statuscolumn.detach(window);
+		return;
 	end
 
 	---@type integer
@@ -444,10 +445,7 @@ statuscolumn.Start = function ()
 	---|fS
 
 	statuscolumn.state.enable = true;
-
-	for win in ipairs(vim.api.nvim_list_wins()) do
-		statuscolumn.attach(win)
-	end
+	statuscolumn.start();
 
 	statuscolumn.Enable();
 
@@ -470,15 +468,9 @@ end
 statuscolumn.Toggle = function ()
 	---|fS
 
-	for win, state in pairs(statuscolumn.state.attached_windows) do
-		if state == false then
-			statuscolumn.enable(win);
-		else
-			statuscolumn.disable(win);
-		end
+	for win, _ in pairs(statuscolumn.state.attached_windows) do
+		statuscolumn.toggle(win);
 	end
-
-	statuscolumn.state.enable = not statuscolumn.state.enable;
 
 	---|fE
 end
@@ -493,8 +485,6 @@ statuscolumn.Enable = function ()
 		end
 	end
 
-	statuscolumn.state.enable = true;
-
 	---|fE
 end
 
@@ -507,8 +497,6 @@ statuscolumn.Disable = function ()
 			statuscolumn.disable(win);
 		end
 	end
-
-	statuscolumn.state.enable = false;
 
 	---|fE
 end
