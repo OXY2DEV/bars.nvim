@@ -321,8 +321,23 @@ statuscolumn.detach = function (window)
 	if generic.get_win_state(statuscolumn.state, window) then
 		statuscolumn.remove(window);
 		generic.set_win_state(statuscolumn.state, window, false);
-	end
+	elseif vim.wo[window].statuscolumn == STC then
+		local current = vim.wo[window].statuscolumn;
+		local should_attach = generic.should_attach(
+			statuscolumn.state,
+			statuscolumn.config,
+			current,
+			STC,
+			window
+		);
 
+		if should_attach then
+			statuscolumn.set(window);
+			generic.set_win_state(statuscolumn.state, window, true);
+		else
+			statuscolumn.remove(window);
+		end
+	end
 
 	---|fE
 end

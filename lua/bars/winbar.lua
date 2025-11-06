@@ -691,6 +691,22 @@ winbar.detach = function (window)
 	if generic.get_win_state(winbar.state, window) then
 		winbar.remove(window);
 		generic.set_win_state(winbar.state, window, false);
+	elseif vim.wo[window].winbar == WBR then
+		local current = vim.wo[window].winbar;
+		local should_attach = generic.should_attach(
+			winbar.state,
+			winbar.config,
+			current,
+			WBR,
+			window
+		);
+
+		if should_attach then
+			winbar.set(window);
+			generic.set_win_state(winbar.state, window, true);
+		else
+			winbar.remove(window);
+		end
 	end
 
 	---|fE

@@ -594,6 +594,22 @@ statusline.detach = function (window)
 	if generic.get_win_state(statusline.state, window) then
 		statusline.remove(window);
 		generic.set_win_state(statusline.state, window, false);
+	elseif vim.wo[window].statusline == STL then
+		local current = vim.wo[window].statusline;
+		local should_attach = generic.should_attach(
+			statusline.state,
+			statusline.config,
+			current,
+			STL,
+			window
+		);
+
+		if should_attach then
+			statusline.set(window);
+			generic.set_win_state(statusline.state, window, true);
+		else
+			statusline.remove(window);
+		end
 	end
 
 	---|fE
