@@ -545,6 +545,10 @@ statusline.start = function ()
 		return;
 	end
 
+	-- NOTE: Disable `quickfix` windows statusline.
+	vim.g.bars_qf_disable_statusline = vim.g.qf_disable_statusline;
+	vim.g.qf_disable_statusline = true;
+
 	vim.api.nvim_set_option_value("statusline", STL, { scope = "global" })
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -734,6 +738,9 @@ statusline.Stop = function ()
 	---|fS
 
 	statusline.state.enable = false;
+
+	-- NOTE: Restore `quickfix` windows statusline.
+	vim.g.qf_disable_statusline = vim.g.bars_qf_disable_statusline;
 
 	for win, _ in pairs(statusline.state.attached_windows) do
 		statusline.detach(win);
