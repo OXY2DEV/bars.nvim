@@ -79,6 +79,27 @@ bars.actions = {
 		end
 	end,
 
+	Start = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) then
+				pcall(module.Start);
+			end
+		end
+	end,
+	Stop = function (affect)
+		local modules = get_modules();
+		affect = affect or vim.tbl_keys(modules);
+
+		for name, module in pairs(modules) do
+			if vim.list_contains(affect, name) then
+				pcall(module.Stop);
+			end
+		end
+	end,
+
 	toggle = function (affect, windows)
 		windows = windows or { vim.api.nvim_get_current_win() };
 
