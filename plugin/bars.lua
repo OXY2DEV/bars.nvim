@@ -29,6 +29,9 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 ---@type table Timer for the update task.
 local timer = vim.uv.new_timer();
 
+---@type table Timer for the update task.
+local update_timer = vim.uv.new_timer();
+
 ---@type integer Debounce delay.
 local DELAY = 100;
 
@@ -40,6 +43,32 @@ local function task ()
 			require("bars.statusline").attach(win);
 			require("bars.statuscolumn").attach(win);
 			require("bars.winbar").attach(win);
+		end
+
+		--- Unstable API function.
+		--- Use `pcall()`
+		pcall(vim.api.nvim__redraw, {
+			statuscolumn = true,
+		});
+	end
+
+	if vim.in_fast_event() then
+		vim.schedule(callback);
+	else
+		callback();
+	end
+
+	---|fE
+end
+
+local function update_task ()
+	---|fS
+
+	local function callback ()
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			require("bars.statuscolumn").update_style(win);
+			require("bars.statusline").update_style(win);
+			require("bars.winbar").update_style(win);
 		end
 
 		--- Unstable API function.
@@ -72,18 +101,22 @@ vim.api.nvim_create_autocmd({
 	end
 });
 
--- vim.api.nvim_create_autocmd({
--- 	"OptionSet"
--- }, {
--- 	callback = function (event)
--- 		local valid = { "statusline", "statuscolumn", "tabline", "winbar" };
---
--- 		if vim.list_contains(valid, event.match) then
--- 			timer:stop();
--- 			timer:start(DELAY, 0, vim.schedule_wrap(task));
--- 		end
--- 	end
--- });
+vim.api.nvim_create_autocmd({
+	"OptionSet"
+}, {
+	callback = function (event)
+		local valid = { "statusline", "statuscolumn", "tabline", "winbar" };
+		local update = { "filetype", "buftype" };
+
+		if vim.list_contains(valid, event.match) then
+			timer:stop();
+			timer:start(DELAY, 0, vim.schedule_wrap(task));
+		elseif vim.list_contains(update, event.match) then
+			update_timer:stop();
+			update_timer:start(DELAY, 0, vim.schedule_wrap(update_task));
+		end
+	end
+});
 
 local mode_timer = vim.uv.new_timer();
 
