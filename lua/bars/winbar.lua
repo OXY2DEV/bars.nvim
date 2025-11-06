@@ -616,8 +616,8 @@ winbar.render = function ()
 
 	winbar.update_style(window);
 
-	local wbID = vim.w[window].bars_winbar_style or "default";
-	local config = winbar.config[wbID];
+	local style = vim.w[window].bars_winbar_style or "default";
+	local config = winbar.config[style];
 
 	if type(config) ~= "table" then
 		return "";
