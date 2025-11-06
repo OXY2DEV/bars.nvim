@@ -31,6 +31,13 @@ generic.check_condition = function (config, buffer, window)
 	return can_call and cond;
 end
 
+---@param config table
+---@param current string
+---@return boolean
+generic.force_attach = function (config, current)
+	return vim.list_contains(config.force_attach or {}, current);
+end
+
 --- Should we attach to `window`?
 ---@param state table
 ---@param config table
@@ -38,14 +45,9 @@ end
 ---@param to string
 ---@param window integer
 ---@return boolean
+---@return boolean?
 generic.should_attach = function (state, config, current, to, window)
 	---|fS
-
-	--[[ Forcefully attach to `window`? ]]
-	---@return boolean
-	local function force_attach ()
-		return vim.list_contains(config.force_attach or {}, current);
-	end
 
 	---@type boolean? State for `window`.
 	local win_state = generic.get_win_state(state, window);
@@ -56,7 +58,7 @@ generic.should_attach = function (state, config, current, to, window)
 	elseif win_state ~= nil then
 		-- Already attached.
 		return false;
-	elseif current ~= to and current ~= "" and force_attach() == false then
+	elseif current ~= to and current ~= "" and generic.force_attach(config, current) == false then
 		return false;
 	end
 
