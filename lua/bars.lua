@@ -1,3 +1,12 @@
+--[[
+Highly customisable `statusline`, `statuscolumn`, `winbar` & `tabline` for **Neovim**.
+
+Usage,
+
+```lua
+require("bars").setup();
+```
+]]
 local bars = {};
 
 ---@type bars.config
@@ -24,9 +33,11 @@ bars.config = {
 	---|fE
 };
 
---- Gets the modules need by `bars.nvim`.
---- Note: This is to prevent loading
----       the modules at start.
+--[[
+Gets the modules need by `bars.nvim`.
+
+NOTE: This is to prevent loading the modules at start.
+]]
 ---@return table<string, table>
 local function get_modules()
 	---|fS
