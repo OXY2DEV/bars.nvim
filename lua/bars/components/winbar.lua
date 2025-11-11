@@ -138,7 +138,7 @@ wbC.node = function (buffer, window, main_config)
 		local lanuage = get_language(node);
 		local lang_config = utils.match(main_config, lanuage or "default", {});
 
-		local item_config = utils.match(lang_config, "__lookup", {});
+		local item_config = utils.match(lang_config, "_ellipsis", {});
 
 		_o = table.concat({
 

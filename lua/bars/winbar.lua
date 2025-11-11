@@ -56,7 +56,7 @@ winbar.config = {
 				separator_hl = "Comment",
 
 				default = {
-					__lookup = {
+					_ellipsis = {
 						padding_left = " ",
 						padding_right = " ",
 
