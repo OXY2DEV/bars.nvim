@@ -15,7 +15,7 @@ tabline.config = {
 			{
 				kind = "tabs",
 				condition = function ()
-					return vim.g.__show_bufs ~= true;
+					return vim.g.bars_tabline_show_buflist ~= true;
 				end,
 
 
@@ -68,7 +68,7 @@ tabline.config = {
 			{
 				kind = "bufs",
 				condition = function ()
-					return vim.g.__show_bufs == true;
+					return vim.g.bars_tabline_show_buflist == true;
 				end,
 
 				separator = " ",
@@ -144,9 +144,9 @@ tabline.render = function ()
 		return "";
 	end
 
-	tabline.update_id();
+	tabline.update_style();
 
-	local tlID = vim.g.__tlID or "default";
+	local tlID = vim.g.bars_tabline_style or "default";
 	local config = tabline.config[tlID];
 
 	if type(config) ~= "table" then
@@ -199,8 +199,8 @@ tabline.detach = function ()
 	---|fE
 end
 
---- Updates the configuration ID for {window}.
-tabline.update_id = function ()
+--- Updates the configuration style for the tabline.
+tabline.update_style = function ()
 	---|fS
 
 	---@type string[]
@@ -209,7 +209,7 @@ tabline.update_id = function ()
 	local ignore = { "default" };
 	table.sort(keys);
 
-	local ID = "default";
+	local style = "default";
 
 	for _, key in ipairs(keys) do
 		if vim.list_contains(ignore, key) then
@@ -222,13 +222,13 @@ tabline.update_id = function ()
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
-			ID = key;
+			style = key;
 		elseif type(tmp.condition) == "function" then
 			---@diagnostic disable-next-line
 			local can_eval, val = pcall(tmp.condition, buffer, window);
 
 			if can_eval and val then
-				ID = key;
+				style = key;
 			end
 		end
 
@@ -237,7 +237,7 @@ tabline.update_id = function ()
 		::continue::
 	end
 
-	vim.g.__tlID = ID;
+	vim.g.bars_tabline_style = style;
 	tabline.state.attached = true;
 
 	---|fE
