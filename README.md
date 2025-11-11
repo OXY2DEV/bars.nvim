@@ -1,19 +1,5 @@
 # 🚀 bars.nvim
 
-<div align="center">
-    <img alt="Neovim" src="https://img.shields.io/badge/Neovim-000?style=for-the-badge&logo=neovim&logoColor=A6E3A1&color=1E1E2E">
-    <img alt="Repo size" src="https://img.shields.io/github/languages/code-size/OXY2DEV/bars.nvim?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggc3Ryb2tlPSIjQ0JBNkY3IiBmaWxsPSIjQ0JBNkY3IiBkPSJNOTYgMEM0MyAwIDAgNDMgMCA5NkwwIDQxNmMwIDUzIDQzIDk2IDk2IDk2bDI4OCAwIDMyIDBjMTcuNyAwIDMyLTE0LjMgMzItMzJzLTE0LjMtMzItMzItMzJsMC02NGMxNy43IDAgMzItMTQuMyAzMi0zMmwwLTMyMGMwLTE3LjctMTQuMy0zMi0zMi0zMkwzODQgMCA5NiAwem0wIDM4NGwyNTYgMCAwIDY0TDk2IDQ0OGMtMTcuNyAwLTMyLTE0LjMtMzItMzJzMTQuMy0zMiAzMi0zMnptMzItMjQwYzAtOC44IDcuMi0xNiAxNi0xNmwxOTIgMGM4LjggMCAxNiA3LjIgMTYgMTZzLTcuMiAxNi0xNiAxNmwtMTkyIDBjLTguOCAwLTE2LTcuMi0xNi0xNnptMTYgNDhsMTkyIDBjOC44IDAgMTYgNy4yIDE2IDE2cy03LjIgMTYtMTYgMTZsLTE5MiAwYy04LjggMC0xNi03LjItMTYtMTZzNy4yLTE2IDE2LTE2eiIvPjwvc3ZnPg%3D%3D&logoColor=CBA6F7&labelColor=1e1e2e&color=B4BEFE">
-    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/OXY2DEV/bars.nvim?include_prereleases&sort=semver&display_name=release&style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0%2BPHBhdGggZmlsbD0iI0Y1RTBEQyIgc3Ryb2tlPSIjRjVFMERDIiBkPSJNMzQ1IDM5LjFMNDcyLjggMTY4LjRjNTIuNCA1MyA1Mi40IDEzOC4yIDAgMTkxLjJMMzYwLjggNDcyLjljLTkuMyA5LjQtMjQuNSA5LjUtMzMuOSAuMnMtOS41LTI0LjUtLjItMzMuOUw0MzguNiAzMjUuOWMzMy45LTM0LjMgMzMuOS04OS40IDAtMTIzLjdMMzEwLjkgNzIuOWMtOS4zLTkuNC05LjItMjQuNiAuMi0zMy45czI0LjYtOS4yIDMzLjkgLjJ6TTAgMjI5LjVMMCA4MEMwIDUzLjUgMjEuNSAzMiA0OCAzMmwxNDkuNSAwYzE3IDAgMzMuMyA2LjcgNDUuMyAxOC43bDE2OCAxNjhjMjUgMjUgMjUgNjUuNSAwIDkwLjVMMjc3LjMgNDQyLjdjLTI1IDI1LTY1LjUgMjUtOTAuNSAwbC0xNjgtMTY4QzYuNyAyNjIuNyAwIDI0Ni41IDAgMjI5LjV6TTE0NCAxNDRhMzIgMzIgMCAxIDAgLTY0IDAgMzIgMzIgMCAxIDAgNjQgMHoiLz48L3N2Zz4%3D&labelColor=1E1E2E&color=45475A">
-</div>
-
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-tokyonight.png">
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-onedark.png">
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v2/repo/bars-desktop.png">
-
-A starting point/guide for creating custom statusline, statuscolumn, tabline & winbar for Neovim.
-
-> `bars.nvim` is NOT a plugin, if it wasn't clear. It's just a reference manual.
-
 ## 📖 Table of contents
 
 - [✨ Features](#-features)
@@ -25,33 +11,37 @@ A starting point/guide for creating custom statusline, statuscolumn, tabline & w
 
 ## ✨ Features
 
-- Actually fast,
-    - Termux: average: `7ms`, lowest: `5ms`.
-    - MacOS: average: `2ms`, lowest: `1.8ms`.
+- Fully customisable `statusline`, `statuscolumn`, `tabline` & `winbar`.
+- Component-style configuration to keep things *clean* & *readable*.
+- Per window configuration, allowing users to change how things look on each window.
+- Conditional rendering to disable certain components based on conditions.
+- Enable or disable various bars via `commands`.
 
-- Fully customisable.
-- Per-window configuration.
-- Ability to toggle various bars/lines via commands.
+More specific features are as follows,
 
-## 📚 Requirements
+### 🧩 Statusline
 
-- 0.10.4 or higher recommended.
+- Built-in support for showing current `Git branch` & `diagnostics count`
+- Customisable `ruler`.
+- Custom `statusline` for,
+    - Help files
+    - Quickfix
 
->[!NOTE]
-> The version requirement varies for different parts of `bars.nvim`.
+### 🧩 Statuscolumn
 
-- Nerd font >= 3.0.0
-- Git(`branch` in statusline).
-- Tree-sitter parser(`node` in winbar).
+- Filtering of `Signs`.
+- Built-in support for mixed line numbers(`relative` for normal lines & `absolute` for current line).
+- Fancy `virtual lines` & `wrapped lines` indicators.
 
-## 💡 Guide
+### 🧩 Winbar
 
-Guide for creating your own custom statusline, statuscolumn, tabline & winbar are given below,
+- Built-in support for Tree-sitter node hierarchy for the current node.
+- File path segments from.project root.
 
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Guide_Tabline)
+### 🧩 Tabline
+
+- Buffer list(tab list similar to IDEs) support.
+- Mouse-support.
 
 ## 📐 Installation
 
@@ -122,7 +112,7 @@ require("bars").setup({
 });
 ```
 
-2. Via the modules own setup function.
+2. Via each module's setup function.
 
 ```lua
 require("bars.statusline").setup({
@@ -132,43 +122,24 @@ require("bars.statusline").setup({
 
 Check the [wiki](https://github.com/OXY2DEV/bars.nvim/wiki/Home) to learn about all the configuration options!
 
-Usage instructions for different modules,
-
-- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statuscolumn)
-- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Statusline)
-- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Winbar)
-- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Usage_Tabline)
-
 ## 🧰 Commands
 
 `bars.nvim` provides a single command `:Bars` which has **sub-commands** that can be used to do different things.
-
-```
-USAGE,
-    :Bars
-
-    :Bars [sub-command]
-
-    :Bars [sub-command] [modifier]
-
-    :Bars [sub-command] [modifier] [window_1] [window_2] ..
-
-EXAMPLE,
-    :Bars toggle ? 1000
-```
 
 The sub-commands are given below,
 
 
 | Sub-command | Description                                                       |
 |-------------|-------------------------------------------------------------------|
-| Toggle      | Used to toggle statusline, statuscolumn etc. **globally**.        |
-| Enable      | Used to enable statusline, statuscolumn etc. **globally**.        |
 | Disable     | Used to disable statusline, statuscolumn etc. **globally**.       |
-| toggle      | Used to toggle statusline, statuscolumn etc. of given window(s).  |
-| enable      | Used to enable statusline, statuscolumn etc. of given window(s).  |
-| disable     | Used to disable statusline, statuscolumn etc. of given window(s). |
+| Enable      | Used to enable statusline, statuscolumn etc. **globally**.        |
+| Start       | Signals the module(s) to attach to new windows.                   |
+| Stop        | Stops the module(s) from attaching to nee windows.                |
+| Toggle      | Used to toggle statusline, statuscolumn etc. **globally**.        |
 | clean       | Cleans up cached values of deleted windows.                       |
+| disable     | Used to disable statusline, statuscolumn etc. of given window(s). |
+| enable      | Used to enable statusline, statuscolumn etc. of given window(s).  |
+| toggle      | Used to toggle statusline, statuscolumn etc. of given window(s).  |
 | update      | Updates the module's configuration ID of given window.            |
 
 
@@ -186,10 +157,10 @@ Modifiers are given below,
 
 | Modifier     | Description                       |
 |--------------|-----------------------------------|
-| all          | Affects all modules.              |
 | ?            | Prompt which module(s) to affect. |
-| statusline   | Self-explanatory.                 |
+| all          | Affects all modules.              |
 | statuscolumn | Self-explanatory.                 |
+| statusline   | Self-explanatory.                 |
 | tabline      | Self-explanatory.                 |
 | winbar       | Self-explanatory.                 |
 
@@ -197,53 +168,4 @@ You can add any number of windows after the modifier to specify which windows to
 
 >[!TIP]
 > Cmdline completion are provided for all sub-commands/modifiers/windows!
-
-## 🎨 Highlight groups
-
-`bars.nvim` comes with the following highlight groups,
-
-- BarsFoldClose1
-- BarsFoldOpen1
-- BarsFoldClose2
-- BarsFoldOpen2
-- BarsFoldClose3
-- BarsFoldOpen3
-- BarsFoldClose4
-- BarsFoldOpen4
-- BarsFoldClose5
-- BarsFoldOpen5
-- BarsFoldClose6
-- BarsFoldOpen6
-
-- BarsLineNr
-- BarsWrap1<1..10>
-- BarsVirtual2<1..10>
-
-- BarsNormal<1..10>
-- BarsInsert<1..10>
-- BarsVisual<1..10>
-- BarsVisualLine<1..10>
-- BarsVisualBlock<1..10>
-- BarsCommand<1..10>
-
-- BarsNormal
-- BarsInsert
-- BarsVisual
-- BarsVisualLine
-- BarsVisualBlock
-- BarsCommand
-
-- BarsFt
-- BarsFt0
-- BarsFt1
-- BarsFt2
-- BarsFt3
-- BarsFt4
-- BarsFt5
-- BarsFt6
-
-- BarsGit
-
-- BarsRuler
-- BarsRulerVisual
 
