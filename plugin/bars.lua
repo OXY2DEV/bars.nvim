@@ -137,7 +137,7 @@ vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 --- Update the tab list when opening new tabs.
 vim.api.nvim_create_autocmd({ "TabNew" }, {
 	callback = function ()
-		local max = vim.g.__tabline_max_tabs or 5;
+		local max = vim.g.bars_tabline_visible_tabs or 5;
 		local tabs = #vim.api.nvim_list_tabpages();
 
 		if not package.loaded["bars.tabline"] then
@@ -149,7 +149,7 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 			return;
 		end
 
-		vim.g.__bars_tabpage_from = math.max(1, tabs - math.floor(max * 0.25));
+		vim.g.bars_tablist_start = math.max(1, (tabs + 1) - max);
 	end
 });
 

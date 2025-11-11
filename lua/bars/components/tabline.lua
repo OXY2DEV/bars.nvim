@@ -46,10 +46,10 @@ tlC.tabs = function (config)
 	local tabs = vim.api.nvim_list_tabpages();
 	local _o = "";
 
-	if not vim.g.__bars_tabpage_from then
-		vim.g.__bars_tabpage_from = 1;
-	elseif vim.g.__bars_tabpage_from > #tabs then
-		vim.g.__bars_tabpage_from = 1;
+	if not vim.g.bars_tablist_start then
+		vim.g.bars_tablist_start = 1;
+	elseif vim.g.bars_tablist_start > #tabs then
+		vim.g.bars_tablist_start = 1;
 	end
 
 	if not vim.g.__bars_tabpage_list_locked then
@@ -57,15 +57,14 @@ tlC.tabs = function (config)
 	end
 
 	---@type integer Start index. Must be above 0;
-	local from = utils.clamp(vim.g.__bars_tabpage_from, 1, #tabs);
+	local from = utils.clamp(vim.g.bars_tablist_start, 1, #tabs);
 	---@type integer Number of tabs to show.
 	local max = config.max or 5;
 	---@type boolean Is the list position locked?
 	local locked = vim.g.__bars_tabpage_list_locked;
 
-	--- Maximum number of tabs to show.
-	--- Stored to he used by `autocmds`.
-	vim.g.__tabline_max_tabs = max;
+	--- Maximum number of tabs to show. Stored to he used by `autocmds`.
+	vim.g.bars_tabline_visible_tabs = max;
 
 	if from ~= 1 then
 		if locked == true then
@@ -78,7 +77,7 @@ tlC.tabs = function (config)
 			_o = table.concat({
 				_o,
 
-				"%@v:lua.__tab_from_decrease@",
+				"%@v:lua.bars_tablist_start_decrease@",
 				utils.create_segmant(config.nav_left, config.nav_left_hl),
 				"%X"
 			});
@@ -213,7 +212,7 @@ tlC.tabs = function (config)
 
 				utils.create_segmant(config.separator, config.separator_hl),
 
-				"%@v:lua.__tab_from_increase@",
+				"%@v:lua.bars_tablist_start_increase@",
 				utils.create_segmant(config.nav_right, config.nav_right_hl),
 				"%X"
 			});
@@ -256,10 +255,10 @@ tlC.bufs = function (config)
 	local bufs = utils.get_valid_bufs();
 	local _o = "";
 
-	if not vim.g.__bars_buf_from then
-		vim.g.__bars_buf_from = 1;
-	elseif vim.g.__bars_buf_from > #bufs then
-		vim.g.__bars_buf_from = 1;
+	if not vim.g.bars_buflist_start then
+		vim.g.bars_buflist_start = 1;
+	elseif vim.g.bars_buflist_start > #bufs then
+		vim.g.bars_buflist_start = 1;
 	end
 
 	if not vim.g.__bars_tabpage_list_locked then
@@ -267,7 +266,7 @@ tlC.bufs = function (config)
 	end
 
 	---@type integer Start index. Must be above 0;
-	local from = utils.clamp(vim.g.__bars_buf_from, 1, #bufs);
+	local from = utils.clamp(vim.g.bars_buflist_start, 1, #bufs);
 	---@type integer Number of bufs to show.
 	local max = config.max or 5;
 	---@type boolean Is the list position locked?
@@ -288,7 +287,7 @@ tlC.bufs = function (config)
 			_o = table.concat({
 				_o,
 
-				"%@v:lua.__buf_from_decrease@",
+				"%@v:lua.bars_buflist_start_decrease@",
 				utils.create_segmant(config.nav_left, config.nav_left_hl),
 				"%X"
 			});
@@ -417,7 +416,7 @@ tlC.bufs = function (config)
 
 				utils.create_segmant(config.separator, config.separator_hl),
 
-				"%@v:lua.__buf_from_increase@",
+				"%@v:lua.bars_buflist_start_increase@",
 				utils.create_segmant(config.nav_right, config.nav_right_hl),
 				"%X"
 			});

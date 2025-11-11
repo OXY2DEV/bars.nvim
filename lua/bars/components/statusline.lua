@@ -265,11 +265,13 @@ slC.diagnostics = function (buffer, window, config)
 	---| 5 All
 	local mode = 5;
 
-	if type(vim.w[window].__slDiagnostic_mode) ~= "number" then
-		mode = config.default_mode or 1;
-		vim.w[window].__slDiagnostic_mode = config.default_mode or 1;
+	if type(vim.w[window].bars_diagnostic_state) ~= "number" then
+		-- NOTE: Default should show all diagnostic types.
+
+		mode = config.default_mode or 5;
+		vim.w[window].bars_diagnostic_state = config.default_mode or 5;
 	else
-		mode = vim.w[window].__slDiagnostic_mode;
+		mode = vim.w[window].bars_diagnostic_state;
 	end
 
 	local _d = "";
@@ -334,7 +336,7 @@ slC.diagnostics = function (buffer, window, config)
 	end
 
 	return table.concat({
-		"%@v:lua.__change_diagnostic_state@",
+		"%@v:lua.bars_change_diagnostic_state@",
 		utils.set_hl(config.hl),
 
 		string.format("%s%s", utils.set_hl(config.corner_left_hl), config.corner_left  or ""),

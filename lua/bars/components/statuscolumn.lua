@@ -82,31 +82,31 @@ scC.lnum = function (buffer, window, config)
 		_o = table.concat({
 			_o,
 			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
-			utils.align("right", vim.v.lnum, max_width)
+			utils.align("right", tostring(vim.v.lnum), max_width)
 		});
 	elseif config.mode == 2 then
 		_o = table.concat({
 			_o,
 			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
-			utils.align("right", vim.v.relnum, max_width)
+			utils.align("right", tostring(vim.v.relnum), max_width)
 		});
 	elseif vim.v.relnum == 0 then
 		_o = table.concat({
 			_o,
 			utils.set_hl(get(config.hl, vim.v.relnum + 1, true)),
-			utils.align("right", vim.v.lnum, max_width)
+			utils.align("right", tostring(vim.v.lnum), max_width)
 		});
 	else
 		_o = table.concat({
 			_o,
 			utils.set_hl(get(config.hl, vim.v.relnum + 1)),
-			utils.align("right", vim.v.relnum, max_width)
+			utils.align("right", tostring(vim.v.relnum), max_width)
 		});
 	end
 
 	if config.click ~= false then
 		_o = table.concat({
-			"%@v:lua.__goto_lnum@",
+			"%@v:lua.bars_goto_lnum@",
 			_o,
 			"%X"
 		});
