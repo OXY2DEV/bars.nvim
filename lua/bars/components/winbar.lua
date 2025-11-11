@@ -19,8 +19,9 @@ wbC.node = function (buffer, window, main_config)
 
 	local throttle = main_config.throttle or 50;
 
-	local before = vim.w[window].__node_time or 0;
-	local old = vim.w[window].__node_data;
+	local before = vim.w[window].bars_cached_time_tsnodes or 0;
+	local old = vim.w[window].bars_cached_tsnodes;
+
 	local now = vim.uv.hrtime();
 
 	if old and (now - before) < (throttle * 1e6) then
@@ -157,8 +158,8 @@ wbC.node = function (buffer, window, main_config)
 		});
 	end
 
-	vim.w[window].__node_data = _o;
-	vim.w[window].__node_time = now;
+	vim.w[window].bars_cached_tsnodes = _o;
+	vim.w[window].bars_cached_time_tsnodes = now;
 
 	return _o;
 
@@ -186,9 +187,9 @@ wbC.path = function (buffer, window, main_config)
 	local throttle = main_config.throttle or 50;
 
 	---@type integer
-	local before = vim.w[window].__path_time or 0;
+	local before = vim.w[window].bars_cached_time_oath or 0;
 	---@type string
-	local old = vim.w[window].__path_data;
+	local old = vim.w[window].bars_cached_path;
 	---@type integer
 	local now = vim.uv.hrtime();
 
@@ -235,8 +236,8 @@ wbC.path = function (buffer, window, main_config)
 		table.remove(parts, #parts);
 	end
 
-	vim.w[window].__path_data = _o;
-	vim.w[window].__path_time = now;
+	vim.w[window].bars_cached_path = _o;
+	vim.w[window].bars_cached_time_oath = now;
 
 	return _o;
 
