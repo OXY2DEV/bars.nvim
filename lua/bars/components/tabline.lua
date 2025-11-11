@@ -52,8 +52,8 @@ tlC.tabs = function (config)
 		vim.g.bars_tablist_start = 1;
 	end
 
-	if not vim.g.__bars_tabpage_list_locked then
-		vim.g.__bars_tabpage_list_locked = false;
+	if not vim.g.bars_tablist_locked then
+		vim.g.bars_tablist_locked = false;
 	end
 
 	---@type integer Start index. Must be above 0;
@@ -61,7 +61,7 @@ tlC.tabs = function (config)
 	---@type integer Number of tabs to show.
 	local max = config.max or 5;
 	---@type boolean Is the list position locked?
-	local locked = vim.g.__bars_tabpage_list_locked;
+	local locked = vim.g.bars_tablist_locked;
 
 	--- Maximum number of tabs to show. Stored to he used by `autocmds`.
 	vim.g.bars_tabline_visible_tabs = max;
@@ -261,8 +261,8 @@ tlC.bufs = function (config)
 		vim.g.bars_buflist_start = 1;
 	end
 
-	if not vim.g.__bars_tabpage_list_locked then
-		vim.g.__bars_tabpage_list_locked = false;
+	if not vim.g.bars_buflist_locked then
+		vim.g.bars_buflist_locked = false;
 	end
 
 	---@type integer Start index. Must be above 0;
@@ -270,11 +270,10 @@ tlC.bufs = function (config)
 	---@type integer Number of bufs to show.
 	local max = config.max or 5;
 	---@type boolean Is the list position locked?
-	local locked = vim.g.__bars_tabpage_list_locked;
+	local locked = vim.g.bars_buflist_locked;
 
-	--- Maximum number of bufs to show.
-	--- Stored to he used by `autocmds`.
-	vim.g.__tabline_max_bufs = max;
+	--- Maximum number of buffers to show. Stored to he used by `autocmds`.
+	vim.g.bars_tabline_visible_bufs = max;
 
 	if from ~= 1 then
 		if locked == true then
@@ -338,7 +337,7 @@ tlC.bufs = function (config)
 		local buf_config = current == true and (config.active or {}) or (config.inactive or {});
 
 		if current == false then
-			utils.create_to_buf(buffer)
+			utils.create_buffer_click_handler(buffer)
 		end
 
 		local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buffer), ":t");
@@ -365,7 +364,7 @@ tlC.bufs = function (config)
 		_o = table.concat({
 			_o,
 
-			current == false and "%@v:lua.__tabline_to_buf.b" .. buffer .. "@" or "",
+			current == false and "%@v:lua.bars_tabline_to_buffer.b" .. buffer .. "@" or "",
 
 			utils.create_segmant(buf_config.corner_left, buf_config.corner_left_hl or buf_config.hl),
 			utils.create_segmant(buf_config.padding_left, buf_config.padding_left_hl or buf_config.hl),

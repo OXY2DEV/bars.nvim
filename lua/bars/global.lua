@@ -175,5 +175,6 @@ _G.bars_buflist_start_decrease = function ()
 	---|fE
 end
 
-_G.__tabline_to_buf = {};
+---@type table<integer, function> Maps a `buffer` to it's `click handler`.
+_G.bars_tabline_to_buffer = {};
 

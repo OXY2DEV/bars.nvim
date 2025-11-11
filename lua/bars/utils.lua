@@ -143,12 +143,14 @@ utils.get_valid_bufs = function ()
 	return _b;
 end
 
-utils.create_to_buf = function (buffer)
-	if type(_G.__tabline_to_buf) ~= "table" then
-		_G.__tabline_to_buf = {};
+--- Creates click handler to go to specific buffer.
+---@param buffer integer
+utils.create_buffer_click_handler = function (buffer)
+	if type(_G.bars_tabline_to_buffer) ~= "table" then
+		_G.bars_tabline_to_buffer = {};
 	end
 
-	_G.__tabline_to_buf["b" .. buffer] = function ()
+	_G.bars_tabline_to_buffer["b" .. buffer] = function ()
 		if vim.api.nvim_buf_is_valid(buffer) == false then
 			return;
 		elseif #vim.fn.win_findbuf(buffer) > 0 then

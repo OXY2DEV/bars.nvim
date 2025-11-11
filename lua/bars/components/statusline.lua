@@ -526,12 +526,23 @@ slC.progress = function (buffer, window, config)
 		return;
 	end
 
-	---@type "start" | "progress" | "finish", "buffer" | "window"
-	local last_frame = src == "buffer" and vim.b[buffer].__loader_last_frame or vim.w[window].__loader_last_frame;
+	---@type
+	---| "buffer"
+	---| "finish"
+	---| "progress"
+	---| "start"
+	---| "window"
+	local last_frame = src == "buffer" and
+		vim.b[buffer].bars_loader_last_frame or
+		vim.w[window].bars_loader_last_frame
+	;
 	last_frame = last_frame or 1;
 
 	---@type integer
-	local last_tick = src == "buffer" and vim.b[buffer].__loader_last_tick or vim.w[window].__loader_last_tick;
+	local last_tick = src == "buffer" and
+		vim.b[buffer].bars_loader_last_tick or
+		vim.w[window].bars_loader_last_tick
+	;
 	local now = vim.uv.hrtime() / 1e6; ---@diagnostic disable-line
 
 	--- Gets progress-bar state
@@ -560,11 +571,11 @@ slC.progress = function (buffer, window, config)
 		end
 
 		if src == "buffer" then
-			vim.b[buffer].__loader_last_tick = now;
-			vim.b[buffer].__loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
+			vim.b[buffer].bars_loader_last_tick = now;
+			vim.b[buffer].bars_loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
 		else
-			vim.w[window].__loader_last_tick = now;
-			vim.w[window].__loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
+			vim.w[window].bars_loader_last_tick = now;
+			vim.w[window].bars_loader_last_frame = last_frame + 1 > max and 1 or last_frame + 1;
 		end
 
 		---|fE
