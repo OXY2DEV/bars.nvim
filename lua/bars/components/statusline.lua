@@ -4,11 +4,11 @@ local slC = {};
 local utils = require("bars.utils");
 
 --- Shows current git branch.
----@param _ integer
+---@param buffer integer
 ---@param window integer
 ---@param main_config statusline.components.branch
 ---@return string
-slC.branch = function (_, window, main_config)
+slC.branch = function (buffer, window, main_config)
 	---|fS
 
 	local cwd;
@@ -28,6 +28,18 @@ slC.branch = function (_, window, main_config)
 	---@return string
 	local function get_branch ()
 		---|fS
+
+		if package.loaded["gitsigns"] and type(vim.b[buffer].gitsigns_head) == "string" then
+			--[[
+				NOTE: In case `gitsigns.nvim` is available, use their information instead.
+
+				Getting the branch data may be expensive, so there should be no reason to do it multiple times.
+				And `gitsigns.nvim` should handle Git-related stuff better than we do.
+
+				See `:h b:gitsigns_head`.
+			]]
+			return vim.b[buffer].gitsigns_head;
+		end
 
 		--- Are we in a repo?
 		---@type string
