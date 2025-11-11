@@ -87,19 +87,19 @@ slC.branch = function (buffer, window, main_config)
 		---|fE
 	end
 
-	if not vim.w[window].__git_branch then
+	if not vim.w[window].bars_cached_git_branch then
 		--- Cached branch name not found.
 		--- Get current branch name.
 		---@type string
 		branch = vim.split(get_branch(), "\n", { trimempty = true });
 
-		vim.w[window].__git_branch = branch;
-		vim.w[window].__branch_time = vim.uv.hrtime();
+		vim.w[window].bars_cached_git_branch = branch;
+		vim.w[window].bars_cached_time_git = vim.uv.hrtime();
 	else
 		---@type infowhat
 		local now = vim.uv.hrtime();
 		---@type integer
-		local bef = vim.w.__branch_time or 0;
+		local bef = vim.w.bars_cached_time_git or 0;
 
 		--- Branch value update delay.
 		---@type integer
@@ -111,12 +111,12 @@ slC.branch = function (buffer, window, main_config)
 			branch = vim.split(get_branch(), "\n", { trimempty = true });
 
 			--- Update cached value & update time.
-			vim.w[window].__git_branch = branch;
-			vim.w[window].__branch_time = vim.uv.hrtime();
+			vim.w[window].bars_cached_git_branch = branch;
+			vim.w[window].bars_cached_time_git = vim.uv.hrtime();
 		else
 			--- Not enough time has passed.
 			--- Use cached value.
-			branch = vim.w[window].__git_branch;
+			branch = vim.w[window].bars_cached_git_branch;
 		end
 	end
 
