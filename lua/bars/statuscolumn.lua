@@ -558,7 +558,7 @@ statuscolumn.setup = function (config)
 	end
 
 	for window, _ in pairs(statuscolumn.state.attached_windows) do
-		 statuscolumn.update_id(window);
+		 statuscolumn.update_style(window);
 	end
 
 	---|fE
