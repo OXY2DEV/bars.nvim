@@ -261,11 +261,8 @@ slC.diagnostics = function (buffer, window, config)
 	---@diagnostic disable-next-line: deprecated
 	local clients = vim.fn.has("nvim-0.11") == 1 and vim.lsp.get_clients({ bufnr = buffer }) or vim.lsp.buf_get_clients(buffer);
 
-	if #clients == 0 and config.auto_hide == true then
-		return "";
-	end
-
-	if not diagnostics_count then
+	if (#clients == 0 or vim.tbl_isempty(diagnostics_count)) and config.auto_hide == true then
+		-- No diagnostics clients or no count available.
 		return "";
 	end
 
