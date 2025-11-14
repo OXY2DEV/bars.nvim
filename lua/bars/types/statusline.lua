@@ -1,107 +1,66 @@
---- Type definitions for the statusline.
 ---@meta
-
---- Statusline state variable(s).
----@class statusline.state
----
---- Should we attach to new windows?
----@field enable boolean
----
---- State of attached windows.
----   true -> Attached & rendering.
----   false -> Attached only.
----@field attached_windows table<integer, boolean>
-
------------------------------------------------------------------------------
 
 --- Statusline configuration table.
 ---@class statusline.config
 ---
----@field force_attach? string[] List of `statusline`s to ignore when attaching.
+---@field force_attach? string[] List of `statusline` values to ignore when attaching.
 ---
---- Filetypes to ignore.
----@field ignore_filetypes? string[]
---- Buftypes to ignore.
----@field ignore_buftypes? string[]
+---@field ignore_filetypes string[] Filetypes to ignore when attaching.
+---@field ignore_buftypes string[] Buffer types to ignore when attaching.
 ---
---- Additional condition for attaching to new windows.
----@field condition? fun(buffer: integer, window: integer): boolean | nil
+---@field condition? fun(buffer: integer, window: integer): boolean Additional condition for attaching to windows.
 ---
---- Default style.
----@field default statusline.style
----
---- Custom style.
----@field [string] statusline.style
+---@field default statusline.style Default style.
+---@field [string] statusline.style Named style.
 
 -----------------------------------------------------------------------------
 
 --- Statusline style
 ---@class statusline.style
 ---
----@field condition? boolean | fun(buffer: integer, window: integer): boolean Condition for this style. Unused for `default`.
----
----@field components statusline_component[] Statusline components.
+---@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.(unused when style is `default`)
+---@field components statusline.component[] Components for this style.
 
----@alias statusline_component
----| statusline.components.section
----| statusline.components.ruler
----| statusline.components.mode
----| statusline.components.diagnostics
----| statusline.components.branch
----| statusline.components.bufname
----| statusline.components.empty
+
+---@alias statusline.component
+---| statusline.components.branch Git branch.
+---| statusline.components.bufname Buffer name.
 ---| statusline.components.custom
----| statusline.components.macro
----| statusline.components.progress
+---| statusline.components.diagnostics Diagnostics count.
+---| statusline.components.empty Empty space.
+---| statusline.components.macro Macro play/record indicator.
+---| statusline.components.mode Current mode.
+---| statusline.components.progress Progressbar.
+---| statusline.components.ruler Ruler.
+---| statusline.components.section Generic section.
 
 -----------------------------------------------------------------------------
 
 --- Shows current git branch.
 ---@class statusline.components.branch
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "branch"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Delay(in milliseconds) between branch
---- name updates.
----@field throttle? integer
+---@field throttle? integer Number of milliseconds used between updating the branch name.
 ---
---- Default configuration for git branch.
----@field default branch.opts
----
---- Configuration for branches whose name
---- matches `string`.
----@field [string] branch.opts
+---@field default branch.opts Default configuration.
+---@field [string] branch.opts Configuration for `string`.
 
 
---- Git branch component options.
---- Drawn like so,
----
----```txt
---- abc----de
---- │││    │└ corner_right
---- │││    └ padding_right
---- ││└ icon
---- │└ padding_left
---- └ corner_left
----```
+--- Options for git branch.
 ---@class branch.opts
 ---
 ---@field corner_left? string
 ---@field padding_left? string
 ---
---- Alternate branch name.
----@field text? string
+---@field text? string Alternate branch name.
 ---@field icon? string
 ---
 ---@field padding_right? string
 ---@field corner_right? string
 ---
---- Primary highlight group.
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
@@ -116,60 +75,37 @@
 --- Shows buffer name.
 ---@class statusline.components.bufname
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "bufname"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Maximum name length.
----@field max_len? integer
+---@field max_len? integer Maximum name length.
+---@field truncate_symbol? string Symbol used to show name truncation.
 ---
---- Symbol used to show truncation.
----@field truncate_symbol? string
----
----@field default bufname.opts
----@field [string] bufname.opts
+---@field default bufname.opts Default configuration.
+---@field [string] bufname.opts Configuration for buffer names matching `string`.
 
 
---- Buffer name component options.
---- Drawn like so,
----
----```txt
---- abc----de
---- │││    │└ corner_right
---- │││    └ padding_right
---- ││└ icon / nomodifiable_icon
---- │└ padding_left
---- └ corner_left
----```
+--- Options for buffer name.
 ---@class bufname.opts
 ---
 ---@field corner_left? string
 ---@field padding_left? string
 ---
---- Alternate branch name.
----@field text? string
+---@field text? string Alternate name.
 ---@field icon? string
 ---
---- Icon for 'nomodifiable' buffers.
----@field nomodifiable_icon? string
+---@field nomodifiable_icon? string Icon for 'nomodifiable' buffers.
 ---
 ---@field padding_right? string
 ---@field corner_right? string
 ---
---- Primary highlight group.
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
 ---
---- Highlight groups for the icons.
---- Used by `icon.nvim`
----@field icon_hl? string[]
----
---- Highlight group for `nomodifiable_icon`
----@field nomodifiable_icon_hl? string
+---@field icon_hl? string[] Highlight groups for the icons. Used by `icons.nvim`.
+---@field nomodifiable_icon_hl? string Highlight group for `nomodifiable_icon`
 ---
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
@@ -179,24 +115,12 @@
 --- Shows diagnostics count.
 ---@class statusline.components.diagnostics
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "diagnostics"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Should this component be automatically hidden?
+---@field auto_hide? boolean When `true`, this component will be hidden if no diagnostics are available.
+---@field compact? boolean When `true`, a compact sign is used if diagnostics are empty. Cannot be used with `auto_hide`.
 ---
---- > This component gets hidden if a buffer has
---- > no client attached to it.
----@field auto_hide? boolean
----
---- Should the component be compacted?
---- This prevents showing empty diagnostics counts.
----@field compact? boolean
----
---- Determines what type of diagnostics are
---- shown.
 ---@field default_mode?
 ---|1 Error
 ---|2 Warning
@@ -216,54 +140,36 @@
 ---@field hint_icon? string
 ---@field hint_hl? string
 ---
---- Icon to show when no diagnostics are available.
----@field empty_icon? string
+---@field empty_icon? string Icon to show when no diagnostics are available and `compact = true` & `auto_hide = false`.
+---@field empty_text? string Text to show when no diagnostics are available and `compact = true` & `auto_hide = false`.
 ---
---- Text to show when no diagnostics are available.
----@field empty_text? string
+---@field empty_hl? string Highlight group for `empty_icon` & `empty_text`.
 ---
---- Highlight group to use when no diagnostics are
---- available.
----@field empty_hl? string
----
---- Text used as separator between each diagnostics
---- type.
----@field separator? string
----
---- Highlight group for the separator.
+---@field separator? string Text used as a separator between each diagnostics type.
 ---@field separator_hl? string
 ---
---- Left corner of the component. 
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
+---
 ---@field corner_left? string
 ---@field corner_left_hl? string
 ---
---- Left padding of the component. 
 ---@field padding_left? string
 ---@field padding_left_hl? string
 ---
---- Right padding of the component. 
 ---@field padding_right? string
 ---@field padding_right_hl? string
 ---
---- Right corner of the component. 
 ---@field corner_right? string
 ---@field corner_right_hl? string
----
---- Primary highlight group for the component
----@field hl? string
 
 -----------------------------------------------------------------------------
 
 --- Empty space.
 ---@class statusline.components.empty
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "empty"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Highlight group for this component.
 ---@field hl? string
 
 -----------------------------------------------------------------------------
@@ -271,44 +177,28 @@
 --- Shows current mode.
 ---@class statusline.components.mode
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "mode"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Should we show a compact version?
----@field compact? boolean | fun(buffer: integer, window: integer): boolean
+---@field compact? boolean | fun(buffer: integer, window: integer): boolean Show a compact version(only show `padding` & `icon`)?
 ---
----@field default mode.opts
----@field [string] mode.opts
+---@field default mode.opts Default configuration.
+---@field [string] mode.opts Configuration for mode string matching `string`.
 
 
---- Mode name component options.
---- Drawn like so,
----
----```txt
---- abc----de
---- │││    │└ corner_right
---- │││    └ padding_right
---- ││└ icon
---- │└ padding_left
---- └ corner_left
----```
+--- Options for mode indicator.
 ---@class mode.opts
 ---
 ---@field corner_left? string
 ---@field padding_left? string
 ---
---- Mode name.
----@field text? string
+---@field text? string Mode name.
 ---@field icon? string
 ---
 ---@field padding_right? string
 ---@field corner_right? string
 ---
---- Primary highlight group.
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
@@ -320,26 +210,13 @@
 
 -----------------------------------------------------------------------------
 
---- Custom section for the statusline.
---- Drawn like so,
----
---- abc-de
---- │││││└ corner_right
---- ││││└ padding_right
---- │││└ text
---- ││└ icon
---- │└ padding_left
---- └ corner_left
+--- Structured section. Used as scaffolding for custom components.
 ---@class statusline.components.section
 ---
---- Condition for this component.
----@field condition? fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind? "section"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Reference to a click handler.
----@field click? string
+---@field click? string Click handler.
 ---
 ---@field corner_left? string
 ---@field padding_left? string
@@ -350,8 +227,7 @@
 ---@field padding_right? string
 ---@field corner_right? string
 ---
---- Primary highlight group
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 ---
 ---@field corner_left_hl? string
 ---@field padding_left_hl? string
@@ -367,36 +243,19 @@
 --- Custom ruler.
 ---@class statusline.components.ruler
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "ruler"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Should visual modes be shown
 ---@field mode
 ---| "normal" Show cursor position.
 ---| "visual" Show selection size.
 ---| fun(buffer: integer, window: integer): ( "normal" | "visual" )
 ---
---- Default configuration.
----@field default ruler.opts
----
---- Configuration for visual modes.
----@field visual ruler.opts
+---@field default ruler.opts Default configuration.
+---@field visual ruler.opts Configuration for visual modes.
 
 
---- Ruler component options.
---- Drawn like so,
----
----```txt
---- abcXX-YYde
---- │││  │  │└ corner_right
---- │││  │  └ padding_right
---- │││  └ separator
---- ││└ icon
---- │└ padding_left
---- └ corner_left
+--- Ruler options.
 ---@class ruler.opts
 ---
 ---@field corner_left? string
@@ -404,8 +263,7 @@
 ---
 ---@field icon? string
 ---
---- Separator between texts.
----@field separator? string
+---@field separator? string Text between row & col.
 ---
 ---@field padding_right? string
 ---@field corner_right? string
@@ -420,54 +278,39 @@
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
 ---
---- Primary highlight group.
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 
 -----------------------------------------------------------------------------
 
 --- Custom statusline component.
 ---@class statusline.components.custom
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "custom"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Text to show for this component.
 ---@field value fun(buffer: integer, window: integer): string
 
 -----------------------------------------------------------------------------
 
+--- Macro record/play indicator.
 ---@class statusline.components.macro
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "macro"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
---- Icon to show Macros being recorded.
----@field record_icon string
+---@field record_icon string Icon to show Macros being recorded.
+---@field record_hl? string Highlight group for record icon.
 ---
---- Highlight group for record icon.
----@field record_hl? string
----
---- Icon to show Macros being executed.
----@field exec_icon string
----
---- Highlight group for exec icon.
----@field exec_hl? string
+---@field exec_icon string Icon to show Macros being executed.
+---@field exec_hl? string Highlight group for exec icon.
 
 -----------------------------------------------------------------------------
 
+--- Progressbar.
 ---@class statusline.components.progress
 ---
---- Optional condition for this component.
----@field condition? boolean | fun(buffer: integer, window: integer): boolean
----
---- What kind of component is this?
 ---@field kind "progress"
+---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
 ---
 ---@field check? string The variable that holds the progress state, default is "progress_state".
 ---
