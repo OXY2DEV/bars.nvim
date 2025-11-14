@@ -18,7 +18,6 @@ tabline.config = {
 					return vim.g.bars_tabline_show_buflist ~= true;
 				end,
 
-
 				separator = " ",
 				separator_hl = "Normal",
 
@@ -218,7 +217,7 @@ tabline.update_style = function ()
 			goto continue;
 		end
 
-		---@type tabline.opts
+		---@type tabline.style
 		local tmp = tabline.config[key];
 
 		if tmp.condition == true then
@@ -231,8 +230,6 @@ tabline.update_style = function ()
 				style = key;
 			end
 		end
-
-		---@diagnostic enable:undefined-field
 
 		::continue::
 	end

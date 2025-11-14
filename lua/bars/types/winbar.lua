@@ -1,126 +1,81 @@
 ---@meta
 
---- State variables for the winbar
---- module.
----@class winbar.state
----
----@field enable boolean
----
---- State for attached windows.
----@field attached_windows { [integer]: boolean }
-
-----------------------------------------------------------------------
-
 --- Configuration for the winbar module.
 ---@class winbar.config
 ---
 ---@field force_attach? string[] List of `winbar`s to ignore when attaching.
 ---
---- Filetypes to ignore.
----@field ignore_filetypes string[]
+---@field ignore_filetypes string[] Filetypes to ignore when attaching.
+---@field ignore_buftypes string[] Buffer types to ignore when attaching.
 ---
---- Buftypes to ignore.
----@field ignore_buftypes string[]
+---@field condition? fun(buffer: integer, window: integer): boolean Additional condition for attaching to windows.
 ---
---- Additional condition for attaching to
---- windows.
----@field condition? fun(buffer: integer, window: integer): boolean | nil
----
---- Default style.
----@field default winbar_component[]
----
---- Style named `string`
----@field [string] winbar.opts
+---@field default winbar.style Default style.
+---@field [string] winbar.style Named style.
 
 
----@class winbar.opts
+--[[ Style for the `winbar`. ]]
+---@class winbar.style
 ---
----@field condition fun(buffer: integer, window: integer): boolean Condition for a style.
----@field components winbar_component[]
+---@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.(unused when style is `default`)
+---@field components winbar.component[] Components for this style.
 
 
----@alias winbar_component
----| winbar.component.node
----| winbar.component.path
+---@alias winbar.component
+---| winbar.components.custom Custom text.
+---| winbar.components.node Node hierarchy for the node under cursor.
+---| winbar.components.path Path segments relative to `current working directory`.
 
 
 --- Shows the current node's hierarchy.
----@class winbar.component.node
+---@class winbar.components.node
 ---
 ---@field kind "node"
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
 ---
---- Condition for this component
----@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+---@field throttle? integer Update delay(in milliseconds).
+---@field depth? integer Maximum node depth.
 ---
---- Update delay(in milliseconds).
----@field throttle? integer
+---@field separator? string Separator between nodes.
+---@field separator_hl? string Highlight group for the separator.
 ---
---- Maximum node depth.
----@field depth? integer
----
---- Separator between nodes.
----@field separator? string
----
---- Highlight group for the separator.
----@field separator_hl? string
----
---- Default configuration for languages.
----@field default node.opts
----
---- Configuration for language named `string`.
----@field [string] node.opts
+---@field default node.language.opts Default configuration for languages.
+---@field [string] node.language.opts Configuration for language named `string`.
 
 
----@class node.opts
+--[[ Language options for the `node` component. ]]
+---@class node.language.opts
 ---
---- Default configuration for nodes.
----@field default winbar.section
----
---- Configuration for the ellipsis.
----@field __lookup table
----
---- Configuration for nodes named `string.
----@field [string] winbar.section
+---@field default winbar.section Default configuration for nodes.
+---@field _ellipsis winbar.section Configuration for the ellipsis(shown when a node's depth is higher than `depth`).
+---@field [string] winbar.section Configuration for nodes named `string.
 
 
---- Configuration for file path.
----@class winbar.component.path
+--- Configuration for file path segment.
+---@class winbar.components.path
 ---
---- What kind of component is this?
 ---@field kind "path"
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
 ---
---- Condition for this component
----@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+---@field throttle? integer Update delay(in milliseconds).
 ---
---- Update delay(in milliseconds).
----@field throttle? integer
+---@field separator? string Separator between path components.
+---@field separator_hl? string Highlight group for the separator.
 ---
---- Separator between path components.
----@field separator? string
----
----Highlight group for separator.
----@field separator_hl? string
----
---- Default configuration for path segment.
----@field default winbar.section
----
---- Configuration for segments matching `string`.
----@field [string] winbar.section
+---@field default winbar.section Default configuration for path segment.
+---@field [string] winbar.section Configuration for segments matching `string`.
 
 
 --- Custom section for the winbar.
----@class winbar.component.custom
+---@class winbar.components.custom
 ---
---- What kind of component is this?
 ---@field kind "custom"
+---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
 ---
---- Condition for this component
----@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
----
---- Text to show for this section.
----@field value string | fun(buffer: integer, window: integer, winbar: string): string
+---@field value string | fun(buffer: integer, window: integer, winbar: string): string Text to show for this section.
 
 
+--- Options for a structured section of the winbar.
 ---@class winbar.section
 ---
 ---@field corner_left? string
@@ -136,7 +91,7 @@
 ---@field padding_left_hl? string
 ---
 ---@field icon_hl? string
----@field hl? string
+---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
 ---
 ---@field padding_right_hl? string
 ---@field corner_right_hl? string
