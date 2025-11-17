@@ -885,11 +885,9 @@ end
 winbar.toggle = function (window)
 	---|fS
 
-	local state = generic.get_win_state(generic.state, window);
-
-	if state == true then
+	if winbar.state.attached_windows[window] == true then
 		winbar.disable(window);
-	elseif state == false then
+	else
 		winbar.enable(window);
 	end
 
