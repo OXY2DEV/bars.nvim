@@ -5,7 +5,7 @@
 >
 > Other than that, this repository acts as a working `example bars & lines plugin`.
 
-<!-- IMAGE -->
+<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo.png"/>
 
 A *highly customisable* & *toggle-able* bars & lines plugin for `Neovim`.
 
