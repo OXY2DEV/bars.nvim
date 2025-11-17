@@ -1,6 +1,6 @@
 # 🚀 bars.nvim
 
->[!TIP],
+>[!TIP]
 > This repository contains guides for both [creating your own bars & lines plugin]() & [customising various bars & lines without external plugins]().
 >
 > Other than that, this repository acts as a working `example bars & lines plugin`.
