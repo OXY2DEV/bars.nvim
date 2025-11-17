@@ -42,7 +42,8 @@ local function get_icon (ft, icon_hls)
 		ft_icon = ft_icon .. " ";
 		return ft_icon, ft_icon_hl;
 	elseif package.loaded["icons"] then
-		return package.loaded["icons"].get(ft, icon_hls);
+		local output = package.loaded["icons"].get(ft, icon_hls);
+		return output.icon, output.hl;
 	end
 
 	return "", nil;
