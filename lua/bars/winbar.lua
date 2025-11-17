@@ -752,7 +752,7 @@ winbar.update_style = function (window)
 			goto continue;
 		end
 
-		---@type winbar.opts
+		---@type winbar.style
 		local tmp = winbar.config[key];
 
 		if tmp.condition == true then

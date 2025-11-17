@@ -1,5 +1,14 @@
 # 🚀 bars.nvim
 
+>[!TIP],
+> This repository contains guides for both [creating your own bars & lines plugin]() & [customising various bars & lines without external plugins]().
+>
+> Other than that, this repository acts as a working `example bars & lines plugin`.
+
+<!-- IMAGE -->
+
+A *highly customisable* & *toggle-able* bars & lines plugin for `Neovim`.
+
 ## 📖 Table of contents
 
 - [✨ Features](#-features)
@@ -8,14 +17,15 @@
 - [📐 Installation](#-installation)
 - [🧭 Configuration](#-configuration)
 - [🧰 Commands](#-commands)
+- [📚 Guides](#-guides)
 
 ## ✨ Features
 
-- Fully customisable `statusline`, `statuscolumn`, `tabline` & `winbar`.
+- Ability to toggle various bars & lines either *globally* or on *specific window*.
 - Component-style configuration to keep things *clean* & *readable*.
 - Per window configuration, allowing users to change how things look on each window.
 - Conditional rendering to disable certain components based on conditions.
-- Enable or disable various bars via `commands`.
+- Enable or disable various bars via `:Bars`.
 
 More specific features are as follows,
 
@@ -168,4 +178,24 @@ You can add any number of windows after the modifier to specify which windows to
 
 >[!TIP]
 > Cmdline completion are provided for all sub-commands/modifiers/windows!
+
+## 📚 Guides
+
++ [📖 Basics]()
++ [📖 Statusline]()
+    - [🔖 Buffer name]()
+    - [🔖 Diagnostics]()
+    - [🔖 Git branch]()
+    - [🔖 Ruler]()
++ [📖 Statuscolumn]()
+    - [🔖 Folds]()
+    - [🔖 Line numbers]()
+    - [🔖 Signs]()
++ [📖 Winbar]()
+    - [🔖 LSP breadcrumbs]()
+    - [🔖 Node hierarchy]()
+    - [🔖 Path segments]()
++ [📖 Tabline]()
+    - [🔖 Buffers]()
+    - [🔖 Tabs]()
 

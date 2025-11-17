@@ -4,7 +4,7 @@ local utils = require("bars.utils");
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.component.node
+---@param main_config winbar.components.node
 ---@return string
 wbC.node = function (buffer, window, main_config)
 	---|fS
@@ -22,6 +22,7 @@ wbC.node = function (buffer, window, main_config)
 	local before = vim.w[window].bars_cached_time_tsnodes or 0;
 	local old = vim.w[window].bars_cached_tsnodes;
 
+	---@diagnostic disable-next-line: undefined-field
 	local now = vim.uv.hrtime();
 
 	if old and (now - before) < (throttle * 1e6) then
@@ -169,7 +170,7 @@ end
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.component.path
+---@param main_config winbar.components.path
 ---@return string
 wbC.path = function (buffer, window, main_config)
 	---|fS
@@ -191,6 +192,7 @@ wbC.path = function (buffer, window, main_config)
 	---@type string
 	local old = vim.w[window].bars_cached_path;
 	---@type integer
+	---@diagnostic disable-next-line: undefined-field
 	local now = vim.uv.hrtime();
 
 	if old and (now - before) < (throttle * 1e6) then
@@ -245,7 +247,7 @@ wbC.path = function (buffer, window, main_config)
 end
 
 --- Custom section.
----@param config winbar.component.custom
+---@param config winbar.components.custom
 ---@return string
 wbC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
