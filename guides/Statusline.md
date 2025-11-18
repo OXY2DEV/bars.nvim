@@ -9,6 +9,10 @@ To use a lua function for the `statusline`, we can make use of `v:lua` like this
 vim.o.statusline = "%!v:lua.require('bars.statusline').render()"
 ```
 
+>[!NOTE]
+> The `%!` part allows statusline items to be used in the output of `render()`.
+> This is useful as certain things(e.g. spacing) are easier to do via items. 
+
 You can replace it with whatever your function name is,
 
 ```lua
@@ -42,7 +46,7 @@ statusline.render = function ()
 
 	statusline.update_style(window);
 
-	local style = vim.w[window].bars_statusline_style or "default";
+	local style = vim.w[window].bars_statusline_style or vim.w[window]._bars_statusline_style or "default";
 	local config = statusline.config[style];
 
 	if type(config) ~= "table" then
@@ -77,20 +81,86 @@ Let's break it down,
 - These lines are used to get the current style of the statusline.
 
   ```lua
-  	local style = vim.w[window].bars_statusline_style or "default";
-  	local config = statusline.config[style];
-  
-  	if type(config) ~= "table" then
-  		return "";
-  	end
+      local style = vim.w[window].bars_statusline_style or vim.w[window]._bars_statusline_style or"default";
+      local config = statusline.config[style];
+
+      if type(config) ~= "table" then
+          return "";
+      end
   ```
 
 - `_o`(short for `_output`, `_` prefix for internal variable) is the text that will be shown in the statusline.
 
 - The loop part iterates over the components and adds the output to `_o`.
+
   ```lua
-  	for _, component in ipairs(config.components or {}) do
-  		_o = _o .. components.get(component.kind, buffer, window, component, _o);
-  	end
+      for _, component in ipairs(config.components or {}) do
+          _o = _o .. components.get(component.kind, buffer, window, component, _o);
+      end
   ```
+
+## 🧩 Components
+
+Components are stored in [lua/bars/components/statusline.lua](https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/statusline.lua).
+
+These components are exposed via the `get()` function.
+
+```lua from: ../lua/bars/components/statusline.lua field: slC.get
+--- Returns the output of the section {name}.
+---@param name string
+---@param buffer integer
+---@param window integer
+---@param component_config table
+---@param statusline string
+---@return string
+slC.get = function (name, buffer, window, component_config, statusline)
+	---|fS
+
+	if type(name) ~= "string" then
+		--- Component doesn't exist.
+		return "";
+	elseif type(slC[name]) ~= "function" then
+		--- Not a valid component.
+		return "";
+	else
+		if component_config.condition ~= nil then
+			if component_config.condition == false then
+				--- Component is disabled.
+				return "";
+			else
+				local sucess, val = pcall(component_config.condition, buffer, window, statusline);
+
+				if sucess == false then
+					return "";
+				elseif val == false then
+					return "";
+				end
+			end
+		end
+
+		local static_config = vim.deepcopy(component_config);
+
+		for key, value in pairs(static_config) do
+			if type(value) ~= "function" then
+				goto continue;
+			end
+
+			local s_success, s_val = pcall(value, buffer, window, statusline);
+
+			if s_success == false then
+				static_config[key] = nil;
+			else
+				static_config[key] = s_val;
+			end
+
+			::continue::
+		end
+
+		--- Return component value.
+		return slC[name](buffer, window, static_config, statusline) or "";
+	end
+
+	---|fE
+end
+```
 
