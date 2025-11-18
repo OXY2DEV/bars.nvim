@@ -45,6 +45,9 @@ More specific features are as follows,
 
 🧩 Statusline ~
 
+Image {img:4}
+Image {img:3}
+
 ◆ Built-in support for showing current `Git branch` & `diagnostics count`
 ◆ Customisable `ruler`.
 ◆ Custom `statusline` for,
@@ -60,10 +63,15 @@ More specific features are as follows,
 
 🧩 Winbar ~
 
+Image {img:6}
+Image {img:5}
+
 ◆ Built-in support for Tree-sitter node hierarchy for the current node.
 ◆ File path segments from.project root.
 
 🧩 Tabline ~
+
+Image {img:7}
 
 ◆ Buffer list(tab list similar to IDEs) support.
 ◆ Mouse-support.
@@ -260,5 +268,10 @@ Images ~
 
 1: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo_2.png
 2: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo.png
+3: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-statusline_qf.png
+4: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-statusline_help.png
+5: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-winbar_path.png
+6: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-winbar_node.png
+7: https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-tabline_tabs.png
 
 vim:ft=help:textwidth=80:tabstop=4:noexpandtab:
