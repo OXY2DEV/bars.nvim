@@ -3,26 +3,24 @@
 This page explains the basics for modifying the `statusline`, `statuscolumn`, `tabline` and/or `winbar`.
 
 It explains,
-- [💡 The syntax]()
-- [💡 Item groups]()
-- [💡 Spacing]()
-- [💡 Highlighting]()
-- [💡 Dynamic values]()
-- [💡 Click handlers]()
-- [💡 Using lua instead of format expressions]()
+- [💡 Syntax](#-syntax)
+- [💡 Item groups](#-item-groups)
+- [💡 Spacing](#-spacing)
+- [💡 Highlighting](#-hugglighting)
+- [💡 Dynamic values](#-dynamic-values)
+- [💡 Click handlers](#-click-handlers)
+- [💡 Using Lua](#-using-lua)
 - [💡 Getting info withing the lua function]()
 
-## 💡 The syntax
+## 💡 Syntax
 
-The various bars & lines in Neovim can be configured by using a `format string` as their option.
+The various bars & lines in Vim/Neovim can be configured by using a string with `statusline item`s inside them.
 
-> For example, you can set `vim.o.statusline` to some format string to change what is shown in the statusline.
+### 🧩 Items
 
-### 🧩 Format strings
+If you have never heard of `statusline items` before or need a refresher they are basically strings/text starting with `%`(percentage) followed by some *special* characters.
 
-If you have never heard of `format strings` before or need a refresher they are basically some string(text) starting with `%`(percentage) followed by some specific characters.
-
-In `C`, this is used by functions such as `printf()` & `scanf()`,
+In `C`, something similar is used by functions such as `printf()` & `scanf()`,
 
 ```c
 int C = 10;
@@ -42,12 +40,9 @@ As you can see, `%d` gets replaced with the value of `C` in the output.
 
 > `%d` stands for **Decimal value**.
 
-Vim's/Neovim's bars & lines works similarly. You define **what** to show **where** in the option(s.g. `vim.o.statusline`) and the editor fills those spots with the correct information.
+Similarly, in various bars & lines you specify where to show different things and Vim/Neovim fills those spots with the correct information.
 
->[!NOTE]
-> In the help files these are referred to as `item`s.
-
-The most commonly used format strings are,
+The most commonly used statusline items are,
 
 
 | Item | Description         |
@@ -122,7 +117,7 @@ Together they will look something like this,
 
 ## 💡 Item groups
 
-Item groups are a way of structuring a number of `format string`s together. Typically this is done to add stuff like [click handlers](#-click-handlers) and/or apply spacing/alignment. But this may also he used to increase readability.
+Item groups are a way of structuring a number of `statusline item`s together. Typically this is done to add stuff like [click handlers](#-click-handlers) and/or apply spacing/alignment. But this may also he used to increase readability.
 
 You can define an item group by using `%(` & `%)`. So, an item group showing the **line number** & **column number** will look something like,
 
@@ -167,12 +162,125 @@ Now, we can manually add spacing like so,
 
 But not only does it make the string unnecessarily long it also doesn't work on all screen sizes.
 
-To solve that Vim/Neovim has a special `%=` format string. We can use it like this,
+To solve that Vim/Neovim has a special `%=` item. We can use it like this,
 
 ```
 %(%{mode()}%)%=%(%f%)%=%(%l,%c%)
 ```
 
+## 💡 Highlighting
+
+So, far everything has been looking the same color. So it's time to *color* them.
+
+For highlighting texts we use `%#{group_name}#` where `group_name` is the highlight group's name.
+
+>[!NOTE]
+> By default, the statusline will use the `StatusLine`!
+
+However, you can't directly specify which part gets what highlight group(like you can with `virtual text`). So, highlights can *bleed* outside of where they should be if you aren't careful.
+
+So, let's try making the **file name** a different color.
+
+```
+%(%{mode()}%)%=%(%#Question#%f%%*%)%=%(%l,%c%)
+```
+>[!TIP]
+> You can reset the highlight group to whatever the statusline is using as default via `%*`.
+
+## 💡 Dynamic values
+
+You can show some dynamic value using the `%{...}` and `%{%...}` where the `...` returns some value.
+
+You can also specify what type of variable you want to use by using one of these prefixes,
+
+
+| Prefix | Description                    |
+|--------|--------------------------------|
+|  `b:`  | Local to the current buffer.   |
+|  `w:`  | Local to the current window.   |
+|  `t:`  | Local to the current tab page. |
+|  `g:`  | Global.                        |
+|  `v:`  | Global, predefined by Vim.     |
+
+
 ## 💡 Click handlers
 
+Vim/Neovim provides the `%@{handler}@` and `%X`/`%T` items for defining clickable regions.
+
+The `{handler}` can be a `Vim` function or a **global** lua function.
+
+> As this guide solely focuses on **Lua**, I won't be discussing about Vimscript functions.
+
+Let's say, you have a click handler like this that goes to
+
+```lua
+_G.somefunc = function ()
+	vim.print("hi");
+end
+```
+
+We can use it on some text `Click me` like this,
+
+```
+%@v:lua.somefunc@Click me%X
+```
+
+## 💡 Using Lua
+
+From the help files,
+
+```help
+							*stl-%!*
+	When the option starts with "%!" then it is used as an expression,
+	evaluated and the result is used as the option value.  Example: >vim
+		set statusline=%!MyStatusLine()
+<	The *g:statusline_winid* variable will be set to the |window-ID| of the
+	window that the status line belongs to.
+	The result can contain %{} items that will be evaluated too.
+	Note that the "%!" expression is evaluated in the context of the
+	current window and buffer, while %{} items are evaluated in the
+	context of the window that the statusline belongs to.
+
+	When there is error while evaluating the option then it will be made
+	empty to avoid further errors.  Otherwise screen updating would loop.
+	When the result contains unprintable characters the result is
+	unpredictable.
+```
+
+For using Lua functions, we can make use of `v:lua`. For example,
+
+```lua eval: vim.o.statusline
+vim.o.statusline = "%!v:lua.require('bars.statusline').render()"
+```
+
+Here, `require('bars.statusline').render()` returns a string containing `items`(or a literal string, if you want).
+
+## 💡 Getting info withing the lua function
+
+If you wish to change how different bars & lines look based on the `buffer` and/or `window` then you will need to get these values.
+
+Functions such as these,
+
+```lua
+vim.api.nvim_get_current_buf();
+vim.api.nvim_get_current_win();
+```
+
+Will not work for windows that aren't the current one. Luckily there are some variables to get these informations.
+
+Some of the more important ones are,
+
+- `vim.g.statusline_winid`, for getting the window where the bars/lines is being rendered.
+
+>[!TIP]
+> Use `vim.api.nvim_win_get_buf()` to get the buffer being shown in `vim.g.statusline_winid`.
+
+For `statuscolumn` we have access to,
+
+- `vim.v.lnum`, for the line number of the line being rendered.
+- `vim.v.relnum`, for the relative line number of the line being rendered.
+- `vim.v.virtnum`, for detecting **wrapped** & **virtual** lines.
+    + It is `0` for regular lines.
+    + It is `<0` for virtual lines.
+    + It is `>0` for wrapped lines.
 
