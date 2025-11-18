@@ -1860,8 +1860,9 @@ The `winbar` module has the following API functions.
 ◆ `winbar.attach(window)`, Attaches to window(doesn't check `ignore_filetypes`,
   `ignore_buftypes` & `condition`).
 ◆ `winbar.detach(window)`, Detaches from window.
-◆ `winbar.update_style(window)`, Causes the winbar style to be updated.
-    ◇ `vim.w.bars_winbar_style`, Winbar style of the current window.
+    ◇ `vim.w.bars_winbar_style`, User defined winbar style of the current
+      window.
+    ◇ `vim.w._bars_winbar_style`, Calculated winbar style of the current window.
 
 Links ~
 

@@ -550,7 +550,10 @@ The `tabline` module has the following API functions.
   `ignore_buftypes` & `condition`).
 ◆ `tabline.detach(window)`, Detaches from window.
 ◆ `tabline.update_style(window)`, Causes the tabline style to be updated.
-    ◇ `vim.g.bars_tabline_style`, Tabline style.
+    ◇ `vim.w.bars_tabline_style`, User defined tabline style of the current
+      window.
+    ◇ `vim.w._bars_tabline_style`, Calculated tabline style of the current
+      window.
 ◆ `vim.g.bars_tabline_show_buflist`, Set to `true` to switch to buffer list.
 
 Links ~

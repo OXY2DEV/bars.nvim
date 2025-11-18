@@ -693,7 +693,10 @@ The `statuscolumn` module has the following API functions.
 ◆ `statuscolumn.detach(window)`, Detaches from window.
 ◆ `statuscolumn.update_style(window)`, Causes the statuscolumn style to be
   updated.
-    ◇ `vim.w.bars_statuscolumn_style`, Statuscolumn style of the current window.
+    ◇ `vim.w.bars_statuscolumn_style`, User defined statuscolumn style of the
+      current window.
+    ◇ `vim.w._bars_statuscolumn_style`, Calculated statuscolumn style of the
+      current window.
 
 Links ~
 

@@ -239,7 +239,7 @@ statuscolumn.render = function ()
 
 	statuscolumn.update_style(window);
 
-	local style = vim.w[window].bars_statuscolumn_style or "default";
+	local style = vim.w[window].bars_statuscolumn_style or vim.w[window]._bars_statuscolumn_style or "default";
 	local config = statuscolumn.config[style];
 
 	if type(config) ~= "table" then
@@ -401,7 +401,7 @@ statuscolumn.update_style = function (window)
 		::continue::
 	end
 
-	vim.w[window].bars_statuscolumn_style = style;
+	vim.w[window]._bars_statuscolumn_style = style;
 
 	---|fE
 end

@@ -616,7 +616,7 @@ winbar.render = function ()
 
 	winbar.update_style(window);
 
-	local style = vim.w[window].bars_winbar_style or "default";
+	local style = vim.w[window].bars_winbar_style or vim.w[window]._bars_winbar_style or "default";
 	local config = winbar.config[style];
 
 	if type(config) ~= "table" then

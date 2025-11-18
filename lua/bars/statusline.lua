@@ -517,7 +517,7 @@ statusline.render = function ()
 
 	statusline.update_style(window);
 
-	local style = vim.w[window].bars_statusline_style or "default";
+	local style = vim.w[window].bars_statusline_style or vim.w[window]._bars_statusline_style or "default";
 	local config = statusline.config[style];
 
 	if type(config) ~= "table" then
@@ -677,7 +677,7 @@ statusline.update_style = function (window)
 		::continue::
 	end
 
-	vim.w[window].bars_statusline_style = style;
+	vim.w[window]._bars_statusline_style = style;
 
 	---|fE
 end

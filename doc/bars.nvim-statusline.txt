@@ -880,7 +880,10 @@ The `statusline` module has the following API functions.
   `ignore_filetypes`, `ignore_buftypes` & `condition`).
 ◆ `statusline.detach(window)`, Detaches from window.
 ◆ `statusline.update_style(window)`, Causes the statusline style to be updated.
-    ◇ `vim.w.bars_statusline_style`, Statusline style of the current window.
+    ◇ `vim.w.bars_statusline_style`, User defined statusline style of the
+      current window.
+    ◇ `vim.w._bars_statusline_style`, Calculated statusline style of the current
+      window.
 
 Links ~
 

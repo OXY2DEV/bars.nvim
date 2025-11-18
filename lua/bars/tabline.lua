@@ -145,7 +145,7 @@ tabline.render = function ()
 
 	tabline.update_style();
 
-	local tlID = vim.g.bars_tabline_style or "default";
+	local tlID = vim.g.bars_tabline_style or vim.g._bars_tabline_style or "default";
 	local config = tabline.config[tlID];
 
 	if type(config) ~= "table" then
@@ -234,7 +234,7 @@ tabline.update_style = function ()
 		::continue::
 	end
 
-	vim.g.bars_tabline_style = style;
+	vim.g._bars_tabline_style = style;
 	tabline.state.attached = true;
 
 	---|fE
