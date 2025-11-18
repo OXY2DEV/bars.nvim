@@ -1,0 +1,704 @@
+*bars.nvim-statuscolumn.txt*                      Statuscolumn from `bars.nvim`.
+
+See the following files,
+
+◆ ../lua/bars/types/statuscolumn.lua {1}, for type definitions.
+◆ ../lua/bars/statuscolumn.lua {2}, for setup, commands etc.
+◆ ../lua/bars/components/statuscolumn.lua {3}, for components.
+
+--------------------------------------------------------------------------------
+Table of contents
+
+🧭 Configuration ............................... |bars.nvim-statuscolumn.config|
+💡 API ............................................ |bars.nvim-statuscolumn.api|
+
+--------------------------------------------------------------------------------
+🧭 Configuration                                 *bars.nvim-statuscolumn.config*
+
+The statuscolumn can be configured via
+`require("bars").setup({ statuscolumn = { ... } })` or
+`require("bars.statuscolumn").setup({ ... })`.
+
+▋  Tip
+▋ You can use `require("bars").setup({ statuscolumn = false })` or
+▋ `require("bars.statuscolumn").setup(false)` to disable it!
+
+The configuration table has the following structure.
+
+>lua
+	--- Configuration table for the statuscolumn.
+	---@class statuscolumn.config
+	---
+	---@field force_attach? string[] List of `statuscolumn` values to ignore when attaching.
+	---
+	---@field ignore_filetypes string[] Filetypes to ignore when attaching.
+	---@field ignore_buftypes string[] Buffer types to ignore when attaching.
+	---
+	---@field condition? fun(buffer: integer, window: integer): boolean Additional condition for attaching to windows.
+	---
+	---@field default statuscolumn.style Default style.
+	---@field [string] statuscolumn.style Named style.
+<
+
+The default configuration is given below,
+
+>lua
+	statuscolumn.config = {
+		force_attach = {},
+	
+		ignore_filetypes = { "blink-cmp-menu" },
+		ignore_buftypes = { "help", "quickfix" },
+	
+		condition = function (buffer)
+			local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
+	
+			if bt == "nofile" and ft == "query" then
+				--- Buffer for `:InspectTree`
+				return true;
+			elseif bt == "nofile" then
+				--- Normal nofile buffer.
+				return false;
+			else
+				return true;
+			end
+		end,
+	
+		default = {
+			components = {
+				---|fS
+	
+				{
+					kind = "empty",
+					width = 1,
+	
+					hl = "LineNr"
+				},
+				{
+					kind = "signs",
+					hl = "LineNr",
+	
+					filter = function (buffer, namespaces, _, _, _, details)
+						---@type string
+						local mode = vim.api.nvim_get_mode().mode;
+						local name = namespaces[details.ns_id] or "";
+	
+						if package.loaded["markview"] and vim.bo[buffer].ft == "markdown" then
+							--- On markdown files when on normal
+							--- mode only show markview signs.
+							if mode == "n" then
+								return string.match(name, "^markview") ~= nil;
+							else
+								return true;
+							end
+						elseif package.loaded["helpview"] and vim.bo[buffer].ft == "help" then
+							--- On help files when on normal
+							--- mode only show helpview signs.
+							if mode == "n" then
+								return string.match(name, "^helpview") ~= nil;
+							else
+								return true;
+							end
+						else
+							if vim.list_contains({ "i", "v", "V", "" }, mode) then
+								--- On visual mode only show git signs.
+								return string.match(name, "^gitsigns") ~= nil;
+							end
+	
+							return true;
+						end
+					end
+				},
+				{
+					kind = "folds",
+	
+					close_text = { "󱠂" },
+					close_hl = { "BarsFoldClose1", "BarsFoldClose2", "BarsFoldClose3", "BarsFoldClose4", "BarsFoldClose5", "BarsFoldClose6", },
+					open_text = { "󰌶" },
+					open_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+	
+					scope_text = "│",
+					scope_end_text = "╰",
+					scope_merge_text = "├",
+	
+					fill_text = " ",
+					fill_hl = "LineNr",
+	
+					scope_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+					scope_end_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+					scope_merge_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+				},
+				{
+					kind = "empty",
+					width = 1,
+					hl = "LineNr"
+				},
+				{
+					kind = "lnum",
+					mode = 3,
+	
+					click = function (_, window)
+						return window == vim.api.nvim_get_current_win();
+					end,
+	
+					wrap_markers = "│",
+					virt_markers = "│",
+	
+					wrap_hl = {
+						"BarsWrap1", "BarsWrap2", "BarsWrap3", "BarsWrap4", "BarsWrap5",
+					},
+					virt_hl = {
+						"BarsVirtual1", "BarsVirtual2", "BarsVirtual3", "BarsVirtual4", "BarsVirtual5",
+					},
+					hl = function ()
+						---@type string
+						local mode = vim.api.nvim_get_mode().mode;
+						local USE = gradient_map[mode] or gradient_map.default
+	
+						return {
+							string.format(USE, 1),
+							"LineNr",
+						};
+					end,
+				},
+				{
+					kind = "border",
+					text = "▕",
+					hl = function ()
+						local _o = {};
+						---@type string
+						local mode = vim.api.nvim_get_mode().mode;
+						local USE = gradient_map[mode] or gradient_map.default
+	
+						for g = 1, 7 do
+							table.insert(_o, string.format(USE, g));
+						end
+	
+						return _o;
+					end
+				},
+				{
+					kind = "empty",
+					width = 1,
+					hl = "Normal"
+				},
+	
+				---|fE
+			}
+		},
+	
+		inspect_tree = {
+			---|fS
+	
+			condition = function (buffer, window)
+				if vim.b[buffer].dev_base then
+					return true;
+				elseif vim.w[window].inspecttree_window then
+					return true;
+				end
+	
+				return false;
+			end,
+	
+			components = {
+				{
+					kind = "custom",
+					value = function (buffer)
+						local lnums = vim.b[buffer].injections or {};
+						local current = lnums[vim.v.lnum] or "LineNr";
+	
+						return "%#" .. current .. "# ";
+					end
+				},
+			}
+	
+			---|fE
+		},
+	
+		terminal = {
+			---|fS
+	
+			condition = function (buffer)
+				return vim.bo[buffer].bt == "terminal";
+			end,
+	
+			components = {}
+	
+			---|fE
+		}
+	};
+<
+
+🎨 Styles ~
+
+You can use various styles to easily change how the statuscolumn looks.
+
+>lua
+	--[[ Style for the `statuscolumn`. ]]
+	---@class statuscolumn.style
+	---
+	---@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.(unused when style is `default`)
+	---@field components statuscolumn.component[] Components for this style.
+<
+
+Example,
+
+>lua
+	default = {
+		components = {
+			---|fS
+	
+			{
+				kind = "empty",
+				width = 1,
+	
+				hl = "LineNr"
+			},
+			{
+				kind = "signs",
+				hl = "LineNr",
+	
+				filter = function (buffer, namespaces, _, _, _, details)
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+					local name = namespaces[details.ns_id] or "";
+	
+					if package.loaded["markview"] and vim.bo[buffer].ft == "markdown" then
+						--- On markdown files when on normal
+						--- mode only show markview signs.
+						if mode == "n" then
+							return string.match(name, "^markview") ~= nil;
+						else
+							return true;
+						end
+					elseif package.loaded["helpview"] and vim.bo[buffer].ft == "help" then
+						--- On help files when on normal
+						--- mode only show helpview signs.
+						if mode == "n" then
+							return string.match(name, "^helpview") ~= nil;
+						else
+							return true;
+						end
+					else
+						if vim.list_contains({ "i", "v", "V", "" }, mode) then
+							--- On visual mode only show git signs.
+							return string.match(name, "^gitsigns") ~= nil;
+						end
+	
+						return true;
+					end
+				end
+			},
+			{
+				kind = "folds",
+	
+				close_text = { "󱠂" },
+				close_hl = { "BarsFoldClose1", "BarsFoldClose2", "BarsFoldClose3", "BarsFoldClose4", "BarsFoldClose5", "BarsFoldClose6", },
+				open_text = { "󰌶" },
+				open_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+	
+				scope_text = "│",
+				scope_end_text = "╰",
+				scope_merge_text = "├",
+	
+				fill_text = " ",
+				fill_hl = "LineNr",
+	
+				scope_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+				scope_end_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+				scope_merge_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+			},
+			{
+				kind = "empty",
+				width = 1,
+				hl = "LineNr"
+			},
+			{
+				kind = "lnum",
+				mode = 3,
+	
+				click = function (_, window)
+					return window == vim.api.nvim_get_current_win();
+				end,
+	
+				wrap_markers = "│",
+				virt_markers = "│",
+	
+				wrap_hl = {
+					"BarsWrap1", "BarsWrap2", "BarsWrap3", "BarsWrap4", "BarsWrap5",
+				},
+				virt_hl = {
+					"BarsVirtual1", "BarsVirtual2", "BarsVirtual3", "BarsVirtual4", "BarsVirtual5",
+				},
+				hl = function ()
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+					local USE = gradient_map[mode] or gradient_map.default
+	
+					return {
+						string.format(USE, 1),
+						"LineNr",
+					};
+				end,
+			},
+			{
+				kind = "border",
+				text = "▕",
+				hl = function ()
+					local _o = {};
+					---@type string
+					local mode = vim.api.nvim_get_mode().mode;
+					local USE = gradient_map[mode] or gradient_map.default
+	
+					for g = 1, 7 do
+						table.insert(_o, string.format(USE, g));
+					end
+	
+					return _o;
+				end
+			},
+			{
+				kind = "empty",
+				width = 1,
+				hl = "Normal"
+			},
+	
+			---|fE
+		}
+	},
+<
+
+📦 Components ~
+
+Each style contains one or more components which can be any one of,
+
+>lua
+	---@alias statuscolumn.component
+	---| statuscolumn.components.border Border.
+	---| statuscolumn.components.custom Custom text.
+	---| statuscolumn.components.empty Empty column.
+	---| statuscolumn.components.folds Fold column.
+	---| statuscolumn.components.lnum Line numbers.
+	---| statuscolumn.components.signs Sign column.
+<
+
+🧩 Component: border ~
+
+Shows a border. Can be configured to use a gradient instead of a solid border.
+
+>lua
+	--[[ Border. ]]
+	---@class statuscolumn.components.border
+	---
+	---@field kind "border"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field text string | string[] Text to use for the border. Can be a list to change the character used for `n`th line relative to the current line..
+	---@field hl? string | string[] Highlight group for the border. Can be a list to change the highlight group used for `n`th line relative to the current line..
+<
+
+Example,
+
+>lua
+	{
+		kind = "border",
+		text = "▕",
+		hl = function ()
+			local _o = {};
+			---@type string
+			local mode = vim.api.nvim_get_mode().mode;
+			local USE = gradient_map[mode] or gradient_map.default
+	
+			for g = 1, 7 do
+				table.insert(_o, string.format(USE, g));
+			end
+	
+			return _o;
+		end
+	},
+<
+
+🧩 Component: custom ~
+
+Shows some custom text.
+
+▋  Important
+▋ If the text's width changes frequently you should call `vim.api.nvim__redraw({ flush = true, statuscolumn = true })` whenever the width changes.
+▋ This is a Vim/Neovim behavior! Not a bug!
+
+>lua
+	--[[ Custom component. ]]
+	---@class statuscolumn.components.custom
+	---
+	---@field kind "custom"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field value
+	---| string
+	---| fun(buffer: integer, window: integer, statuscolumn: string): string
+<
+
+Example,
+
+>lua
+	{
+	    kind = "custom",
+	    value = "foo"
+	}
+<
+
+🧩 Component: empty ~
+
+Empty columns with a specific width.
+
+>lua
+	--[[ Empty column. ]]
+	---@class statuscolumn.components.empty
+	---
+	---@field kind "empty"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field width integer How many columns should this span?
+	---@field hl? string Highlight group for this component.
+<
+
+Example,
+
+>lua
+	{
+		kind = "empty",
+		width = 1,
+	
+		hl = "LineNr"
+	},
+<
+
+🧩 Component: folds ~
+
+Shows the folds.
+
+>lua
+	--[[ Fold column. ]]
+	---@class statuscolumn.components.folds
+	---
+	---@field kind "folds"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field close_text string | string[] Text used for indicating a closed fold. Can be a list to change the character used for the `n`th fold level.
+	---@field close_hl? string | string[] Highlight group used for indicating a closed fold. Can be a list to change the Highlight group used for the `n`th fold level.
+	---
+	---@field open_text string | string[] Text used for indicating a opened fold. Can be a list to change the character used for the `n`th fold level.
+	---@field open_hl? string | string[] Highlight group used for indicating a opened fold. Can be a list to change the Highlight group used for the `n`th fold level.
+	---
+	---@field scope_text string | string[] Text used for indicating the scope of a fold. Can be a list to change the character used for the `n`th fold level.
+	---@field scope_hl? string | string[] Highlight group used for indicating the scope of a fold. Can be a list to change the Highlight group used for the `n`th fold level.
+	---
+	---@field scope_end_text string | string[] Text used for indicating the end of scope of a fold. Can be a list to change the character used for the `n`th fold level.
+	---@field scope_end_hl? string | string[] Highlight group used for indicating the end of scope of a fold. Can be a list to change the Highlight group used for the `n`th fold level.
+	---
+	---@field scope_merge_text string | string[] Text used for indicating the change of fold level. Can be a list to change the character used for the `n`th fold level where the level is shifting from `n -> m`.
+	---@field scope_merge_hl? string | string[] Highlight group used for indicating the change of fold level. Can be a list to change the highlight group used for the `n`th fold level where the level is shifting from `n -> m`.
+	---
+	---@field fill_text string Text for normal lines.
+	---@field fill_hl? string Highlight group for `fill_text`.
+<
+
+Example,
+
+>lua
+	{
+		kind = "folds",
+	
+		close_text = { "󱠂" },
+		close_hl = { "BarsFoldClose1", "BarsFoldClose2", "BarsFoldClose3", "BarsFoldClose4", "BarsFoldClose5", "BarsFoldClose6", },
+		open_text = { "󰌶" },
+		open_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+	
+		scope_text = "│",
+		scope_end_text = "╰",
+		scope_merge_text = "├",
+	
+		fill_text = " ",
+		fill_hl = "LineNr",
+	
+		scope_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+		scope_end_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+		scope_merge_hl = { "BarsFoldOpen1", "BarsFoldOpen2", "BarsFoldOpen3", "BarsFoldOpen4", "BarsFoldOpen5", "BarsFoldOpen6", },
+	},
+<
+
+🧩 Component: lnum ~
+
+Shows the line number.
+
+>lua
+	--[[ Line numbers. ]]
+	---@class statuscolumn.components.lnum
+	---
+	---@field kind "lnum"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field click? boolean | fun(buffer: integer, window: integer, statuscolumn: string): boolean
+	---
+	---@field mode
+	---| 1 Absolute line number.
+	---| 2 Relative line number.
+	---| 3 Hybrid line number.
+	---
+	---@field wrap_markers string | string[] Text used for the wrapped lines. Can be a list to change the character used for `n`th wrapped line.
+	---@field virt_markers string | string[] Text used for the virtual lines. Can be a list to change the character used for `n`th virtual line.
+	---
+	---@field wrap_hl? string | string[] Highlight group for `wrap_markers`. Can be a list to create a *gradient effect*(relative to the main line).
+	---@field virt_hl? string | string[] Highlight group for `virt_markers`. Can be a list to create a *gradient effect*(relative to the main line).
+	---
+	---@field hl? string | string[] | fun(buffer: integer, window: integer): ( string | string[] ) Highlight group for the line numbers. Can be a list to create a *gradient effect*(relative to current line).
+<
+
+Example,
+
+>lua
+	{
+		kind = "lnum",
+		mode = 3,
+	
+		click = function (_, window)
+			return window == vim.api.nvim_get_current_win();
+		end,
+	
+		wrap_markers = "│",
+		virt_markers = "│",
+	
+		wrap_hl = {
+			"BarsWrap1", "BarsWrap2", "BarsWrap3", "BarsWrap4", "BarsWrap5",
+		},
+		virt_hl = {
+			"BarsVirtual1", "BarsVirtual2", "BarsVirtual3", "BarsVirtual4", "BarsVirtual5",
+		},
+		hl = function ()
+			---@type string
+			local mode = vim.api.nvim_get_mode().mode;
+			local USE = gradient_map[mode] or gradient_map.default
+	
+			return {
+				string.format(USE, 1),
+				"LineNr",
+			};
+		end,
+	},
+<
+
+🧩 Component: signs ~
+
+Shows the signs optionally allows filtering which signs get shown.
+
+>lua
+	--[[ Sign column. ]]
+	---@class statuscolumn.components.signs
+	---
+	---@field kind "signs"
+	---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean Condition for this component.
+	---
+	---@field filter? fun(buffer: integer, ns_map: table<integer, string>, ns: integer, row: integer, col: integer, extmark: table): boolean Filter for signs.
+	---@field hl? string Custom highlight group for the signs.
+<
+
+Example,
+
+>lua
+	{
+		kind = "signs",
+		hl = "LineNr",
+	
+		filter = function (buffer, namespaces, _, _, _, details)
+			---@type string
+			local mode = vim.api.nvim_get_mode().mode;
+			local name = namespaces[details.ns_id] or "";
+	
+			if package.loaded["markview"] and vim.bo[buffer].ft == "markdown" then
+				--- On markdown files when on normal
+				--- mode only show markview signs.
+				if mode == "n" then
+					return string.match(name, "^markview") ~= nil;
+				else
+					return true;
+				end
+			elseif package.loaded["helpview"] and vim.bo[buffer].ft == "help" then
+				--- On help files when on normal
+				--- mode only show helpview signs.
+				if mode == "n" then
+					return string.match(name, "^helpview") ~= nil;
+				else
+					return true;
+				end
+			else
+				if vim.list_contains({ "i", "v", "V", "" }, mode) then
+					--- On visual mode only show git signs.
+					return string.match(name, "^gitsigns") ~= nil;
+				end
+	
+				return true;
+			end
+		end
+	},
+<
+
+ ╶────────────────────────────────────────────────────────────────────────────╴ 
+
+--------------------------------------------------------------------------------
+💡 API                                              *bars.nvim-statuscolumn.api*
+
+You can access this module via,
+
+>lua
+	local statuscolumn = require("bars.statuscolumn");
+<
+
+🧩 High level API ~
+
+The `statuscolumn` module has the following API functions.
+
+◇ `statuscolumn.setup(config)`, Updates configuration of the statuscolumn.
+
+◇ `statuscolumn.Start()`, Starts the module and attaches & enables custom
+  statuscolumn for all valid windows.
+◇ `statuscolumn.Stop()`, Stops the module and detaches & disables custom
+  statuscolumn for all valid windows.
+
+◇ `statuscolumn.Toggle()`, Toggles the custom statuscolumn for all valid
+  windows.
+◇ `statuscolumn.Enable()`, Enables the custom statuscolumn for all disabled
+  windows.
+◇ `statuscolumn.Disable()`, Disables the custom statuscolumn for all enabled
+  windows.
+
+◇ `statuscolumn.toggle(window)`, Toggles the custom statuscolumn for `window`.
+◇ `statuscolumn.enable(window)`, Enables the custom statuscolumn for `window`(if
+  it's valid & disabled).
+◇ `statuscolumn.disable(window)`, Disables the custom statuscolumn for `window`
+  (if it's valid & disabled).
+
+🧩 Low level API ~
+
+◆ `statuscolumn.config`, Current configuration.
+◆ `statuscolumn.state`, Current state.
+
+>lua
+	statuscolumn.state = {
+		enable = true,
+		attached_windows = {}
+	};
+<
+
+◆ `statuscolumn.attach(window)`, Attaches to window(doesn't check
+  `ignore_filetypes`, `ignore_buftypes` & `condition`).
+◆ `statuscolumn.detach(window)`, Detaches from window.
+◆ `statuscolumn.update_style(window)`, Causes the statuscolumn style to be
+  updated.
+    ◇ `vim.w.bars_statuscolumn_style`, Statuscolumn style of the current window.
+
+Links ~
+
+1: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/types/statuscolumn.lua
+2: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/statuscolumn.lua
+3: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/statuscolumn.lua
+
+vim:ft=help:textwidth=80:tabstop=4:noexpandtab:

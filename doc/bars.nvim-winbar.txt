@@ -1,88 +1,56 @@
-*bars.u-winbar*                                            Usage: Statuscolumn
+*bars.nvim-winbar.txt*                            Statuscolumn from `bars.nvim`.
 
-▌💥 Tip
-▌ You can disable this module for a buffer via
-▌ `vim.b[buffer].bars_winbar = false`.
-▌ You can also disable this module for a window via
-▌ `vim.w[buffer].bars_winbar = false`.
+See the following files,
 
-Usage guide for the Statuscolumn module.
+◆ ../lua/bars/types/winbar.lua {1}, for type definitions.
+◆ ../lua/bars/winbar.lua {2}, for setup, commands etc.
+◆ ../lua/bars/components/winbar.lua {3}, for components.
 
-The relevant files are shown below,
+--------------------------------------------------------------------------------
+🧭 Configuration                                       *bars.nvim-winbar.config*
 
->txt
-	📂 bars.nvim
-	├── 🔐 ///////
-	├── 📂 lua
-	│   ├── 📂 bars
-	│   │   ├── 📂 components
-	│   │   │   ├── 📄 //////////////
-	│   │   │   ├── 📄 ///////////
-	│   │   │   ├── 📄 //////////
-	│   │   │   └── 📄 winbar.lua          # Components
-	│   │   ├── 📄 global.lua              # Click functions
-	│   │   ├── 📄 ////////////////        # Winbar module
-	│   │   ├── 📄 //////////////
-	│   │   ├── 📄 ///////////
-	│   │   ├── 📄 utils.lua               # Utilities
-	│   │   └── 📄 winbar.lua
-	│   ├── 📄 ////////
-	│   └── 📂 definitions
-	│       ├── 📄 ////////
-	│       ├── 📄 ////////////////        # Type definitions
-	│       ├── 📄 //////////////
-	│       ├── 📄 ///////////
-	│       └── 📄 winbar.lua
-	├── 📂 plugin
-	│   └── 📄 ////////
-	└── 📄 /////////
-<
+The winbar can be configured via `require("bars").setup({ winbar = { ... } })`
+or `require("bars.winbar").setup({ ... })`.
 
-------------------------------------------------------------------------------
-🧭 Configuration
+▋  Tip
+▋ You can use `require("bars").setup({ winbar = false })` or
+▋ `require("bars.winbar").setup(false)` to disable it!
 
-The winbar module can be configured via the `winbar` key in `require("bars").setup()` or `require("bars.winbar").setup()`.
+The configuration table has the following structure.
 
 >lua
 	--- Configuration for the winbar module.
 	---@class winbar.config
 	---
-	--- Filetypes to ignore.
-	---@field ignore_filetypes string[]
+	---@field force_attach? string[] List of `winbar`s to ignore when attaching.
 	---
-	--- Buftypes to ignore.
-	---@field ignore_buftypes string[]
+	---@field ignore_filetypes string[] Filetypes to ignore when attaching.
+	---@field ignore_buftypes string[] Buffer types to ignore when attaching.
 	---
-	--- Additional condition for attaching to
-	--- windows.
-	---@field condition? fun(buffer: integer, window: integer): boolean | nil
+	---@field condition? fun(buffer: integer, window: integer): boolean Additional condition for attaching to windows.
 	---
-	--- Default style.
-	---@field default winbar_component[]
-	---
-	--- Style named `string`
-	---@field [string] winbar_component[]
+	---@field default winbar.style Default style.
+	---@field [string] winbar.style Named style.
+<
 
+The default configuration is given below,
 
-	---@alias winbar_component
-	---| winbar.component.node
-	---| winbar.component.path
-
-
-	---@class winbar.config
+>lua
 	winbar.config = {
+		force_attach = {},
+	
 		ignore_filetypes = { "blink-cmp-menu" },
 		ignore_buftypes = { "nofile", "help" },
-
+	
 		default = {
 			components = {
 				---|fS
-
+	
 				{
 					kind = "path",
 					condition = function (buffer)
 						local check_parsers, parser = pcall(vim.treesitter.get_parser, buffer);
-
+	
 						if check_parsers == false then
 							return true;
 						elseif parser == nil then
@@ -91,1176 +59,1700 @@ The winbar module can be configured via the `winbar` key in `require("bars").set
 							return false;
 						end
 					end,
-
+	
 					separator = " → ",
 					separator_hl = "Comment",
-
+	
 					default = {
 						dir_icon = "󰉋 ",
 						icon = "󰈔 ",
-
+	
 						hl = "Special"
 					}
 				},
 				{
 					kind = "node",
 					depth = 3,
-
+	
 					separator = " → ",
 					separator_hl = "Comment",
-
+	
 					default = {
-						__lookup = {
+						_ellipsis = {
 							padding_left = " ",
 							padding_right = " ",
-
+	
 							icon = "󱎓",
-
-							hl = "Color7R"
+	
+							hl = "BarsVisualBlock"
 						},
-
+	
 					},
-
+	
 					["^luadoc$"] = {
 						---|fS
-
+	
 						documentation = {
 							icon = "󱪙 ",
 							hl = "Title"
 						},
-
+	
 						class_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						type_annotation = {
 							icon = "󰐫 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						param_annotation = {
 							icon = "󰡱 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						alias_annotation = {
 							icon = "󰔌 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						continuation = {
 							icon = "󰌑 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						return_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						field_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						qualifier_annotation = {
 							icon = "󰙴 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						generic_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						vararg_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						diagnostic_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						deprecated_annotation = {
 							icon = " ",
 							hl = "@error"
 						},
-
+	
 						meta_annotation = {
 							icon = "󰐱 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						module_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						source_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						version_annotation = {
 							icon = "󰯏 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						package_annotation = {
 							icon = "󰏖 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						operator_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						nodiscard_annotation = {
 							icon = "󰌾 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						cast_annotation = {
 							icon = "󱦈 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						async_annotation = {
 							icon = "󰦖 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						overload_annotation = {
 							icon = "󱐋 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						enum_annotation = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						language_injection = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						see_reference = {
 							icon = "󰈈 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						link_reference = {
 							icon = " ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						since_annotation = {
 							icon = "󰔚 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						as_annotation = {
 							icon = "󰤖 ",
 							hl = "@keyword.luadoc"
 						},
-
+	
 						[".+%_type"] = {
 							icon = " ",
 							hl = "@type.luadoc"
 						},
-
+	
 						identifier = {
 							icon = "󰮄 ",
 							hl = "Special"
 						},
-
+	
 						["^comment$"] = {
 							icon = "󱀡 ",
 							hl = "@comment.lua"
 						},
-
+	
 						comment_content = {
 							icon = "󱀢 ",
 							hl = "@comment.lua"
 						},
-
+	
 						parameter = {
 							icon = " ",
 							hl = "@variable.parameter.luadoc"
 						},
-
+	
 						---|fE
 					},
-
+	
 					["^lua$"] = {
 						---|fS
-
+	
 						chunk = {
 							icon = "󰢱 ",
 							hl = "@function.lua"
 						},
-
+	
 						variable_declaration = {
 							icon = "󰏖 ",
 							hl = "@variable"
 						},
-
+	
 						function_declaration = {
 							icon = "󰡱 ",
 							hl = "@function"
 						},
-
-
+	
 						binary_expression = {
 							icon = "󱃲 ",
 							hl = "Comment"
 						},
-
+	
 						["false"] = {
 							icon = "󰌶 ",
 							hl = "@boolean"
 						},
-
+	
 						function_call = {
 							icon = "󰡱 ",
 							hl = "@function.call.lua"
 						},
-
+	
 						function_definition = {
 							icon = "󰡱 ",
 							hl = "@function.lua"
 						},
-
+	
 						["nil"] = {
 							icon = "󰆧 ",
 							hl = "@constant.builtin.lua"
 						},
-
+	
 						number = {
 							icon = " ",
 							hl = "@number.lua"
 						},
-
+	
 						parenthesized_expression = {
 							icon = "󰅲 ",
 							hl = "Comment"
 						},
-
+	
 						["string"] = {
 							icon = "󰛓 ",
 							hl = "@string.lua"
 						},
-
+	
 						string_content = {
 							icon = "󰴓 ",
 							hl = "@string.lua"
 						},
-
+	
 						table_constructor = {
 							icon = " ",
 							hl = "@constructor.lua"
 						},
-
+	
 						["true"] = {
 							icon = "󱠂 ",
 							hl = "@boolean"
 						},
-
+	
 						unary_expression = {
 							icon = "󰋙 ",
 							hl = "Comment"
 						},
-
+	
 						vararg_expression = {
 							icon = "󰋘 ",
 							hl = "Comment"
 						},
-
+	
 						variable = {
 							icon = "󰋘 ",
 							hl = "@variable.lua"
 						},
-
-
+	
 						assignment_statement = {
 							icon = "󰆦 ",
 							hl = "@operator.lua"
 						},
-
+	
 						break_statement = {
 							icon = "󰆋 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						declaration = {
 							icon = "󰆨 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						do_statement = {
 							icon = "󰣖 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						empty_statement = {
 							icon = "󰆧 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						for_statement = {
 							icon = "󰓦 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						goto_statement = {
 							icon = "󱤬 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						if_statement = {
 							icon = "󰘬 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						elseif_statement = {
 							icon = "󰘬 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						else_statement = {
 							icon = "󰘬 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						label_statement = {
 							icon = "󰓽 ",
 							hl = "@label.lua"
 						},
-
+	
 						repeat_statement = {
 							icon = " ",
 							hl = "@keyword.lua"
 						},
-
+	
 						while_statement = {
 							icon = "󰅐 ",
 							hl = "@keyword.lua"
 						},
-
+	
 						bracket_index_expression = {
 							icon = "󰅪 ",
 							hl = "@punctuation.bracket.lua"
 						},
-
+	
 						dot_index_expression = {
 							icon = "󱦜 ",
 							hl = "@punctuation.delimiter.lua"
 						},
-
+	
 						identifier = {
 							icon = "󰮄 ",
 							hl = "Special"
 						},
-
-
+	
 						arguments = {
 							icon = "󰅲 ",
 							hl = "@punctuation.bracket.lua"
 						},
-
+	
 						expression = {
 							icon = "󱓝 ",
 							hl = "@punctuation.bracket.lua"
 						},
-
-
+	
 						expression_list = {
 							icon = "󱇂 ",
 							hl = "@punctuation.bracket.lua"
 						},
-
+	
 						variable_list = {
 							icon = "󱇂 ",
 							hl = "@punctuation.bracket.lua"
 						},
-
-
+	
 						attribute = {
 							icon = "󱈝 ",
 							hl = "@attribute.lua"
 						},
-
+	
 						block = {
 							icon = "󰴓 ",
 							hl = "Special"
 						},
-
-
+	
 						return_statement = {
 							icon = " ",
 							hl = "@keyword.lua"
 						},
-
+	
 						hash_bang_line = {
 							icon = " ",
 							hl = "Comment"
 						},
-
-
+	
 						["^comment$"] = {
 							icon = "󱀡 ",
 							hl = "@comment.lua"
 						},
-
+	
 						comment_content = {
 							icon = "󱀢 ",
 							hl = "@comment.lua"
 						},
-
-
+	
 						field = {
 							icon = "󱏒 ",
 							hl = "@property.lua"
 						},
-
-
+	
 						for_numeric_clause = {
 							icon = " ",
 							hl = "@keyword.lua"
 						},
-
+	
 						for_generic_clause = {
 							icon = " ",
 							hl = "@keyword.lua"
 						},
-
-
+	
 						method_index_expression = {
 							icon = " ",
 							hl = "@method.lua"
 						},
-
-
+	
 						parameters = {
 							icon = " ",
 							hl = "@variable.parameter.luadoc"
 						},
-
+	
 						---|fE
 					},
-
+	
 					["^lua_patterns$"] = {
 						chunk = {
 							icon = "󰛪 ",
 							hl = "@comment"
 						},
-
-
+	
 						start_assertion = {
 							icon = "󰾺 ",
 							hl = "@keyword"
 						},
-
+	
 						end_assertion = {
 							icon = "󰾸 ",
 							hl = "@keyword"
 						},
-
-
+	
 						zero_or_more = {
 							icon = " ",
 							hl = "@keyword.operator"
 						},
-
+	
 						one_or_more = {
 							icon = " ",
 							hl = "@keyword.operator"
 						},
-
+	
 						lazy = {
 							icon = " ",
 							hl = "@keyword.operator"
 						},
-
+	
 						optional = {
 							icon = " ",
 							hl = "@keyword.operator"
 						},
-
-
+	
 						literal_character = {
 							icon = "󱄽 ",
 							hl = "@character"
 						},
-
+	
 						character_reference = {
 							icon = " ",
 							hl = "@constant.builtin"
 						},
-
+	
 						any_character = {
 							icon = " ",
 							hl = "@variable.member"
 						},
-
-
+	
 						character_class = {
 							icon = "󰏗 ",
 							hl = "@variable.builtin"
 						},
-
+	
 						character_range = {
 							icon = "󰊱 ",
 							hl = "@comment"
 						},
-
+	
 						character_set = {
 							icon = "󱉓 ",
 							hl = "@label"
 						},
-
+	
 						character_set_content = {
 							icon = "󰆦 ",
 							hl = "@comment"
 						},
-
+	
 						caprure_group = {
 							icon = " ",
 							hl = "@label"
 						},
-
-
+	
 						escaped_character = {
 							icon = "󰩈 ",
 							hl = "@string.escape"
 						},
-
+	
 						escape_sequence = {
 							icon = "󰩈 ",
 							hl = "@character.special"
 						},
 					}
 				}
-
+	
 				---|fE
 			}
 		}
 	};
 <
 
-------------------------------------------------------------------------------
-🧩 Components
+🎨 Styles ~
 
-By default, `bars.nvim` ships with a bunch of components. These components are,
+You can use various styles to easily change how the winbar looks.
 
-💡 Node hierarchy(node) ~
+>lua
+	--[[ Style for the `winbar`. ]]
+	---@class winbar.style
+	---
+	---@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.(unused when style is `default`)
+	---@field components winbar.component[] Components for this style.
+<
 
-Shows the hierarchy of the node under the cursor.
+Example,
+
+>lua
+	default = {
+		components = {
+			---|fS
+	
+			{
+				kind = "path",
+				condition = function (buffer)
+					local check_parsers, parser = pcall(vim.treesitter.get_parser, buffer);
+	
+					if check_parsers == false then
+						return true;
+					elseif parser == nil then
+						return true;
+					else
+						return false;
+					end
+				end,
+	
+				separator = " → ",
+				separator_hl = "Comment",
+	
+				default = {
+					dir_icon = "󰉋 ",
+					icon = "󰈔 ",
+	
+					hl = "Special"
+				}
+			},
+			{
+				kind = "node",
+				depth = 3,
+	
+				separator = " → ",
+				separator_hl = "Comment",
+	
+				default = {
+					_ellipsis = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						icon = "󱎓",
+	
+						hl = "BarsVisualBlock"
+					},
+	
+				},
+	
+				["^luadoc$"] = {
+					---|fS
+	
+					documentation = {
+						icon = "󱪙 ",
+						hl = "Title"
+					},
+	
+					class_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					type_annotation = {
+						icon = "󰐫 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					param_annotation = {
+						icon = "󰡱 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					alias_annotation = {
+						icon = "󰔌 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					continuation = {
+						icon = "󰌑 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					return_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					field_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					qualifier_annotation = {
+						icon = "󰙴 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					generic_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					vararg_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					diagnostic_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					deprecated_annotation = {
+						icon = " ",
+						hl = "@error"
+					},
+	
+					meta_annotation = {
+						icon = "󰐱 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					module_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					source_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					version_annotation = {
+						icon = "󰯏 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					package_annotation = {
+						icon = "󰏖 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					operator_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					nodiscard_annotation = {
+						icon = "󰌾 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					cast_annotation = {
+						icon = "󱦈 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					async_annotation = {
+						icon = "󰦖 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					overload_annotation = {
+						icon = "󱐋 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					enum_annotation = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					language_injection = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					see_reference = {
+						icon = "󰈈 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					link_reference = {
+						icon = " ",
+						hl = "@keyword.luadoc"
+					},
+	
+					since_annotation = {
+						icon = "󰔚 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					as_annotation = {
+						icon = "󰤖 ",
+						hl = "@keyword.luadoc"
+					},
+	
+					[".+%_type"] = {
+						icon = " ",
+						hl = "@type.luadoc"
+					},
+	
+					identifier = {
+						icon = "󰮄 ",
+						hl = "Special"
+					},
+	
+					["^comment$"] = {
+						icon = "󱀡 ",
+						hl = "@comment.lua"
+					},
+	
+					comment_content = {
+						icon = "󱀢 ",
+						hl = "@comment.lua"
+					},
+	
+					parameter = {
+						icon = " ",
+						hl = "@variable.parameter.luadoc"
+					},
+	
+					---|fE
+				},
+	
+				["^lua$"] = {
+					---|fS
+	
+					chunk = {
+						icon = "󰢱 ",
+						hl = "@function.lua"
+					},
+	
+					variable_declaration = {
+						icon = "󰏖 ",
+						hl = "@variable"
+					},
+	
+					function_declaration = {
+						icon = "󰡱 ",
+						hl = "@function"
+					},
+	
+					binary_expression = {
+						icon = "󱃲 ",
+						hl = "Comment"
+					},
+	
+					["false"] = {
+						icon = "󰌶 ",
+						hl = "@boolean"
+					},
+	
+					function_call = {
+						icon = "󰡱 ",
+						hl = "@function.call.lua"
+					},
+	
+					function_definition = {
+						icon = "󰡱 ",
+						hl = "@function.lua"
+					},
+	
+					["nil"] = {
+						icon = "󰆧 ",
+						hl = "@constant.builtin.lua"
+					},
+	
+					number = {
+						icon = " ",
+						hl = "@number.lua"
+					},
+	
+					parenthesized_expression = {
+						icon = "󰅲 ",
+						hl = "Comment"
+					},
+	
+					["string"] = {
+						icon = "󰛓 ",
+						hl = "@string.lua"
+					},
+	
+					string_content = {
+						icon = "󰴓 ",
+						hl = "@string.lua"
+					},
+	
+					table_constructor = {
+						icon = " ",
+						hl = "@constructor.lua"
+					},
+	
+					["true"] = {
+						icon = "󱠂 ",
+						hl = "@boolean"
+					},
+	
+					unary_expression = {
+						icon = "󰋙 ",
+						hl = "Comment"
+					},
+	
+					vararg_expression = {
+						icon = "󰋘 ",
+						hl = "Comment"
+					},
+	
+					variable = {
+						icon = "󰋘 ",
+						hl = "@variable.lua"
+					},
+	
+					assignment_statement = {
+						icon = "󰆦 ",
+						hl = "@operator.lua"
+					},
+	
+					break_statement = {
+						icon = "󰆋 ",
+						hl = "@keyword.lua"
+					},
+	
+					declaration = {
+						icon = "󰆨 ",
+						hl = "@keyword.lua"
+					},
+	
+					do_statement = {
+						icon = "󰣖 ",
+						hl = "@keyword.lua"
+					},
+	
+					empty_statement = {
+						icon = "󰆧 ",
+						hl = "@keyword.lua"
+					},
+	
+					for_statement = {
+						icon = "󰓦 ",
+						hl = "@keyword.lua"
+					},
+	
+					goto_statement = {
+						icon = "󱤬 ",
+						hl = "@keyword.lua"
+					},
+	
+					if_statement = {
+						icon = "󰘬 ",
+						hl = "@keyword.lua"
+					},
+	
+					elseif_statement = {
+						icon = "󰘬 ",
+						hl = "@keyword.lua"
+					},
+	
+					else_statement = {
+						icon = "󰘬 ",
+						hl = "@keyword.lua"
+					},
+	
+					label_statement = {
+						icon = "󰓽 ",
+						hl = "@label.lua"
+					},
+	
+					repeat_statement = {
+						icon = " ",
+						hl = "@keyword.lua"
+					},
+	
+					while_statement = {
+						icon = "󰅐 ",
+						hl = "@keyword.lua"
+					},
+	
+					bracket_index_expression = {
+						icon = "󰅪 ",
+						hl = "@punctuation.bracket.lua"
+					},
+	
+					dot_index_expression = {
+						icon = "󱦜 ",
+						hl = "@punctuation.delimiter.lua"
+					},
+	
+					identifier = {
+						icon = "󰮄 ",
+						hl = "Special"
+					},
+	
+					arguments = {
+						icon = "󰅲 ",
+						hl = "@punctuation.bracket.lua"
+					},
+	
+					expression = {
+						icon = "󱓝 ",
+						hl = "@punctuation.bracket.lua"
+					},
+	
+					expression_list = {
+						icon = "󱇂 ",
+						hl = "@punctuation.bracket.lua"
+					},
+	
+					variable_list = {
+						icon = "󱇂 ",
+						hl = "@punctuation.bracket.lua"
+					},
+	
+					attribute = {
+						icon = "󱈝 ",
+						hl = "@attribute.lua"
+					},
+	
+					block = {
+						icon = "󰴓 ",
+						hl = "Special"
+					},
+	
+					return_statement = {
+						icon = " ",
+						hl = "@keyword.lua"
+					},
+	
+					hash_bang_line = {
+						icon = " ",
+						hl = "Comment"
+					},
+	
+					["^comment$"] = {
+						icon = "󱀡 ",
+						hl = "@comment.lua"
+					},
+	
+					comment_content = {
+						icon = "󱀢 ",
+						hl = "@comment.lua"
+					},
+	
+					field = {
+						icon = "󱏒 ",
+						hl = "@property.lua"
+					},
+	
+					for_numeric_clause = {
+						icon = " ",
+						hl = "@keyword.lua"
+					},
+	
+					for_generic_clause = {
+						icon = " ",
+						hl = "@keyword.lua"
+					},
+	
+					method_index_expression = {
+						icon = " ",
+						hl = "@method.lua"
+					},
+	
+					parameters = {
+						icon = " ",
+						hl = "@variable.parameter.luadoc"
+					},
+	
+					---|fE
+				},
+	
+				["^lua_patterns$"] = {
+					chunk = {
+						icon = "󰛪 ",
+						hl = "@comment"
+					},
+	
+					start_assertion = {
+						icon = "󰾺 ",
+						hl = "@keyword"
+					},
+	
+					end_assertion = {
+						icon = "󰾸 ",
+						hl = "@keyword"
+					},
+	
+					zero_or_more = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+	
+					one_or_more = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+	
+					lazy = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+	
+					optional = {
+						icon = " ",
+						hl = "@keyword.operator"
+					},
+	
+					literal_character = {
+						icon = "󱄽 ",
+						hl = "@character"
+					},
+	
+					character_reference = {
+						icon = " ",
+						hl = "@constant.builtin"
+					},
+	
+					any_character = {
+						icon = " ",
+						hl = "@variable.member"
+					},
+	
+					character_class = {
+						icon = "󰏗 ",
+						hl = "@variable.builtin"
+					},
+	
+					character_range = {
+						icon = "󰊱 ",
+						hl = "@comment"
+					},
+	
+					character_set = {
+						icon = "󱉓 ",
+						hl = "@label"
+					},
+	
+					character_set_content = {
+						icon = "󰆦 ",
+						hl = "@comment"
+					},
+	
+					caprure_group = {
+						icon = " ",
+						hl = "@label"
+					},
+	
+					escaped_character = {
+						icon = "󰩈 ",
+						hl = "@string.escape"
+					},
+	
+					escape_sequence = {
+						icon = "󰩈 ",
+						hl = "@character.special"
+					},
+				}
+			}
+	
+			---|fE
+		}
+	}
+<
+
+📦 Components ~
+
+Each style contains one or more components which can be any one of,
+
+>lua
+	---@alias winbar.component
+	---| winbar.components.custom Custom text.
+	---| winbar.components.node Node hierarchy for the node under cursor.
+	---| winbar.components.path Path segments relative to `current working directory`.
+<
+
+🧩 Component: custom ~
+
+Shows some custom text.
+
+>lua
+	--- Custom section for the winbar.
+	---@class winbar.components.custom
+	---
+	---@field kind "custom"
+	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
+	---
+	---@field value string | fun(buffer: integer, window: integer, winbar: string): string Text to show for this section.
+<
+
+🧩 Component: node ~
+
+Shows the node hierarchy of the current node.
 
 >lua
 	--- Shows the current node's hierarchy.
-	---@class winbar.component.node
+	---@class winbar.components.node
 	---
 	---@field kind "node"
+	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
 	---
-	--- Condition for this component
-	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+	---@field throttle? integer Update delay(in milliseconds).
+	---@field depth? integer Maximum node depth.
 	---
-	--- Update delay(in milliseconds).
-	---@field throttle? integer
+	---@field separator? string Separator between nodes.
+	---@field separator_hl? string Highlight group for the separator.
 	---
-	--- Maximum node depth.
-	---@field depth? integer
-	---
-	--- Separator between nodes.
-	---@field separator? string
-	---
-	--- Highlight group for the separator.
-	---@field separator_hl? string
-	---
-	--- Default configuration for languages.
-	---@field default node.opts
-	---
-	--- Configuration for language named `string`.
-	---@field [string] node.opts
+	---@field default node.language.opts Default configuration for languages.
+	---@field [string] node.language.opts Configuration for language named `string`.
+<
 
+Example,
 
-	---@class node.opts
-	---
-	--- Default configuration for nodes.
-	---@field default winbar.section
-	---
-	--- Configuration for the ellipsis.
-	---@field __lookup table
-	---
-	--- Configuration for nodes named `string.
-	---@field [string] winbar.section
-
-
-	---@class winbar.section
-	---
-	---@field corner_left? string
-	---@field padding_left? string
-	---
-	---@field icon? string
-	---@field text? string
-	---
-	---@field padding_right? string
-	---@field corner_right? string
-	---
-	---@field corner_left_hl? string
-	---@field padding_left_hl? string
-	---
-	---@field icon_hl? string
-	---@field hl? string
-	---
-	---@field padding_right_hl? string
-	---@field corner_right_hl? string
-
-
+>lua
 	{
 		kind = "node",
 		depth = 3,
-
+	
 		separator = " → ",
 		separator_hl = "Comment",
-
+	
 		default = {
-			__lookup = {
+			_ellipsis = {
 				padding_left = " ",
 				padding_right = " ",
-
+	
 				icon = "󱎓",
-
-				hl = "Color7R"
+	
+				hl = "BarsVisualBlock"
 			},
-
+	
 		},
-
+	
 		["^luadoc$"] = {
 			---|fS
-
+	
 			documentation = {
 				icon = "󱪙 ",
 				hl = "Title"
 			},
-
+	
 			class_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			type_annotation = {
 				icon = "󰐫 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			param_annotation = {
 				icon = "󰡱 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			alias_annotation = {
 				icon = "󰔌 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			continuation = {
 				icon = "󰌑 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			return_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			field_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			qualifier_annotation = {
 				icon = "󰙴 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			generic_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			vararg_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			diagnostic_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			deprecated_annotation = {
 				icon = " ",
 				hl = "@error"
 			},
-
+	
 			meta_annotation = {
 				icon = "󰐱 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			module_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			source_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			version_annotation = {
 				icon = "󰯏 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			package_annotation = {
 				icon = "󰏖 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			operator_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			nodiscard_annotation = {
 				icon = "󰌾 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			cast_annotation = {
 				icon = "󱦈 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			async_annotation = {
 				icon = "󰦖 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			overload_annotation = {
 				icon = "󱐋 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			enum_annotation = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			language_injection = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			see_reference = {
 				icon = "󰈈 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			link_reference = {
 				icon = " ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			since_annotation = {
 				icon = "󰔚 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			as_annotation = {
 				icon = "󰤖 ",
 				hl = "@keyword.luadoc"
 			},
-
+	
 			[".+%_type"] = {
 				icon = " ",
 				hl = "@type.luadoc"
 			},
-
+	
 			identifier = {
 				icon = "󰮄 ",
 				hl = "Special"
 			},
-
+	
 			["^comment$"] = {
 				icon = "󱀡 ",
 				hl = "@comment.lua"
 			},
-
+	
 			comment_content = {
 				icon = "󱀢 ",
 				hl = "@comment.lua"
 			},
-
+	
 			parameter = {
 				icon = " ",
 				hl = "@variable.parameter.luadoc"
 			},
-
+	
 			---|fE
 		},
-
+	
 		["^lua$"] = {
 			---|fS
-
+	
 			chunk = {
 				icon = "󰢱 ",
 				hl = "@function.lua"
 			},
-
+	
 			variable_declaration = {
 				icon = "󰏖 ",
 				hl = "@variable"
 			},
-
+	
 			function_declaration = {
 				icon = "󰡱 ",
 				hl = "@function"
 			},
-
-
+	
 			binary_expression = {
 				icon = "󱃲 ",
 				hl = "Comment"
 			},
-
+	
 			["false"] = {
 				icon = "󰌶 ",
 				hl = "@boolean"
 			},
-
+	
 			function_call = {
 				icon = "󰡱 ",
 				hl = "@function.call.lua"
 			},
-
+	
 			function_definition = {
 				icon = "󰡱 ",
 				hl = "@function.lua"
 			},
-
+	
 			["nil"] = {
 				icon = "󰆧 ",
 				hl = "@constant.builtin.lua"
 			},
-
+	
 			number = {
 				icon = " ",
 				hl = "@number.lua"
 			},
-
+	
 			parenthesized_expression = {
 				icon = "󰅲 ",
 				hl = "Comment"
 			},
-
+	
 			["string"] = {
 				icon = "󰛓 ",
 				hl = "@string.lua"
 			},
-
+	
 			string_content = {
 				icon = "󰴓 ",
 				hl = "@string.lua"
 			},
-
+	
 			table_constructor = {
 				icon = " ",
 				hl = "@constructor.lua"
 			},
-
+	
 			["true"] = {
 				icon = "󱠂 ",
 				hl = "@boolean"
 			},
-
+	
 			unary_expression = {
 				icon = "󰋙 ",
 				hl = "Comment"
 			},
-
+	
 			vararg_expression = {
 				icon = "󰋘 ",
 				hl = "Comment"
 			},
-
+	
 			variable = {
 				icon = "󰋘 ",
 				hl = "@variable.lua"
 			},
-
-
+	
 			assignment_statement = {
 				icon = "󰆦 ",
 				hl = "@operator.lua"
 			},
-
+	
 			break_statement = {
 				icon = "󰆋 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			declaration = {
 				icon = "󰆨 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			do_statement = {
 				icon = "󰣖 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			empty_statement = {
 				icon = "󰆧 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			for_statement = {
 				icon = "󰓦 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			goto_statement = {
 				icon = "󱤬 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			if_statement = {
 				icon = "󰘬 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			elseif_statement = {
 				icon = "󰘬 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			else_statement = {
 				icon = "󰘬 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			label_statement = {
 				icon = "󰓽 ",
 				hl = "@label.lua"
 			},
-
+	
 			repeat_statement = {
 				icon = " ",
 				hl = "@keyword.lua"
 			},
-
+	
 			while_statement = {
 				icon = "󰅐 ",
 				hl = "@keyword.lua"
 			},
-
+	
 			bracket_index_expression = {
 				icon = "󰅪 ",
 				hl = "@punctuation.bracket.lua"
 			},
-
+	
 			dot_index_expression = {
 				icon = "󱦜 ",
 				hl = "@punctuation.delimiter.lua"
 			},
-
+	
 			identifier = {
 				icon = "󰮄 ",
 				hl = "Special"
 			},
-
-
+	
 			arguments = {
 				icon = "󰅲 ",
 				hl = "@punctuation.bracket.lua"
 			},
-
+	
 			expression = {
 				icon = "󱓝 ",
 				hl = "@punctuation.bracket.lua"
 			},
-
-
+	
 			expression_list = {
 				icon = "󱇂 ",
 				hl = "@punctuation.bracket.lua"
 			},
-
+	
 			variable_list = {
 				icon = "󱇂 ",
 				hl = "@punctuation.bracket.lua"
 			},
-
-
+	
 			attribute = {
 				icon = "󱈝 ",
 				hl = "@attribute.lua"
 			},
-
+	
 			block = {
 				icon = "󰴓 ",
 				hl = "Special"
 			},
-
-
+	
 			return_statement = {
 				icon = " ",
 				hl = "@keyword.lua"
 			},
-
+	
 			hash_bang_line = {
 				icon = " ",
 				hl = "Comment"
 			},
-
-
+	
 			["^comment$"] = {
 				icon = "󱀡 ",
 				hl = "@comment.lua"
 			},
-
+	
 			comment_content = {
 				icon = "󱀢 ",
 				hl = "@comment.lua"
 			},
-
-
+	
 			field = {
 				icon = "󱏒 ",
 				hl = "@property.lua"
 			},
-
-
+	
 			for_numeric_clause = {
 				icon = " ",
 				hl = "@keyword.lua"
 			},
-
+	
 			for_generic_clause = {
 				icon = " ",
 				hl = "@keyword.lua"
 			},
-
-
+	
 			method_index_expression = {
 				icon = " ",
 				hl = "@method.lua"
 			},
-
-
+	
 			parameters = {
 				icon = " ",
 				hl = "@variable.parameter.luadoc"
 			},
-
+	
 			---|fE
 		},
-
+	
 		["^lua_patterns$"] = {
 			chunk = {
 				icon = "󰛪 ",
 				hl = "@comment"
 			},
-
-
+	
 			start_assertion = {
 				icon = "󰾺 ",
 				hl = "@keyword"
 			},
-
+	
 			end_assertion = {
 				icon = "󰾸 ",
 				hl = "@keyword"
 			},
-
-
+	
 			zero_or_more = {
 				icon = " ",
 				hl = "@keyword.operator"
 			},
-
+	
 			one_or_more = {
 				icon = " ",
 				hl = "@keyword.operator"
 			},
-
+	
 			lazy = {
 				icon = " ",
 				hl = "@keyword.operator"
 			},
-
+	
 			optional = {
 				icon = " ",
 				hl = "@keyword.operator"
 			},
-
-
+	
 			literal_character = {
 				icon = "󱄽 ",
 				hl = "@character"
 			},
-
+	
 			character_reference = {
 				icon = " ",
 				hl = "@constant.builtin"
 			},
-
+	
 			any_character = {
 				icon = " ",
 				hl = "@variable.member"
 			},
-
-
+	
 			character_class = {
 				icon = "󰏗 ",
 				hl = "@variable.builtin"
 			},
-
+	
 			character_range = {
 				icon = "󰊱 ",
 				hl = "@comment"
 			},
-
+	
 			character_set = {
 				icon = "󱉓 ",
 				hl = "@label"
 			},
-
+	
 			character_set_content = {
 				icon = "󰆦 ",
 				hl = "@comment"
 			},
-
+	
 			caprure_group = {
 				icon = " ",
 				hl = "@label"
 			},
-
-
+	
 			escaped_character = {
 				icon = "󰩈 ",
 				hl = "@string.escape"
 			},
-
+	
 			escape_sequence = {
 				icon = "󰩈 ",
 				hl = "@character.special"
@@ -1269,62 +1761,37 @@ Shows the hierarchy of the node under the cursor.
 	}
 <
 
-💡 Path ~
+🧩 Component: path ~
 
-Shows the various parts of the path.
+Shows the path segments of the current file relative to the `current working directory`.
+
+▋ 󰋽 Note
+▋ This is disabled if any `tree-sitter` parser(s) is attached to the buffer.
 
 >lua
-	--- Configuration for file path.
-	---@class winbar.component.path
+	--- Configuration for file path segment.
+	---@class winbar.components.path
 	---
-	--- What kind of component is this?
 	---@field kind "path"
+	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean Condition for this component.
 	---
-	--- Condition for this component
-	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
+	---@field throttle? integer Update delay(in milliseconds).
 	---
-	--- Update delay(in milliseconds).
-	---@field throttle? integer
+	---@field separator? string Separator between path components.
+	---@field separator_hl? string Highlight group for the separator.
 	---
-	--- Separator between path components.
-	---@field separator? string
-	---
-	---Highlight group for separator.
-	---@field separator_hl? string
-	---
-	--- Default configuration for path segment.
-	---@field default winbar.section
-	---
-	--- Configuration for segments matching `string`.
-	---@field [string] winbar.section
+	---@field default winbar.section Default configuration for path segment.
+	---@field [string] winbar.section Configuration for segments matching `string`.
+<
 
+Example,
 
-	---@class winbar.section
-	---
-	---@field corner_left? string
-	---@field padding_left? string
-	---
-	---@field icon? string
-	---@field text? string
-	---
-	---@field padding_right? string
-	---@field corner_right? string
-	---
-	---@field corner_left_hl? string
-	---@field padding_left_hl? string
-	---
-	---@field icon_hl? string
-	---@field hl? string
-	---
-	---@field padding_right_hl? string
-	---@field corner_right_hl? string
-
-
+>lua
 	{
 		kind = "path",
 		condition = function (buffer)
 			local check_parsers, parser = pcall(vim.treesitter.get_parser, buffer);
-
+	
 			if check_parsers == false then
 				return true;
 			elseif parser == nil then
@@ -1333,42 +1800,73 @@ Shows the various parts of the path.
 				return false;
 			end
 		end,
-
+	
 		separator = " → ",
 		separator_hl = "Comment",
-
+	
 		default = {
 			dir_icon = "󰉋 ",
 			icon = "󰈔 ",
-
+	
 			hl = "Special"
 		}
 	},
 <
 
-💡 Custom ~
+ ╶────────────────────────────────────────────────────────────────────────────╴ 
 
-Custom component.
+--------------------------------------------------------------------------------
+💡 API                                                    *bars.nvim-winbar.api*
+
+You can access this module via,
 
 >lua
-	--- Custom section for the winbar.
-	---@class winbar.component.custom
-	---
-	--- What kind of component is this?
-	---@field kind "custom"
-	---
-	--- Condition for this component
-	---@field condition? fun(buffer: integer, window: integer, winbar: string): boolean | nil
-	---
-	--- Text to show for this section.
-	---@field value string | fun(buffer: integer, window: integer, winbar: string): string
-
-
-	{
-		kind = "custom",
-
-		value = "Hello, Winbar!"
-	},
+	local winbar = require("bars.winbar");
 <
 
-vim:ft=help:tw=78:
+🧩 High level API ~
+
+The `winbar` module has the following API functions.
+
+◇ `winbar.setup(config)`, Updates configuration of the winbar.
+
+◇ `winbar.Start()`, Starts the module and attaches & enables custom winbar for
+  all valid windows.
+◇ `winbar.Stop()`, Stops the module and detaches & disables custom winbar for
+  all valid windows.
+
+◇ `winbar.Toggle()`, Toggles the custom winbar for all valid windows.
+◇ `winbar.Enable()`, Enables the custom winbar for all disabled windows.
+◇ `winbar.Disable()`, Disables the custom winbar for all enabled windows.
+
+◇ `winbar.toggle(window)`, Toggles the custom winbar for `window`.
+◇ `winbar.enable(window)`, Enables the custom winbar for `window`(if it's valid
+  & disabled).
+◇ `winbar.disable(window)`, Disables the custom winbar for `window`(if it's
+  valid & disabled).
+
+🧩 Low level API ~
+
+◆ `winbar.config`, Current configuration.
+◆ `winbar.state`, Current state.
+
+>lua
+	winbar.state = {
+		enable = true,
+		attached_windows = {}
+	};
+<
+
+◆ `winbar.attach(window)`, Attaches to window(doesn't check `ignore_filetypes`,
+  `ignore_buftypes` & `condition`).
+◆ `winbar.detach(window)`, Detaches from window.
+◆ `winbar.update_style(window)`, Causes the winbar style to be updated.
+    ◇ `vim.w.bars_winbar_style`, Winbar style of the current window.
+
+Links ~
+
+1: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/types/winbar.lua
+2: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/winbar.lua
+3: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/winbar.lua
+
+vim:ft=help:textwidth=80:tabstop=4:noexpandtab:

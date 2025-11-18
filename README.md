@@ -5,14 +5,15 @@
             "force_write": true,
             "header": {
                 "desc": "A toggle-able bars & lines plugin for `Neovim`.",
-                "tag": "bars.nvim"
+                "tag": "bars.nvim.txt"
             },
             "toc": {
                 "entries": [
                     { "text": "📚 Requirements", "tag": "bars.nvim-requirements" },
                     { "text": "🎇 Commands", "tag": "bars.nvim-commands" },
                     { "text": "💡 Configuration", "tag": "bars.nvim-config" },
-                    { "text": "🧭 Usage", "tag": "bars.nvim-usage" }
+                    { "text": "🧰 Commands", "tag": "bars.nvim-commands" },
+                    { "text": "📚 Guides", "tag": "bars.nvim-guides" }
                 ]
             }
         },
@@ -27,8 +28,9 @@
                 "Features$": [ "bars.nvim-features" ],
                 "Requirements$": [ "bars.nvim-requirements" ],
                 "Commands$": [ "bars.nvim-commands" ],
-                "Autocmds$": [ "bars.nvim-autocmds" ],
-            }
+                "Autocmds$": [ "bars.nvim-autocmds" ]
+            },
+            "tables": { "max_col_size": 60 }
         }
     }
 -->
@@ -39,12 +41,14 @@
 <!--markdoc_ignore_end-->
 
 >[!TIP]
-> This repository contains guides for both [creating your own bars & lines plugin]() & [customising various bars & lines without external plugins]().
+> This repository contains guides for both [creating your own bars & lines plugin](https://github.com/OXY2DEV/bars.nvim/tree/dev/guides) & [customising various bars & lines without external plugins](https://github.com/OXY2DEV/bars.nvim/wiki/Home).
 >
 > Other than that, this repository acts as a working `example bars & lines plugin`.
 
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo.png"/>
-<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo_2.png"/>
+<TOC/>
+
+<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo.png">
+<img src="https://github.com/OXY2DEV/bars.nvim/blob/images/v3/bars.nvim-demo_2.png">
 
 A *highly customisable* & *toggle-able* bars & lines plugin for `Neovim`.
 
