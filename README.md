@@ -1,4 +1,42 @@
+<!--markdoc
+    {
+        "generic": {
+            "filename": "doc/bars.nvim.txt",
+            "force_write": true,
+            "header": {
+                "desc": "A toggle-able bars & lines plugin for `Neovim`.",
+                "tag": "bars.nvim"
+            },
+            "toc": {
+                "entries": [
+                    { "text": "📚 Requirements", "tag": "bars.nvim-requirements" },
+                    { "text": "🎇 Commands", "tag": "bars.nvim-commands" },
+                    { "text": "💡 Configuration", "tag": "bars.nvim-config" },
+                    { "text": "🧭 Usage", "tag": "bars.nvim-usage" }
+                ]
+            }
+        },
+        "markdown": {
+            "link_url_modifiers": [
+            ],
+            "list_items": {
+                "marker_minus": "◆",
+                "marker_plus": "◇"
+            },
+            "tags": {
+                "Features$": [ "bars.nvim-features" ],
+                "Requirements$": [ "bars.nvim-requirements" ],
+                "Commands$": [ "bars.nvim-commands" ],
+                "Autocmds$": [ "bars.nvim-autocmds" ],
+            }
+        }
+    }
+-->
+<!--markdoc_ignore_start-->
+
 # 🚀 bars.nvim
+
+<!--markdoc_ignore_end-->
 
 >[!TIP]
 > This repository contains guides for both [creating your own bars & lines plugin]() & [customising various bars & lines without external plugins]().
@@ -14,7 +52,6 @@ A *highly customisable* & *toggle-able* bars & lines plugin for `Neovim`.
 
 - [✨ Features](#-features)
 - [📚 Requirements](#-requirements)
-- [💡 Guide](#-guide)
 - [📐 Installation](#-installation)
 - [🧭 Configuration](#-configuration)
 - [🧰 Commands](#-commands)
@@ -132,6 +169,15 @@ require("bars.statusline").setup({
 ```
 
 Check the [wiki](https://github.com/OXY2DEV/bars.nvim/wiki/Home) to learn about all the configuration options!
+
+## 🧭 Configuration
+
+Configuration guides are available in the [wiki](https://github.com/OXY2DEV/bars.nvim/wiki).
+
+- [Statusline](https://github.com/OXY2DEV/bars.nvim/wiki/Statusline)
+- [Statuscolumn](https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn)
+- [Tabline](https://github.com/OXY2DEV/bars.nvim/wiki/Tabline)
+- [Winbar](https://github.com/OXY2DEV/bars.nvim/wiki/Winbar)
 
 ## 🧰 Commands
 
