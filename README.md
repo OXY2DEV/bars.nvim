@@ -243,8 +243,8 @@ You can add any number of windows after the modifier to specify which windows to
 >[!NOTE]
 > These are work in progress!
 
-+ [📖 Basics](https://github.com/OXY2DEV/bars.nvim/guides/Basics.md)
-+ [📖 Statusline](https://github.com/OXY2DEV/bars.nvim/guides/Statusline.md)
++ [📖 Basics](https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Basics.md)
++ [📖 Statusline](https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Statusline.md)
 <!--     - [🔖 Buffer name]() -->
 <!--     - [🔖 Diagnostics]() -->
 <!--     - [🔖 Git branch]() -->

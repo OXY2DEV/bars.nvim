@@ -251,8 +251,8 @@ Links ~
 13: https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn
 14: https://github.com/OXY2DEV/bars.nvim/wiki/Tabline
 15: https://github.com/OXY2DEV/bars.nvim/wiki/Winbar
-16: https://github.com/OXY2DEV/bars.nvim/guides/Basics.md
-17: https://github.com/OXY2DEV/bars.nvim/guides/Statusline.md
+16: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Basics.md
+17: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Statusline.md
 
 Images ~
 
