@@ -616,7 +616,7 @@ winbar.render = function ()
 
 	winbar.update_style(window);
 
-	local style = vim.w[window].bars_winbar_style or "default";
+	local style = vim.w[window].bars_winbar_style or vim.w[window]._bars_winbar_style or "default";
 	local config = winbar.config[style];
 
 	if type(config) ~= "table" then
@@ -752,7 +752,7 @@ winbar.update_style = function (window)
 			goto continue;
 		end
 
-		---@type winbar.opts
+		---@type winbar.style
 		local tmp = winbar.config[key];
 
 		if tmp.condition == true then
@@ -885,11 +885,9 @@ end
 winbar.toggle = function (window)
 	---|fS
 
-	local state = generic.get_win_state(generic.state, window);
-
-	if state == true then
+	if winbar.state.attached_windows[window] == true then
 		winbar.disable(window);
-	elseif state == false then
+	else
 		winbar.enable(window);
 	end
 

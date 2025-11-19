@@ -1,5 +1,56 @@
 ---@diagnostic disable: undefined-field
 
+--- Gets icons & highlight groups for a given filetype.
+---@param ft string
+---@param icon_hls? string[]
+---@return string icon
+---@return string? highlight
+local function get_icon (ft, icon_hls)
+	---|fS
+
+	local _ft = ft;
+
+	if vim.filetype.match({ filename = string.format("example.%s", _ft) }) then
+		_ft = vim.filetype.match({ filename = string.format("example.%s", _ft) }) or ft;
+	end
+
+	if package.loaded["nvim-web-devicons"] then
+		local icon, hl = package.loaded["nvim-web-devicons"].get_icon_by_filetype(
+			_ft,
+			{ default = true }
+		);
+
+		return icon .. " ", hl;
+	elseif package.loaded["mini.icons"] then
+		--- Attempt to get icon from filetype directly.
+		---@type string, string, boolean
+		local ft_icon, ft_icon_hl, is_default = package.loaded["mini.icons"].get(
+			"filetype",
+			_ft
+		);
+
+		if is_default == true then
+			--- There is no icon for the filetype.
+			--- Attempt to get the icon from file path instead.
+
+			ft_icon, ft_icon_hl = package.loaded["mini.icons"].get(
+				"file",
+				string.format("example.%s", ft)
+			);
+		end
+
+		ft_icon = ft_icon .. " ";
+		return ft_icon, ft_icon_hl;
+	elseif package.loaded["icons"] then
+		local output = package.loaded["icons"].get(ft, icon_hls);
+		return output.icon, output.hl;
+	end
+
+	return "", nil;
+
+	---|fE
+end
+
 local slC = {};
 local utils = require("bars.utils");
 
@@ -219,15 +270,15 @@ slC.bufname = function (buffer, _, main_config)
 			config.icon_hl = config.nomodifiable_icon_hl or config.icon_hl;
 		end
 
-		if config.icon == "" and pcall(require, "icons") then
-			local icon_config = require("icons").get(
+		if config.icon == "" then
+			local icon, hl = get_icon(
 				vim.fn.fnamemodify(tail, ":e"),
 				icon_hls
 			);
 
-			config.icon = icon_config.icon;
+			config.icon = icon;
 			---@type string
-			config.icon_hl = config.icon_hl or icon_config.hl;
+			config.icon_hl = config.icon_hl or hl;
 		end
 	end
 
@@ -261,11 +312,8 @@ slC.diagnostics = function (buffer, window, config)
 	---@diagnostic disable-next-line: deprecated
 	local clients = vim.fn.has("nvim-0.11") == 1 and vim.lsp.get_clients({ bufnr = buffer }) or vim.lsp.buf_get_clients(buffer);
 
-	if #clients == 0 and config.auto_hide == true then
-		return "";
-	end
-
-	if not diagnostics_count then
+	if (#clients == 0 or vim.tbl_isempty(diagnostics_count)) and config.auto_hide == true then
+		-- No diagnostics clients or no count available.
 		return "";
 	end
 

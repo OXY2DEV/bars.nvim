@@ -1,0 +1,894 @@
+*bars.nvim-statusline.txt*                        Statuscolumn from `bars.nvim`.
+
+See the following files,
+
+◆ ../lua/bars/types/statusline.lua {1}, for type definitions.
+◆ ../lua/bars/statusline.lua {2}, for setup, commands etc.
+◆ ../lua/bars/components/statusline.lua {3}, for components.
+
+--------------------------------------------------------------------------------
+Table of contents
+
+🧭 Configuration ................................. |bars.nvim-statusline.config|
+💡 API .............................................. |bars.nvim-statusline.api|
+
+--------------------------------------------------------------------------------
+🧭 Configuration                                   *bars.nvim-statusline.config*
+
+The statusline can be configured via
+`require("bars").setup({ statusline = { ... } })` or
+`require("bars.statusline").setup({ ... })`.
+
+▋  Tip
+▋ You can use `require("bars").setup({ statusline = false })` or
+▋ `require("bars.statusline").setup(false)` to disable it!
+
+The configuration table has the following structure.
+
+>lua
+	--- Statusline configuration table.
+	---@class statusline.config
+	---
+	---@field force_attach? string[] List of `statusline` values to ignore when attaching.
+	---
+	---@field ignore_filetypes string[] Filetypes to ignore when attaching.
+	---@field ignore_buftypes string[] Buffer types to ignore when attaching.
+	---
+	---@field condition? fun(buffer: integer, window: integer): boolean Additional condition for attaching to windows.
+	---
+	---@field default statusline.style Default style.
+	---@field [string] statusline.style Named style.
+<
+
+The default configuration is given below,
+
+>lua
+	statusline.config = {
+		force_attach = {
+			-- `Quickfix` window's statusline.
+			"%t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P",
+		},
+	
+		ignore_filetypes = {},
+		ignore_buftypes = {},
+	
+		default = {
+			---|fS "Default configuration"
+	
+			components = {
+				TEMPLATES.mode,
+				TEMPLATES.bufname,
+				{ kind = "section", hl = "StatusLine" },
+				TEMPLATES.diagnostics,
+				TEMPLATES.macro,
+				{ kind = "empty", hl = "StatusLine" },
+				TEMPLATES.git_branch,
+				TEMPLATES.lsp,
+				TEMPLATES.ruler
+			}
+	
+			---|fE
+		},
+	
+		["help"] = {
+			---|fS "Help statusline"
+	
+			condition = function (buffer)
+				return vim.bo[buffer].buftype == "help";
+			end,
+			components = {
+				vim.tbl_extend("force", TEMPLATES.mode, {
+					compact = true
+				}),
+				{
+					kind = "ruler",
+	
+					default = {
+						padding_left = " ",
+						padding_right = " ",
+						icon = " ",
+	
+						separator = " 󰇛 ",
+	
+						hl = "BarsFt0"
+					},
+				},
+				{ kind = "empty", hl = "StatusLine" },
+				{
+					kind = "custom",
+					value = function ()
+						local text = "";
+	
+						for i = 15, 2, -1 do
+							text = text .. string.format("%%#BarsHelp%d#", i);
+							text = text .. "▟";
+						end
+	
+						return text;
+					end
+				},
+				{
+					kind = "bufname",
+					max_len = 25,
+	
+					default = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						icon = "",
+						nomodifiable_icon_hl = "BarsFt1",
+						nomodifiable_icon = "󰌾 ",
+						icon_hl = {
+							"BarsFt0", "BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
+						},
+					},
+				},
+			}
+	
+			---|fE
+		},
+	
+		quickfix = {
+			---|fS "Help statusline"
+	
+			condition = function (buffer)
+				return vim.bo[buffer].buftype == "quickfix";
+			end,
+	
+			components = {
+				{
+					kind = "custom",
+					value = function ()
+						local text = "%#BarsQuickfix#";
+						text = text .. " 󱌢 Quickfix ";
+	
+						for i = 2, 15, 1 do
+							text = text .. string.format("%%#BarsQuickfix%d#", i);
+							text = text .. "▛";
+						end
+	
+						return text;
+					end
+				},
+				{ kind = "empty" },
+				TEMPLATES.mode,
+			}
+	
+			---|fE
+		},
+	};
+<
+
+🎨 Styles ~
+
+You can use various styles to easily change how the statusline looks.
+
+>lua
+	--- Statusline style
+	---@class statusline.style
+	---
+	---@field condition? fun(buffer: integer, window: integer): boolean Condition for this style.(unused when style is `default`)
+	---@field components statusline.component[] Components for this style.
+<
+
+Example,
+
+>lua
+	-- NOTE: You can turn most component options into functions,
+	---@diagnostic disable: assign-type-mismatch
+	default = {
+		---|fS "Default configuration"
+	
+		components = {
+			TEMPLATES.mode,
+			TEMPLATES.bufname,
+			{ kind = "section", hl = "StatusLine" },
+			TEMPLATES.diagnostics,
+			TEMPLATES.macro,
+			{ kind = "empty", hl = "StatusLine" },
+			TEMPLATES.git_branch,
+			TEMPLATES.lsp,
+			TEMPLATES.ruler
+		}
+	
+		---|fE
+	},
+<
+
+📦 Components ~
+
+Each style contains one or more components which can be any one of,
+
+>lua
+	---@alias statusline.component
+	---| statusline.components.branch Git branch.
+	---| statusline.components.bufname Buffer name.
+	---| statusline.components.custom
+	---| statusline.components.diagnostics Diagnostics count.
+	---| statusline.components.empty Empty space.
+	---| statusline.components.macro Macro play/record indicator.
+	---| statusline.components.mode Current mode.
+	---| statusline.components.progress Progressbar.
+	---| statusline.components.ruler Ruler.
+	---| statusline.components.section Generic section.
+<
+
+🧩 Component: branch ~
+
+Shows the current Git branch.
+
+▋ 󰋽 Note
+▋ If you have `gitsigns.nvim` installed, the value provided by `gitsigns.nvim` will be used.
+
+>lua
+	--- Shows current git branch.
+	---@class statusline.components.branch
+	---
+	---@field kind "branch"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field throttle? integer Number of milliseconds used between updating the branch name.
+	---
+	---@field default branch.opts Default configuration.
+	---@field [string] branch.opts Configuration for `string`.
+<
+
+Example,
+
+>lua
+	git_branch = {
+		---|fS
+	
+		kind = "branch",
+		condition = function (_, win)
+			return win == vim.api.nvim_get_current_win();
+		end,
+	
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+			icon = "󰊢 ",
+	
+			hl = "@comment"
+		}
+	
+		---|fE
+	},
+<
+
+🧩 Component: bufname ~
+
+Shows current buffer name.
+
+>lua
+	--- Shows buffer name.
+	---@class statusline.components.bufname
+	---
+	---@field kind "bufname"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field max_len? integer Maximum name length.
+	---@field truncate_symbol? string Symbol used to show name truncation.
+	---
+	---@field default bufname.opts Default configuration.
+	---@field [string] bufname.opts Configuration for buffer names matching `string`.
+<
+
+Example,
+
+>lua
+	bufname = {
+		---|fS
+	
+		kind = "bufname",
+		condition = function (_, win)
+			return vim.api.nvim_win_get_width(win) >= 42;
+		end,
+	
+		max_len = 25,
+	
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			icon = "",
+			nomodifiable_icon_hl = "BarsFt1",
+			nomodifiable_icon = "󰌾 ",
+			icon_hl = {
+				"BarsFt0", "BarsFt1", "BarsFt2", "BarsFt3", "BarsFt4", "BarsFt5", "BarsFt6"
+			},
+		},
+	
+		["^$"] = {
+			icon = "󰂵 ",
+			text = "New file",
+	
+			hl = "BarsFt0"
+		},
+	
+		["^config"] = {
+			icon = "󰒓 ",
+	
+			hl = "BarsFt6"
+		},
+	
+		---|fE
+	},
+<
+
+🧩 Component: custom ~
+
+Shows some custom text.
+
+>lua
+	--- Custom statusline component.
+	---@class statusline.components.custom
+	---
+	---@field kind "custom"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field value fun(buffer: integer, window: integer): string
+<
+
+Example,
+
+>lua
+	{
+		kind = "custom",
+		value = function ()
+			local text = "";
+	
+			for i = 15, 2, -1 do
+				text = text .. string.format("%%#BarsHelp%d#", i);
+				text = text .. "▟";
+			end
+	
+			return text;
+		end
+	},
+<
+
+🧩 Component: diagnostics ~
+
+Shows some custom text.
+
+▋  Tip
+▋ Clicking on this changes the diagnostic mode(showing different kinds of diagnostics).
+
+>lua
+	--- Shows diagnostics count.
+	---@class statusline.components.diagnostics
+	---
+	---@field kind "diagnostics"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field auto_hide? boolean When `true`, this component will be hidden if no diagnostics are available.
+	---@field compact? boolean When `true`, a compact sign is used if diagnostics are empty. Cannot be used with `auto_hide`.
+	---
+	---@field default_mode?
+	---|1 Error
+	---|2 Warning
+	---|3 Info
+	---|4 Hint
+	---|5 All of the above
+	---
+	---@field error_icon? string
+	---@field error_hl? string
+	---
+	---@field warn_icon? string
+	---@field warn_hl? string
+	---
+	---@field info_icon? string
+	---@field info_hl? string
+	---
+	---@field hint_icon? string
+	---@field hint_hl? string
+	---
+	---@field empty_icon? string Icon to show when no diagnostics are available and `compact = true` & `auto_hide = false`.
+	---@field empty_text? string Text to show when no diagnostics are available and `compact = true` & `auto_hide = false`.
+	---
+	---@field empty_hl? string Highlight group for `empty_icon` & `empty_text`.
+	---
+	---@field separator? string Text used as a separator between each diagnostics type.
+	---@field separator_hl? string
+	---
+	---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
+	---
+	---@field corner_left? string
+	---@field corner_left_hl? string
+	---
+	---@field padding_left? string
+	---@field padding_left_hl? string
+	---
+	---@field padding_right? string
+	---@field padding_right_hl? string
+	---
+	---@field corner_right? string
+	---@field corner_right_hl? string
+<
+
+Example,
+
+>lua
+	diagnostics = {
+		---|fS
+	
+		kind = "diagnostics",
+		default_mode = 5,
+		compact = true,
+	
+		padding_left = " ",
+		padding_right = " ",
+	
+		empty_icon = "󰂓 ",
+		empty_hl = "@comment",
+	
+		error_icon = "󰅙 ",
+		error_hl = "DiagnosticError",
+	
+		warn_icon = "󰀦 ",
+		warn_hl = "DiagnosticWarn",
+	
+		hint_icon = "󰁨 ",
+		hint_hl = "DiagnosticHint",
+	
+		info_icon = "󰁤 ",
+		info_hl = "DiagnosticInfo"
+	
+		---|fE
+	},
+<
+
+🧩 Component: empty ~
+
+Shows some custom text.
+
+>lua
+	--- Empty space.
+	---@class statusline.components.empty
+	---
+	---@field kind "empty"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field hl? string
+<
+
+Example,
+
+>lua
+	{ kind = "empty", hl = "StatusLine" },
+<
+
+🧩 Component: macro ~
+
+Indicator for `macro` recording/play.
+
+>lua
+	--- Macro record/play indicator.
+	---@class statusline.components.macro
+	---
+	---@field kind "macro"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field record_icon string Icon to show Macros being recorded.
+	---@field record_hl? string Highlight group for record icon.
+	---
+	---@field exec_icon string Icon to show Macros being executed.
+	---@field exec_hl? string Highlight group for exec icon.
+<
+
+Example,
+
+>lua
+	macro = {
+		---|fS
+	
+		kind = "macro",
+	
+		record_icon = "󰦚 ",
+		exec_icon = "󰥠 ",
+	
+		record_hl = "@constant",
+		exec_hl = "DiagnosticOk",
+	
+		---|fE
+	},
+<
+
+🧩 Component: mode ~
+
+Shows current mode.
+
+>lua
+	--- Shows current mode.
+	---@class statusline.components.mode
+	---
+	---@field kind "mode"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field compact? boolean | fun(buffer: integer, window: integer): boolean Show a compact version(only show `padding` & `icon`)?
+	---
+	---@field default mode.opts Default configuration.
+	---@field [string] mode.opts Configuration for mode string matching `string`.
+<
+
+Example,
+
+>lua
+	mode = {
+		---|fS "Mode configuration"
+	
+		kind = "mode",
+	
+		compact = function (_, window)
+			if window ~= vim.api.nvim_get_current_win() then
+				return true;
+			else
+				return vim.api.nvim_win_get_width(window) < math.ceil(vim.o.columns * 0.5);
+			end
+		end,
+	
+		default = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			icon = " ",
+	
+			hl = "BarsNormal",
+		},
+	
+		["^n"] = { text = "Normal" },
+	
+		["^t"] = { text = "Terminal" },
+	
+		["^v$"] = {
+			icon = "󰸿 ",
+			text = "Visual",
+	
+			hl = "BarsVisual",
+		},
+		["^V$"]    = {
+			icon = "󰹀 ",
+			text = "Visual",
+	
+			hl = "BarsVisualLine",
+		},
+		["^$"]   = {
+			icon = "󰸽 ",
+			text = "Visual",
+	
+			hl = "BarsVisualBlock",
+		},
+	
+		["^s$"]    = {
+			icon = "󰕠 ",
+			text = "Select",
+	
+			hl = "BarsVisual",
+		},
+		["^S$"]    = {
+			icon = "󰕞 ",
+			text = "Select",
+	
+			hl = "BarsVisualLine",
+		},
+		["^$"]   = {
+			icon = " ",
+			text = "Select",
+	
+			hl = "BarsVisualBlock",
+		},
+	
+		["^i$"]    = {
+			icon = " ",
+			text = "Insert",
+	
+			hl = "BarsInsert",
+		},
+		["^ic$"]   = {
+			icon = " ",
+			text = "Completion",
+	
+			hl = "BarsInsert",
+		},
+		["^ix$"]   = {
+			text = "Inser8",
+	
+			hl = "BarsInsert",
+		},
+	
+		["^R$"]    = {
+			icon = " ",
+			text = "Replace",
+	
+			hl = "BarsInsert",
+		},
+		["^Rc$"]   = {
+			icon = " ",
+			text = "Completion",
+	
+			hl = "BarsInsert",
+		},
+	
+		["^c"]    = {
+			icon = " ",
+			text = "Command",
+	
+			hl = "BarsCommand",
+		},
+	
+		["^r"] = { text = "Prompt" },
+	
+		["^%!"] = {
+			icon = " ",
+			text = "Shell",
+	
+			hl = "BarsCommand"
+		},
+	
+		---|fE
+	},
+<
+
+🧩 Component: progress ~
+
+▋  Important
+▋ You have to manually set the current progress state via `check`. And call `nvim__redraw()` accordingly.
+▋ Calling `nvim__redraw()` too frequently may slow down the editor!
+
+Shows a progressbar. Unused by default.
+
+>lua
+	--- Progressbar.
+	---@class statusline.components.progress
+	---
+	---@field kind "progress"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field check? string The variable that holds the progress state, default is "progress_state".
+	---
+	---@field finish string Text used as the indicator for progress finish.
+	---@field finish_hl string Highlight group for the progress finish indicator.
+	---
+	---@field progress string[] Text used as the indicator for progress.
+	---@field progress_hl string[] Highlight group for the progress indicator.
+	---
+	---@field start string Text used as the indicator for progress start.
+	---@field start_hl string Highlight group for the progress start indicator.
+	---
+	---@field update_delay? integer Delay in milliseconds between state updates.
+<
+
+Example,
+
+>lua
+	progress = {
+		---|fS
+	
+		kind = "progress",
+	
+		check = "lsp_loader_state",
+		update_delay = 250,
+	
+		start = "󰐌 ",
+		progress = { "󰋙 ", "󰫃 ", "󰫄 ", "󰫅 ", "󰫆 ", "󰫇 ", "󰫈 " },
+		finish = "󰗠 ",
+	
+		start_hl = "@comment",
+		progress_hl = {
+			"BarsNormal4",
+			"BarsNormal3",
+			"BarsNormal3",
+			"BarsNormal2",
+			"BarsNormal2",
+			"BarsNormal1",
+			"BarsNormal1",
+		},
+		finish_hl = "DiagnosticOk"
+	
+		---|fE
+	},
+<
+
+◇ `"start"`
+◇ `"progress"`
+◇ `"finish"`
+
+▋ 󰋽 Note
+▋ The variable in `check` can be either a `window-local` or a `buffer-local` variable name.
+▋ The `window-local` variable is used if both are available.
+▋
+▋ You can set the variable to `nil` to hide the progressbar.
+
+🧩 Component: ruler ~
+
+Show cursor position or visual selection size.
+
+>lua
+	--- Custom ruler.
+	---@class statusline.components.ruler
+	---
+	---@field kind "ruler"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field mode
+	---| "normal" Show cursor position.
+	---| "visual" Show selection size.
+	---| fun(buffer: integer, window: integer): ( "normal" | "visual" )
+	---
+	---@field default ruler.opts Default configuration.
+	---@field visual ruler.opts Configuration for visual modes.
+<
+
+Example,
+
+>lua
+	ruler = {
+		---|fS
+	
+		kind = "ruler",
+		mode = function ()
+			local mode = vim.api.nvim_get_mode().mode;
+			local visual_modes = { "v", "V", "" };
+	
+			return vim.list_contains(visual_modes, mode) and "visual" or "normal";
+		end,
+	
+		-- NOTE: You can turn most component options into functions,
+		---@diagnostic disable: assign-type-mismatch
+		default = function ()
+			---|fS
+	
+			local hl = TEMPLATES.mode.default.hl;
+			local mode = vim.api.nvim_get_mode().mode;
+	
+			local ignore = { "default", "min_width", "kind", "condition", "kind" };
+			---@type mode.opts
+			local config = require("bars.utils").match(TEMPLATES.mode, mode, ignore);
+	
+			hl = config.hl or hl;
+	
+			return {
+				padding_left = " ",
+				padding_right = " ",
+				icon = "󰆤 ",
+	
+				separator = " 󰇛 ",
+	
+				hl = hl or "BarsRuler"
+			};
+	
+			---|fE
+		end,
+	
+		visual = function ()
+			---|fS
+	
+			local hl = TEMPLATES.mode.default.hl;
+			local mode = vim.api.nvim_get_mode().mode;
+	
+			local ignore = { "default", "min_width", "kind", "condition", "kind" };
+			---@type mode.opts
+			local config = require("bars.utils").match(TEMPLATES.mode, mode, ignore);
+	
+			hl = config.hl or hl;
+	
+			return {
+				padding_left = " ",
+				padding_right = " ",
+				icon = "󰆣 ",
+	
+				separator = " 󰇛 ",
+	
+				hl = hl or "BarsRuler"
+			};
+	
+			---|fE
+		end
+		---@diagnostic enable: assign-type-mismatch
+	
+		---|fE
+	},
+<
+
+🧩 Component: section ~
+
+Structured section of the statusline optionally with a click handler.
+
+>lua
+	--- Structured section. Used as scaffolding for custom components.
+	---@class statusline.components.section
+	---
+	---@field kind? "section"
+	---@field condition? fun(buffer: integer, window: integer, statusline: string): boolean Condition for this component.
+	---
+	---@field click? string Click handler.
+	---
+	---@field corner_left? string
+	---@field padding_left? string
+	---@field icon? string
+	---
+	---@field text? string
+	---
+	---@field padding_right? string
+	---@field corner_right? string
+	---
+	---@field hl? string Primary highlight group. Used by other `*_hl` groups as fallback.
+	---
+	---@field corner_left_hl? string
+	---@field padding_left_hl? string
+	---@field icon_hl? string
+	---
+	---@field text_hl? string
+	---
+	---@field padding_right_hl? string
+	---@field corner_right_hl? string
+<
+
+Example,
+
+>lua
+	{ kind = "section", hl = "StatusLine" },
+<
+
+ ╶────────────────────────────────────────────────────────────────────────────╴ 
+
+--------------------------------------------------------------------------------
+💡 API                                                *bars.nvim-statusline.api*
+
+You can access this module via,
+
+>lua
+	local statusline = require("bars.statusline");
+<
+
+🧩 High level API ~
+
+The `statusline` module has the following API functions.
+
+◇ `statusline.setup(config)`, Updates configuration of the statusline.
+
+◇ `statusline.Start()`, Starts the module and attaches & enables custom
+  statusline for all valid windows.
+◇ `statusline.Stop()`, Stops the module and detaches & disables custom
+  statusline for all valid windows.
+
+◇ `statusline.Toggle()`, Toggles the custom statusline for all valid windows.
+◇ `statusline.Enable()`, Enables the custom statusline for all disabled windows.
+◇ `statusline.Disable()`, Disables the custom statusline for all enabled
+  windows.
+
+◇ `statusline.toggle(window)`, Toggles the custom statusline for `window`.
+◇ `statusline.enable(window)`, Enables the custom statusline for `window`(if
+  it's valid & disabled).
+◇ `statusline.disable(window)`, Disables the custom statusline for `window`(if
+  it's valid & disabled).
+
+🧩 Low level API ~
+
+◆ `statusline.config`, Current configuration.
+◆ `statusline.state`, Current state.
+
+>lua
+	statusline.state = {
+		enable = true,
+		attached_windows = {}
+	};
+<
+
+◆ `statusline.attach(window)`, Attaches to window(doesn't check
+  `ignore_filetypes`, `ignore_buftypes` & `condition`).
+◆ `statusline.detach(window)`, Detaches from window.
+◆ `statusline.update_style(window)`, Causes the statusline style to be updated.
+    ◇ `vim.w.bars_statusline_style`, User defined statusline style of the
+      current window.
+    ◇ `vim.w._bars_statusline_style`, Calculated statusline style of the current
+      window.
+
+Links ~
+
+1: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/types/statusline.lua
+2: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/statusline.lua
+3: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/statusline.lua
+
+vim:ft=help:textwidth=80:tabstop=4:noexpandtab:

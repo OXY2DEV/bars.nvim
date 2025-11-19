@@ -14,7 +14,7 @@ local generic = require("bars.generic");
 local STL = "%!v:lua.require('bars.statusline').render()";
 
 --[[ Reusable configuration templates. ]]
----@type table<string, statusline_component>
+---@type table<string, statusline.component>
 local TEMPLATES;
 
 TEMPLATES = {
@@ -324,9 +324,7 @@ TEMPLATES = {
 			return vim.list_contains(visual_modes, mode) and "visual" or "normal";
 		end,
 
-		-- Yes, you can turn most options into
-		-- functions, but some may lead to undefined
-		-- behavior.
+		-- NOTE: You can turn most component options into functions,
 		---@diagnostic disable: assign-type-mismatch
 		default = function ()
 			---|fS
@@ -519,7 +517,7 @@ statusline.render = function ()
 
 	statusline.update_style(window);
 
-	local style = vim.w[window].bars_statusline_style or "default";
+	local style = vim.w[window].bars_statusline_style or vim.w[window]._bars_statusline_style or "default";
 	local config = statusline.config[style];
 
 	if type(config) ~= "table" then
@@ -679,7 +677,7 @@ statusline.update_style = function (window)
 		::continue::
 	end
 
-	vim.w[window].bars_statusline_style = style;
+	vim.w[window]._bars_statusline_style = style;
 
 	---|fE
 end

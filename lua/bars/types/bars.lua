@@ -3,29 +3,32 @@
 --- Primary configuration table.
 ---@class bars.config
 ---
---- When true, all options are set
---- **globally**.
---- Can be used to prevent visible
---- changes to the bars & lines when
---- opening Neovim or new windows.
----@field global? boolean
+---@field global? boolean When true, all options are set **globally**.
 ---
---- Statusline configuration.
----@field statusline? boolean | statusline.config | fun(): (boolean | statusline.config)
+---@field statusline?
+---| boolean Set to `false` to disable the statusline module.
+---| statusline.config Configuration for the `statusline` module.
+---| fun(): (boolean | statusline.config) Dynamic value(evaluated during `setup()` call).
 ---
---- Statuscolumn configuration.
----@field statuscolumn? boolean | statuscolumn.config | fun(): (boolean | statuscolumn.config)
+---@field statuscolumn?
+---| boolean Set to `false` to disable the statuscolumn module.
+---| statuscolumn.config Configuration for the `statuscolumn` module.
+---| fun(): (boolean | statuscolumn.config) Dynamic value(evaluated during `setup()` call).
 ---
---- Winbar configuration.
----@field winbar? boolean | winbar.config | fun(): (boolean | winbar.config)
+---@field winbar?
+---| boolean Set to `false` to disable the winbar module.
+---| winbar.config Configuration for the `winbar` module.
+---| fun(): (boolean | winbar.config) Dynamic value(evaluated during `setup()` call).
 ---
---- Tabline configuration.
----@field tabline? boolean | tabline.config | fun(): (boolean | tabline.config)
+---@field tabline?
+---| boolean Set to `false` to disable the tabline module.
+---| tabline.config Configuration for the `tabline` module.
+---| fun(): (boolean | tabline.config) Dynamic value(evaluated during `setup()` call).
 
 
---- State of a `module`.
+--[[ State of a `module` of `bars.nvim`. ]]
 ---@class bars.mod.state
 ---
----@field enable boolean Should this module listen to Autocmds?
----@field attached_windows table<integer, boolean> Maps window state to it's ID. State is `true` when the module is in use for that window.
+---@field enable boolean When `true`, the module will listen to various events and attach to *valid* windows.
+---@field attached_windows table<integer, boolean> Map between the `window` and whether the module is in use for that window.
 

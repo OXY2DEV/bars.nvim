@@ -1,0 +1,565 @@
+*bars.nvim-tabline.txt*                           Statuscolumn from `bars.nvim`.
+
+See the following files,
+
+◆ ../lua/bars/types/tabline.lua {1}, for type definitions.
+◆ ../lua/bars/tabline.lua {2}, for setup, commands etc.
+◆ ../lua/bars/components/tabline.lua {3}, for components.
+
+--------------------------------------------------------------------------------
+🧭 Configuration                                      *bars.nvim-tabline.config*
+
+The tabline can be configured via `require("bars").setup({ tabline = { ... } })`
+or `require("bars.tabline").setup({ ... })`.
+
+▋  Tip
+▋ You can use `require("bars").setup({ tabline = false })` or
+▋ `require("bars.tabline").setup(false)` to disable it!
+
+The configuration table has the following structure.
+
+>lua
+	--- Configuration table for the tabline.
+	---@class tabline.config
+	---
+	---@field condition? fun(): boolean Additional condition for attaching to windows.
+	---
+	---@field default? tabline.style Default style.
+	---@field [string]? tabline.style Named style.
+<
+
+The default configuration is given below,
+
+>lua
+	tabline.config = {
+		default = {
+			components = {
+				---|fS
+	
+				{ kind = "empty", hl = "Normal" },
+				{
+					kind = "tabs",
+					condition = function ()
+						return vim.g.bars_tabline_show_buflist ~= true;
+					end,
+	
+					separator = " ",
+					separator_hl = "Normal",
+	
+					overflow = " ┇ ",
+					overflow_hl = "BarsNavOverflow",
+	
+					nav_left = "   ",
+					nav_left_hl = "BarsNav",
+	
+					nav_left_locked = "    ",
+					nav_left_locked_hl = "BarsNavLocked",
+	
+					nav_right = "   ",
+					nav_right_hl = "BarsNav",
+	
+					nav_right_locked = " 󰌾  ",
+					nav_right_locked_hl = "BarsNavLocked",
+	
+					active = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						divider = " ┃ ",
+	
+						win_count = "󰨝 %d",
+						win_count_hl = nil,
+	
+						-- bufname = "󰳽 %s",
+	
+						icon = "󰛺 ",
+	
+						hl = "BarsTab"
+					},
+					inactive = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						divider = " | ",
+	
+						icon = "󰛻 ",
+	
+						-- bufname = "󰳽 %s",
+	
+						hl = "BarsInactive"
+					}
+				},
+				{
+					kind = "bufs",
+					condition = function ()
+						return vim.g.bars_tabline_show_buflist == true;
+					end,
+	
+					separator = " ",
+					separator_hl = "Normal",
+	
+					overflow = " ┇ ",
+					overflow_hl = "BarsNavOverflow",
+	
+					nav_left = "   ",
+					nav_left_hl = "BarsNav",
+	
+					nav_left_locked = "    ",
+					nav_left_locked_hl = "BarsNavLocked",
+	
+					nav_right = "   ",
+					nav_right_hl = "BarsNav",
+	
+					nav_right_locked = " 󰌾  ",
+					nav_right_locked_hl = "BarsNavLocked",
+	
+					active = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						win_count = " ┃ 󰨝 %d",
+						win_count_hl = nil,
+	
+						icon = "",
+	
+						hl = "Color7R"
+					},
+					inactive = {
+						padding_left = " ",
+						padding_right = " ",
+	
+						icon = "",
+	
+						hl = "BarsInactive",
+						max_name_len = 10,
+					}
+				},
+				{ kind = "empty", hl = "Normal" },
+	
+				---|fE
+			}
+		}
+	};
+<
+
+🎨 Styles ~
+
+You can use various styles to easily change how the tabline looks.
+
+>lua
+	--[[ Style for the `tabline`. ]]
+	---@class tabline.style
+	---
+	---@field condition? fun(): boolean Condition for this style.(unused when style is `default`)
+	---@field components tabline.component[] Components for this style.
+<
+
+Example,
+
+>lua
+	default = {
+		components = {
+			---|fS
+	
+			{ kind = "empty", hl = "Normal" },
+			{
+				kind = "tabs",
+				condition = function ()
+					return vim.g.bars_tabline_show_buflist ~= true;
+				end,
+	
+				separator = " ",
+				separator_hl = "Normal",
+	
+				overflow = " ┇ ",
+				overflow_hl = "BarsNavOverflow",
+	
+				nav_left = "   ",
+				nav_left_hl = "BarsNav",
+	
+				nav_left_locked = "    ",
+				nav_left_locked_hl = "BarsNavLocked",
+	
+				nav_right = "   ",
+				nav_right_hl = "BarsNav",
+	
+				nav_right_locked = " 󰌾  ",
+				nav_right_locked_hl = "BarsNavLocked",
+	
+				active = {
+					padding_left = " ",
+					padding_right = " ",
+	
+					divider = " ┃ ",
+	
+					win_count = "󰨝 %d",
+					win_count_hl = nil,
+	
+					-- bufname = "󰳽 %s",
+	
+					icon = "󰛺 ",
+	
+					hl = "BarsTab"
+				},
+				inactive = {
+					padding_left = " ",
+					padding_right = " ",
+	
+					divider = " | ",
+	
+					icon = "󰛻 ",
+	
+					-- bufname = "󰳽 %s",
+	
+					hl = "BarsInactive"
+				}
+			},
+			{
+				kind = "bufs",
+				condition = function ()
+					return vim.g.bars_tabline_show_buflist == true;
+				end,
+	
+				separator = " ",
+				separator_hl = "Normal",
+	
+				overflow = " ┇ ",
+				overflow_hl = "BarsNavOverflow",
+	
+				nav_left = "   ",
+				nav_left_hl = "BarsNav",
+	
+				nav_left_locked = "    ",
+				nav_left_locked_hl = "BarsNavLocked",
+	
+				nav_right = "   ",
+				nav_right_hl = "BarsNav",
+	
+				nav_right_locked = " 󰌾  ",
+				nav_right_locked_hl = "BarsNavLocked",
+	
+				active = {
+					padding_left = " ",
+					padding_right = " ",
+	
+					win_count = " ┃ 󰨝 %d",
+					win_count_hl = nil,
+	
+					icon = "",
+	
+					hl = "Color7R"
+				},
+				inactive = {
+					padding_left = " ",
+					padding_right = " ",
+	
+					icon = "",
+	
+					hl = "BarsInactive",
+					max_name_len = 10,
+				}
+			},
+			{ kind = "empty", hl = "Normal" },
+	
+			---|fE
+		}
+	}
+<
+
+📦 Components ~
+
+Each style contains one or more components which can be any one of,
+
+>lua
+	---@alias tabline.component
+	---| tabline.components.bufs Buffer list.
+	---| tabline.components.custom Custom text.
+	---| tabline.components.empty Empty space.
+	---| tabline.components.tabs Tab list.
+<
+
+🧩 Component: bufs ~
+
+Shows list of opened buffers.
+
+>lua
+	--- List of buffers.
+	---@class tabline.components.bufs
+	---
+	---@field kind "bufs"
+	---@field condition? fun(): boolean Condition for this component.
+	---
+	---@field max integer Maximum number of buffers to show.
+	---@field truncate_symbol? string Text to use for truncating long buffer name.
+	---
+	---@field from integer List entry to start showing from.
+	---
+	---@field separator? string Text used to separate buffers.
+	---@field separator_hl? string Highlight group for the separator
+	---
+	---@field overflow? string Text used to indicate where the buffer list ends(the list is looped).
+	---@field overflow_hl? string Highlight group for `overflow`.
+	---
+	---@field nav_left? string Text for the left navigation button.
+	---@field nav_left_hl? string Highlight group for the left navigation button.
+	---
+	---@field nav_left_locked? string Text for the left navigation button when list scroll is locked.
+	---@field nav_left_locked_hl? string Highlight group for `nav_left_locked`.
+	---
+	---@field nav_right? string Text for the right navigation button.
+	---@field nav_right_hl? string Highlight group for the left navigation button.
+	---
+	---@field nav_right_locked? string Text for the right navigation button when list scroll is locked.
+	---@field nav_right_locked_hl? string Highlight group for `nav_right_locked`.
+	---
+	---@field active bufs.opts
+	---@field inactive bufs.opts
+<
+
+Example,
+
+>lua
+	{
+		kind = "bufs",
+		condition = function ()
+			return vim.g.bars_tabline_show_buflist == true;
+		end,
+	
+		separator = " ",
+		separator_hl = "Normal",
+	
+		overflow = " ┇ ",
+		overflow_hl = "BarsNavOverflow",
+	
+		nav_left = "   ",
+		nav_left_hl = "BarsNav",
+	
+		nav_left_locked = "    ",
+		nav_left_locked_hl = "BarsNavLocked",
+	
+		nav_right = "   ",
+		nav_right_hl = "BarsNav",
+	
+		nav_right_locked = " 󰌾  ",
+		nav_right_locked_hl = "BarsNavLocked",
+	
+		active = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			win_count = " ┃ 󰨝 %d",
+			win_count_hl = nil,
+	
+			icon = "",
+	
+			hl = "Color7R"
+		},
+		inactive = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			icon = "",
+	
+			hl = "BarsInactive",
+			max_name_len = 10,
+		}
+	},
+<
+
+🧩 Component: custom ~
+
+Shows some custom text.
+
+>lua
+	--- Custom text.
+	---@class tabline.components.custom
+	---
+	---@field kind "custom"
+	---@field condition? fun(): boolean Condition for this component.
+	---
+	---@field value string | fun(): string Text for this component.
+<
+
+Example,
+
+>lua
+	{
+	    kind = "custom",
+	    value = "foo"
+	}
+<
+
+🧩 Component: empty ~
+
+Empty columns with a specific width.
+
+>lua
+	--- Empty tabline component.
+	---@class tabline.components.empty
+	---
+	---@field kind "empty"
+	---@field condition? fun(): boolean Condition for this component.
+	---
+	---@field hl? string Highlight group for the component.
+<
+
+Example,
+
+>lua
+	{ kind = "empty", hl = "Normal" },
+<
+
+🧩 Component: tabs ~
+
+Shows the tab list.
+
+>lua
+	--- List of tabs.
+	---@class tabline.components.tabs
+	---
+	---@field kind "tabs"
+	---@field condition? fun(): boolean Condition for this component.
+	---
+	---@field max integer Maximum number of tabs to show.
+	---@field from integer List entry to start showing from.
+	---
+	---@field separator? string Text used to separate tabs.
+	---@field separator_hl? string Highlight group for the separator
+	---
+	---@field overflow? string Text used to indicate where the tab list ends(the list is looped).
+	---@field overflow_hl? string Highlight group for `overflow`.
+	---
+	---@field nav_left? string Text for the left navigation button.
+	---@field nav_left_hl? string Highlight group for the left navigation button.
+	---
+	---@field nav_left_locked? string Text for the left navigation button when list scroll is locked.
+	---@field nav_left_locked_hl? string Highlight group for `nav_left_locked`.
+	---
+	---@field nav_right? string Text for the right navigation button.
+	---@field nav_right_hl? string Highlight group for the left navigation button.
+	---
+	---@field nav_right_locked? string Text for the right navigation button when list scroll is locked.
+	---@field nav_right_locked_hl? string Highlight group for `nav_right_locked`.
+	---
+	---@field active tabs.opts Options for current tab.
+	---@field inactive tabs.opts Options for normal tabs.
+<
+
+Example,
+
+>lua
+	{
+		kind = "tabs",
+		condition = function ()
+			return vim.g.bars_tabline_show_buflist ~= true;
+		end,
+	
+		separator = " ",
+		separator_hl = "Normal",
+	
+		overflow = " ┇ ",
+		overflow_hl = "BarsNavOverflow",
+	
+		nav_left = "   ",
+		nav_left_hl = "BarsNav",
+	
+		nav_left_locked = "    ",
+		nav_left_locked_hl = "BarsNavLocked",
+	
+		nav_right = "   ",
+		nav_right_hl = "BarsNav",
+	
+		nav_right_locked = " 󰌾  ",
+		nav_right_locked_hl = "BarsNavLocked",
+	
+		active = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			divider = " ┃ ",
+	
+			win_count = "󰨝 %d",
+			win_count_hl = nil,
+	
+			-- bufname = "󰳽 %s",
+	
+			icon = "󰛺 ",
+	
+			hl = "BarsTab"
+		},
+		inactive = {
+			padding_left = " ",
+			padding_right = " ",
+	
+			divider = " | ",
+	
+			icon = "󰛻 ",
+	
+			-- bufname = "󰳽 %s",
+	
+			hl = "BarsInactive"
+		}
+	},
+<
+
+ ╶────────────────────────────────────────────────────────────────────────────╴ 
+
+--------------------------------------------------------------------------------
+💡 API                                                   *bars.nvim-tabline.api*
+
+You can access this module via,
+
+>lua
+	local tabline = require("bars.tabline");
+<
+
+🧩 High level API ~
+
+The `tabline` module has the following API functions.
+
+◇ `tabline.setup(config)`, Updates configuration of the tabline.
+
+◇ `tabline.Start()`, Starts the module and attaches & enables custom tabline for
+  all valid windows.
+◇ `tabline.Stop()`, Stops the module and detaches & disables custom tabline for
+  all valid windows.
+
+◇ `tabline.Toggle()`, Toggles the custom tabline for all valid windows.
+◇ `tabline.Enable()`, Enables the custom tabline for all disabled windows.
+◇ `tabline.Disable()`, Disables the custom tabline for all enabled windows.
+
+◇ `tabline.toggle(window)`, Toggles the custom tabline for `window`.
+◇ `tabline.enable(window)`, Enables the custom tabline for `window`(if it's
+  valid & disabled).
+◇ `tabline.disable(window)`, Disables the custom tabline for `window`(if it's
+  valid & disabled).
+
+🧩 Low level API ~
+
+◆ `tabline.config`, Current configuration.
+◆ `tabline.state`, Current state.
+
+>lua
+	tabline.state = {
+		enable = true,
+		attached = false
+	};
+<
+
+◆ `tabline.attach(window)`, Attaches to window(doesn't check `ignore_filetypes`,
+  `ignore_buftypes` & `condition`).
+◆ `tabline.detach(window)`, Detaches from window.
+◆ `tabline.update_style(window)`, Causes the tabline style to be updated.
+    ◇ `vim.w.bars_tabline_style`, User defined tabline style of the current
+      window.
+    ◇ `vim.w._bars_tabline_style`, Calculated tabline style of the current
+      window.
+◆ `vim.g.bars_tabline_show_buflist`, Set to `true` to switch to buffer list.
+
+Links ~
+
+1: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/types/tabline.lua
+2: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/tabline.lua
+3: https://github.com/OXY2DEV/bars.nvim/blob/main/lua/bars/components/tabline.lua
+
+vim:ft=help:textwidth=80:tabstop=4:noexpandtab:
