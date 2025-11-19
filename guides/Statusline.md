@@ -3,26 +3,14 @@
 >[!NOTE]
 > It is assumed that you have read [the basics]().
 
-To use a lua function for the `statusline`, we can make use of `v:lua` like this,
-
-```lua eval: vim.o.statusline
-vim.o.statusline = "%!v:lua.require('bars.statusline').render()"
-```
-
->[!NOTE]
-> The `%!` part allows statusline items to be used in the output of `render()`.
-> This is useful as certain things(e.g. spacing) are easier to do via items. 
-
-You can replace it with whatever your function name is,
+To use a lua function for the `statusline`, we can make use of `v:lua` & `:!` like this,
 
 ```lua
 -- Assuming your statusline function is `_G.my_statusline()`.
 vim.o.statusline = "%!v:lua.my_statusline()";
 ```
 
-Now the `render()` function returns a string that will be used as the text. It can also contain `statusline item`s in it, which makes things easier for us.
-
-An example function could look something like this,
+Here `my_statusline()` is a **global** lua function which is why ww have to add `v:lua` before it, The `:!` part evaluates the output of `my_statusline()` which allows use of `statusline items` in it's output.
 
 ```lua
 ---@return string Statusline
@@ -30,6 +18,22 @@ _G.my_statusline = function ()
     return "Some text";
 end
 ```
+
+In `bars.nvim`, this is used for the statusline.
+
+```lua eval: vim.o.statusline
+vim.o.statusline = "%!v:lua.require('bars.statusline').render()"
+```
+
+## 🧭 Structure
+
+🛑 WIP
+
+## 🧩 Rendering
+
+The `render()` function returns a string that will be used as the text. It can also contain `statusline item`s in it, which makes things easier for us.
+
+An example function could look something like this,
 
 The one `bars.nvim` uses looks something like this,
 
