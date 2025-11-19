@@ -41,7 +41,7 @@
 <!--markdoc_ignore_end-->
 
 >[!TIP]
-> This repository contains guides for both [creating your own bars & lines plugin](https://github.com/OXY2DEV/bars.nvim/tree/dev/guides) & [customising various bars & lines without external plugins](https://github.com/OXY2DEV/bars.nvim/wiki/Home).
+> This repository contains guides for both [creating your own bars & lines plugin](https://github.com/OXY2DEV/bars.nvim/guides) & [customising various bars & lines without external plugins](https://github.com/OXY2DEV/bars.nvim/wiki/Home).
 >
 > Other than that, this repository acts as a working `example bars & lines plugin`.
 
@@ -240,21 +240,24 @@ You can add any number of windows after the modifier to specify which windows to
 
 ## 📚 Guides
 
-+ [📖 Basics]()
-+ [📖 Statusline]()
-    - [🔖 Buffer name]()
-    - [🔖 Diagnostics]()
-    - [🔖 Git branch]()
-    - [🔖 Ruler]()
-+ [📖 Statuscolumn]()
-    - [🔖 Folds]()
-    - [🔖 Line numbers]()
-    - [🔖 Signs]()
-+ [📖 Winbar]()
-    - [🔖 LSP breadcrumbs]()
-    - [🔖 Node hierarchy]()
-    - [🔖 Path segments]()
-+ [📖 Tabline]()
-    - [🔖 Buffers]()
-    - [🔖 Tabs]()
+>[!NOTE]
+> These are work in progress!
+
++ [📖 Basics](https://github.com/OXY2DEV/bars.nvim/guides/Basics.md)
++ [📖 Statusline](https://github.com/OXY2DEV/bars.nvim/guides/Statusline.md)
+<!--     - [🔖 Buffer name]() -->
+<!--     - [🔖 Diagnostics]() -->
+<!--     - [🔖 Git branch]() -->
+<!--     - [🔖 Ruler]() -->
+<!-- + [📖 Statuscolumn]() -->
+<!--     - [🔖 Folds]() -->
+<!--     - [🔖 Line numbers]() -->
+<!--     - [🔖 Signs]() -->
+<!-- + [📖 Winbar]() -->
+<!--     - [🔖 LSP breadcrumbs]() -->
+<!--     - [🔖 Node hierarchy]() -->
+<!--     - [🔖 Path segments]() -->
+<!-- + [📖 Tabline]() -->
+<!--     - [🔖 Buffers]() -->
+<!--     - [🔖 Tabs]() -->
 

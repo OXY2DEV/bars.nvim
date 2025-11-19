@@ -228,28 +228,16 @@ run the command on.
 --------------------------------------------------------------------------------
 📚 Guides
 
-◇ [📖 Basics]()
-◇ [📖 Statusline]()
-    ◆ [🔖 Buffer name]()
-    ◆ [🔖 Diagnostics]()
-    ◆ [🔖 Git branch]()
-    ◆ [🔖 Ruler]()
-◇ [📖 Statuscolumn]()
-    ◆ [🔖 Folds]()
-    ◆ [🔖 Line numbers]()
-    ◆ [🔖 Signs]()
-◇ [📖 Winbar]()
-    ◆ [🔖 LSP breadcrumbs]()
-    ◆ [🔖 Node hierarchy]()
-    ◆ [🔖 Path segments]()
-◇ [📖 Tabline]()
-    ◆ [🔖 Buffers]()
-    ◆ [🔖 Tabs]()
+▋ 󰋽 Note
+▋ These are work in progress!
+
+◇ 📖 Basics {16}
+◇ 📖 Statusline {17}
 
 Links ~
 
 1: https://github.com/OXY2DEV/bars.nvim/wiki/Home
-2: https://github.com/OXY2DEV/bars.nvim/tree/dev/guides
+2: https://github.com/OXY2DEV/bars.nvim/guides
 3: #-features
 4: #-requirements
 5: #-installation
@@ -263,6 +251,8 @@ Links ~
 13: https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn
 14: https://github.com/OXY2DEV/bars.nvim/wiki/Tabline
 15: https://github.com/OXY2DEV/bars.nvim/wiki/Winbar
+16: https://github.com/OXY2DEV/bars.nvim/guides/Basics.md
+17: https://github.com/OXY2DEV/bars.nvim/guides/Statusline.md
 
 Images ~
 
