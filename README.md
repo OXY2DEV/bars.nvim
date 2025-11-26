@@ -41,7 +41,7 @@
 <!--markdoc_ignore_end-->
 
 >[!TIP]
-> This repository contains guides for both [creating your own bars & lines plugin](https://github.com/OXY2DEV/bars.nvim/guides) & [customising various bars & lines without external plugins](https://github.com/OXY2DEV/bars.nvim/wiki/Home).
+> This repository contains guides for both [creating your own bars & lines plugin](https://github.com/OXY2DEV/bars.nvim/tree/main/guides).
 >
 > Other than that, this repository acts as a working `example bars & lines plugin`.
 

@@ -2,7 +2,7 @@
 
 ▋  Tip
 ▋ This repository contains guides for both creating your own bars & lines plugin
-▋ {2} & customising various bars & lines without external plugins {1}.
+▋ {1}.
 ▋
 ▋ Other than that, this repository acts as a working
 ▋ `example bars & lines plugin`.
@@ -24,12 +24,12 @@ A highly customisable & toggle-able bars & lines plugin for `Neovim`.
 --------------------------------------------------------------------------------
 📖 Table of contents
 
-◆ ✨ Features {3}
-◆ 📚 Requirements {4}
-◆ 📐 Installation {5}
-◆ 🧭 Configuration {6}
-◆ 🧰 Commands {7}
-◆ 📚 Guides {8}
+◆ ✨ Features {2}
+◆ 📚 Requirements {3}
+◆ 📐 Installation {4}
+◆ 🧭 Configuration {5}
+◆ 🧰 Commands {6}
+◆ 📚 Guides {7}
 
 --------------------------------------------------------------------------------
 ✨ Features                                                 *bars.nvim-features*
@@ -130,7 +130,7 @@ For `plugins/bars.lua`,
 
 📥 GitHub release ~
 
-Tagged releases can be found in the release page {9}.
+Tagged releases can be found in the release page {8}.
 
 ▋ 󰋽 Note
 ▋ `Github releases` may sometimes be slightly behind `main`.
@@ -156,17 +156,17 @@ Tagged releases can be found in the release page {9}.
 	});
 <
 
-Check the wiki {10} to learn about all the configuration options!
+Check the wiki {9} to learn about all the configuration options!
 
 --------------------------------------------------------------------------------
 🧭 Configuration
 
-Configuration guides are available in the wiki {11}.
+Configuration guides are available in the wiki {10}.
 
-◆ Statusline {12}
-◆ Statuscolumn {13}
-◆ Tabline {14}
-◆ Winbar {15}
+◆ Statusline {11}
+◆ Statuscolumn {12}
+◆ Tabline {13}
+◆ Winbar {14}
 
 --------------------------------------------------------------------------------
 🧰 Commands                                                 *bars.nvim-commands*
@@ -231,28 +231,27 @@ run the command on.
 ▋ 󰋽 Note
 ▋ These are work in progress!
 
-◇ 📖 Basics {16}
-◇ 📖 Statusline {17}
+◇ 📖 Basics {15}
+◇ 📖 Statusline {16}
 
 Links ~
 
-1: https://github.com/OXY2DEV/bars.nvim/wiki/Home
-2: https://github.com/OXY2DEV/bars.nvim/guides
-3: #-features
-4: #-requirements
-5: #-installation
-6: #-configuration
-7: #-commands
-8: #-guides
-9: https://github.com/OXY2DEV/bars.nvim/releases
-10: https://github.com/OXY2DEV/bars.nvim/wiki/Home
-11: https://github.com/OXY2DEV/bars.nvim/wiki
-12: https://github.com/OXY2DEV/bars.nvim/wiki/Statusline
-13: https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn
-14: https://github.com/OXY2DEV/bars.nvim/wiki/Tabline
-15: https://github.com/OXY2DEV/bars.nvim/wiki/Winbar
-16: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Basics.md
-17: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Statusline.md
+1: https://github.com/OXY2DEV/bars.nvim/tree/main/guides
+2: #-features
+3: #-requirements
+4: #-installation
+5: #-configuration
+6: #-commands
+7: #-guides
+8: https://github.com/OXY2DEV/bars.nvim/releases
+9: https://github.com/OXY2DEV/bars.nvim/wiki/Home
+10: https://github.com/OXY2DEV/bars.nvim/wiki
+11: https://github.com/OXY2DEV/bars.nvim/wiki/Statusline
+12: https://github.com/OXY2DEV/bars.nvim/wiki/Statuscolumn
+13: https://github.com/OXY2DEV/bars.nvim/wiki/Tabline
+14: https://github.com/OXY2DEV/bars.nvim/wiki/Winbar
+15: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Basics.md
+16: https://github.com/OXY2DEV/bars.nvim/blob/main/guides/Statusline.md
 
 Images ~
 
