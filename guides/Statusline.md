@@ -3,6 +3,28 @@
 >[!NOTE]
 > It is assumed that you have read [the basics]().
 
+## 🧭 Structure
+
+```mermaid
+flowchart LR
+    vim.o.statusline --> r
+
+    subgraph bars.statusline
+        r["bars.render()"]
+        r --> c["components.get()"]
+
+        subgraph components
+            c --> Mode
+            c --> Bufname
+            c --> Diagnostics
+            c --> Empty
+            c --> Ruler
+        end
+    end
+```
+
+## 🧭 Basic setup
+
 To use a lua function for the `statusline`, we can make use of `v:lua` & `:!` like this,
 
 ```lua
@@ -24,10 +46,6 @@ In `bars.nvim`, this is used for the statusline.
 ```lua eval: vim.o.statusline
 vim.o.statusline = "%!v:lua.require('bars.statusline').render()"
 ```
-
-## 🧭 Structure
-
-🛑 WIP
 
 ## 🧩 Rendering
 
