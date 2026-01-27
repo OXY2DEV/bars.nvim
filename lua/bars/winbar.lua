@@ -721,7 +721,7 @@ winbar.update_style = function (window)
 		return;
 	end
 
-	local current = vim.wo[window].statuscolumn;
+	local current = vim.wo[window].winbar;
 	local should_detach = generic.should_detach(
 		winbar.state,
 		winbar.config,
