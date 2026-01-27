@@ -176,7 +176,7 @@ require("bars").setup({
 
 ```lua
 require("bars.statusline").setup({
-    ignore_filwtypes = { "help" }
+    ignore_filetypes = { "help" }
 });
 ```
 
