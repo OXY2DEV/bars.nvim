@@ -12,11 +12,15 @@ local function list_contains (src, element, fallback)
 	return vim.list_contains(src, element)
 end
 
+generic.var_name = "bars_style";
+
 --------------------------------------------------------------------------------
 
+--- Current value for a `bar`.
 ---@param _ integer
-function generic:get_current (_) return ""; end
+function generic:current (_) return ""; end
 
+--- Should we attach to `win`?
 ---@param win integer
 ---@return boolean
 function generic:should_attach (win)
@@ -29,7 +33,7 @@ function generic:should_attach (win)
 	local buffer = vim.api.nvim_win_get_buf(win);
 	local ft, bt = vim.bo.filetype, vim.bo.buftype;
 
-	local current = self:get_current(win) or "";
+	local current = self:current(win) or "";
 
 	if self.config.condition then
 		local could_exec, value = pcall(self.config.condition, win, buffer);
@@ -53,9 +57,7 @@ function generic:should_attach (win)
 	return true;
 end
 
----@param _ integer
-function generic:current (_) return ""; end
-
+--- Should we detach from `win`?
 ---@param win integer
 ---@return boolean
 function generic:should_detach (win)
@@ -96,19 +98,25 @@ end
 
 --------------------------------------------------------------------------------
 
+--- Sets options for a specific bar.
 ---@param _ integer
 function generic:set (_) end
+
+--- Removes/resets options for a specific bar.
 ---@param _ integer
 function generic:remove (_) end
 
+--[[ Attaches a bar to `win`. ]]
 ---@param win integer
 function generic:attach (win)
 	if self.state.window_state[win] == true then return; end
 	self.state.window_state[win] = true;
 
+	self:update_style(win);
 	self:set(win);
 end
 
+--[[ Detaches a bar from `win`. ]]
 ---@param win integer
 function generic:detach (win)
 	if self.state.window_state[win] == false then return; end
@@ -117,6 +125,7 @@ function generic:detach (win)
 	self:remove(win);
 end
 
+--[[ Enables a bar of `win`. ]]
 ---@param win integer
 function generic:enable (win)
 	if not self.state.enable then
@@ -126,9 +135,12 @@ function generic:enable (win)
 	end
 
 	self.state.window_state[win] = true;
+
+	self:update_style(win);
 	self:set(win);
 end
 
+--[[ Disables a bar of `win`. ]]
 ---@param win integer
 function generic:disable (win)
 	if not self.state.enable then
@@ -141,6 +153,7 @@ function generic:disable (win)
 	self:remove(win);
 end
 
+--[[ Handles events that cause a bar to be `attached/detached`. ]]
 ---@param win integer
 function generic:handle_new_window (win)
 	if not self.state.enable then
@@ -152,6 +165,119 @@ function generic:handle_new_window (win)
 	elseif self:should_attach(win) then
 		self:attach(win);
 	end
+end
+
+---@param win integer
+function generic:update_style(win)
+	local buf = vim.api.nvim_win_get_buf(win);
+
+	local keys = vim.tbl_keys(self.config or {});
+	table.sort(keys);
+
+	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
+	local style = "default";
+
+	for _, k in ipairs(keys) do
+		local v = self.config[k];
+
+		if not vim.list_contains(ignore, k) and type(v) == "table" then
+			if v.condition == true then
+				style = k;
+				break;
+			elseif type(v.condition) == "function" then
+				local can_eval, val = pcall(v.condition, buf, win);
+
+				if can_eval and val then
+					style = k;
+					break;
+				end
+			end
+		end
+	end
+
+	vim.api.nvim_win_set_var(win, "_" .. self.var_name, style);
+end
+
+---@param win integer
+---@param buf integer
+---@param components table<string, function>
+---@param entry table
+---@param last string
+---@return string
+function generic:styled_component (win, buf, components, entry, last)
+	if entry.condition then
+		if entry.condition == false then
+			return "";
+		else
+			local could_exec, value = pcall(entry.condition, buf, win, last);
+
+			if could_exec and not value then
+				return "";
+			end
+		end
+	elseif
+		type(entry.kind) ~= "string" or
+		type(components[entry.kind]) ~= "function"
+	then
+		return "!" .. entry.kind;
+	end
+
+	local static_config = vim.deepcopy(entry);
+
+	for key, value in pairs(static_config) do
+		if type(value) == "function" then
+			local s_success, s_val = pcall(value, buf, win, last);
+
+			if s_success == false then
+				static_config[key] = nil;
+			else
+				static_config[key] = s_val;
+			end
+		end
+	end
+
+	local could_exec, part = pcall(components[entry.kind], buf, win, static_config, last);
+
+	if could_exec and type(part) == "string" then
+		return part;
+	else
+		return "?" .. entry.kind;
+	end
+end
+
+---@param win integer
+---@param components table<string, function>
+---@return string
+function generic:get_styled_output (win, components)
+	local buf = vim.api.nvim_win_get_buf(win);
+
+	local function get_var (key)
+		local could_get, value = pcall(vim.api.nvim_win_get_var, win, key);
+		return could_get and value or nil;
+	end
+
+	if not get_var("_" .. self.var_name) then
+		self:update_style(win);
+	end
+
+	local style = get_var(self.var_name) or
+		get_var("_" .. self.var_name) or
+		"default"
+	;
+	local items ={};
+	local output = "";
+
+	if self.config[style] and self.config[style].components then
+		items = self.config[style].components;
+	elseif self.config.default and self.config.default.components then
+		items = self.config.default.components;
+	end
+
+	for _, entry in ipairs(items) do
+		output = output .. self:styled_component(win, buf, components, entry, output);
+	end
+
+	return output;
 end
 
 return generic;
