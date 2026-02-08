@@ -22,9 +22,21 @@ end
 vim.api.nvim_create_autocmd("VimEnter", {
 	group = augroup,
 	callback = function ()
-		vim.g.bars_update_cache();
+		vim.schedule(function ()
+			vim.g.bars_update_cache();
+			require("bars.statusline"):start();
+		end)
+	end
+});
 
-		require("bars.statusline").start();
+vim.api.nvim_create_autocmd("WinNew", {
+	group = augroup,
+	callback = function ()
+		vim.schedule(function ()
+			require("bars.statusline"):handle_new_window(
+				vim.api.nvim_get_current_win()
+			);
+		end)
 	end
 });
 
