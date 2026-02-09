@@ -47,3 +47,27 @@ vim.api.nvim_create_autocmd("WinNew", {
 	end
 });
 
+vim.api.nvim_create_autocmd("OptionSet", {
+	group = augroup,
+	callback = function (event)
+		local style_change = { "statusline", "statuscolumn", "tabline", "winbar" };
+		local state_change = { "filetype", "buftype" };
+
+		vim.schedule(function ()
+			local event_win = vim.api.nvim_get_current_win();
+
+			if vim.list_contains(style_change, event.match) then
+				require("bars.statusline"):update_style(event_win);
+				require("bars.statuscolumn"):update_style(event_win);
+				require("bars.winbar"):update_style(event_win);
+				require("bars.tabline"):update_style(event_win);
+			elseif vim.list_contains(state_change, event.match) then
+				require("bars.statusline"):handle_new_window(event_win);
+				require("bars.statuscolumn"):handle_new_window(event_win);
+				require("bars.winbar"):handle_new_window(event_win);
+				require("bars.tabline"):handle_new_window(event_win);
+			end
+		end)
+	end
+});
+
