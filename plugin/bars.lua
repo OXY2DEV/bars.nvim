@@ -24,7 +24,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function ()
 		vim.schedule(function ()
 			vim.g.bars_update_cache();
+
 			require("bars.statusline"):start();
+			require("bars.statuscolumn"):start();
 		end)
 	end
 });
@@ -33,9 +35,10 @@ vim.api.nvim_create_autocmd("WinNew", {
 	group = augroup,
 	callback = function ()
 		vim.schedule(function ()
-			require("bars.statusline"):handle_new_window(
-				vim.api.nvim_get_current_win()
-			);
+			local new_win = vim.api.nvim_get_current_win();
+
+			require("bars.statusline"):handle_new_window(new_win);
+			require("bars.statuscolumn"):handle_new_window(new_win);
 		end)
 	end
 });
