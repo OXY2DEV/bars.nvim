@@ -1,5 +1,16 @@
 local generic = {};
 
+---@class bars.statusline.state
+---
+---@field enable boolean
+---@field window_state table<integer, boolean|nil>
+generic.state = {
+	enable = true,
+	window_state = {},
+};
+
+generic.config = {};
+
 ---@param src any
 ---@param element any
 ---@param fallback any
@@ -280,4 +291,14 @@ function generic:get_styled_output (win, components)
 	return output;
 end
 
-return generic;
+generic.__index = generic;
+
+--------------------------------------------------------------------------------
+
+local builder = {};
+
+builder.new = function ()
+	return setmetatable({}, generic);
+end
+
+return builder;

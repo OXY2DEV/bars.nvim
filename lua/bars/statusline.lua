@@ -1,20 +1,8 @@
 ---@diagnostic disable: duplicate-set-field
-local statusline = {};
-
-statusline.__index = require("bars.generic");
-statusline = setmetatable(statusline, statusline);
+local statusline = require("bars.generic").new();
 
 statusline.default = "%!v:lua.require('bars.statusline').render()";
 statusline.var_name = "bars_statusline_style";
-
----@class bars.statusline.state
----
----@field enable boolean
----@field window_state table<integer, boolean|nil>
-statusline.state = {
-	enable = true,
-	window_state = {},
-};
 
 --[[ Reusable configuration templates. ]]
 ---@type table<string, statusline.component>
@@ -521,7 +509,7 @@ statusline.config = {
 };
 
 function statusline:original ()
-	return vim.g.bars_cache and vim.g.bars_cache.self or "";
+	return vim.g.bars_cache and vim.g.bars_cache.statusline or "";
 end
 
 function statusline:current (win) return vim.wo[win].statusline; end
