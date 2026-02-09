@@ -25,6 +25,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		vim.schedule(function ()
 			vim.g.bars_update_cache();
 
+			require("bars.highlights").setup();
+
 			require("bars.statusline"):start();
 			require("bars.statuscolumn"):start();
 			require("bars.winbar"):start();
@@ -68,6 +70,26 @@ vim.api.nvim_create_autocmd("OptionSet", {
 				require("bars.tabline"):handle_new_window(event_win);
 			end
 		end)
+	end
+});
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+	group = augroup,
+	callback = function ()
+		require("bars.highlights").setup();
+	end
+});
+
+vim.api.nvim_create_autocmd("ModeChanged", {
+	group = augroup,
+	callback = function ()
+		pcall(vim.api.nvim__redraw, {
+			flush = true,
+
+			statuscolumn = true,
+			winbar = true,
+			tabline = true,
+		});
 	end
 });
 
