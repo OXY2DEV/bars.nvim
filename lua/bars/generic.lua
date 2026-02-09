@@ -35,12 +35,7 @@ function generic:should_attach (win)
 
 	local current = self:current(win) or "";
 
-	if self.config.condition then
-		local could_exec, value = pcall(self.config.condition, win, buffer);
-		return (could_exec and value) and true or false;
-	elseif list_contains(self.config.force_attach, current, false) then
-		return true;
-	elseif self.config.ignore_buftypes or self.config.ignore_filetypes then
+	if self.config.ignore_buftypes or self.config.ignore_filetypes then
 		if list_contains(self.config.ignore_filetypes, ft, false) then
 			return false;
 		elseif list_contains(self.config.ignore_buftypes, bt, false) then
@@ -52,6 +47,11 @@ function generic:should_attach (win)
 		elseif not list_contains(self.config.buftypes, bt, true) then
 			return false;
 		end
+	elseif list_contains(self.config.force_attach, current, false) then
+		return true;
+	elseif self.config.condition then
+		local could_exec, value = pcall(self.config.condition, win, buffer);
+		return (could_exec and value) and true or false;
 	end
 
 	return true;
@@ -74,12 +74,7 @@ function generic:should_detach (win)
 	local buffer = vim.api.nvim_win_get_buf(win);
 	local ft, bt = vim.bo.filetype, vim.bo.buftype;
 
-	if self.config.condition then
-		local could_exec, value = pcall(self.config.condition, win, buffer);
-		return (could_exec and value) and false or true;
-	elseif list_contains(self.config.force_attach, current, false) then
-		return false;
-	elseif self.config.ignore_buftypes or self.config.ignore_filetypes then
+	if self.config.ignore_buftypes or self.config.ignore_filetypes then
 		if list_contains(self.config.ignore_filetypes, ft, false) then
 			return true;
 		elseif list_contains(self.config.ignore_buftypes, bt, false) then
@@ -91,6 +86,11 @@ function generic:should_detach (win)
 		elseif not list_contains(self.config.buftypes, bt, true) then
 			return true;
 		end
+	elseif list_contains(self.config.force_attach, current, false) then
+		return false;
+	elseif self.config.condition then
+		local could_exec, value = pcall(self.config.condition, win, buffer);
+		return (could_exec and value) and false or true;
 	end
 
 	return false;
