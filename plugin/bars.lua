@@ -27,6 +27,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
 			require("bars.statusline"):start();
 			require("bars.statuscolumn"):start();
+			require("bars.winbar"):start();
 		end)
 	end
 });
@@ -39,6 +40,7 @@ vim.api.nvim_create_autocmd("WinNew", {
 
 			require("bars.statusline"):handle_new_window(new_win);
 			require("bars.statuscolumn"):handle_new_window(new_win);
+			require("bars.winbar"):handle_new_window(new_win);
 		end)
 	end
 });
