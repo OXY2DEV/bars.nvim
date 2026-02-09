@@ -25,6 +25,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		vim.schedule(function ()
 			vim.g.bars_update_cache();
 
+			require("bars.global");
 			require("bars.highlights").setup();
 
 			require("bars.statusline"):start();
