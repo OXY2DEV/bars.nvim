@@ -1,5 +1,6 @@
 ---@diagnostic disable: duplicate-set-field
 local tabline = require("bars.generic").new();
+tabline:set_default_state();
 
 tabline.default = "%!v:lua.require('bars.tabline').render()";
 tabline.var_name = "bars_tabline_style";

@@ -4,12 +4,15 @@ local generic = {};
 ---
 ---@field enable boolean
 ---@field window_state table<integer, boolean|nil>
-generic.state = {
-	enable = true,
-	window_state = {},
-};
 
-generic.config = {};
+function generic:set_default_state ()
+	self.state = {
+		enable = true,
+		window_state = {},
+	};
+
+	self.config = {};
+end
 
 ---@param src any
 ---@param element any

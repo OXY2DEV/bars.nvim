@@ -18,7 +18,14 @@ bars.exec = function (action, on, ...)
 	end
 end
 
-bars.setup = function ()
+bars.setup = function (config)
+	for k, v in pairs(config) do
+		local could_load, submodule = pcall(require, "bars." .. k);
+
+		if could_load and submodule then
+			pcall(submodule.setup, v);
+		end
+	end
 end
 
 return bars;

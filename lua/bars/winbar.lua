@@ -1,5 +1,6 @@
 ---@diagnostic disable: duplicate-set-field
 local winbar = require("bars.generic").new();
+winbar:set_default_state();
 
 winbar.default = "%!v:lua.require('bars.winbar').render()";
 winbar.var_name = "bars_winbar_style";
@@ -631,6 +632,14 @@ function winbar:render ()
 	local win = vim.g.statusline_winid;
 
 	return winbar:get_styled_output(win, components);
+end
+
+function winbar.setup (config)
+	if type(config) == "boolean" then
+		winbar.state.enable = config;
+	elseif type(config) == "table" then
+		winbar.config = vim.tbl_extend("force", winbar.config, config);
+	end
 end
 
 return winbar;
