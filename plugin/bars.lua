@@ -94,3 +94,109 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 	end
 });
 
+local commands = {
+	"Disable",
+	"Enable",
+	"Start",
+	"Stop",
+	"Toggle",
+	"disable",
+	"enable",
+	"toggle",
+	"update",
+};
+
+vim.api.nvim_create_user_command("Bars", function (data)
+	local command = data.fargs[1] and data.fargs[1] or "Toggle";
+
+	if not vim.list_contains(commands, command) then
+		vim.print("Not a sub-command: " .. command)
+		return;
+	end
+
+	local target = data.fargs[2] and { data.fargs[2] } or nil;
+
+	if target[1] == "?" then
+		vim.ui.input({
+			prompt = "Run command on target(s)?",
+			default = "",
+		}, function (v)
+			if not v then
+				return;
+			end
+
+			target = vim.split(v, " ", { trimempty = true });
+			if #target == 0 then target = nil; end
+		end);
+	end
+
+	local args = {};
+
+	for a, arg in ipairs(data.fargs or {}) do
+		if a > 2 then
+			if pcall(tonumber, arg) then
+				table.insert(args, tonumber(arg));
+			else
+				table.insert(args, arg);
+			end
+		end
+	end
+
+	if #args == 0 and not vim.list_contains({ "update" }, command) then
+		args = { vim.api.nvim_get_current_win() };
+	end
+
+	require("bars").exec(command, target, unpack(args));
+end, {
+	desc = "Command for `bars.nvim`",
+	nargs = "*",
+
+	complete = function (leader, cmdline, cursor_pos)
+		local function create_completes (list)
+			local sorted = {};
+
+			for _, item in ipairs(list or {}) do
+				if leader == "" or string.match(tostring(item), "^".. leader) then
+					table.insert(sorted, tostring(item));
+				end
+			end
+
+			return sorted;
+		end
+
+		local before_cursor = string.sub(cmdline, 0, cursor_pos);
+		local tokens = vim.split(before_cursor, " ", { trimempty = true });
+
+		table.remove(tokens, 1);
+
+		local current_command = tokens[1] or "";
+
+		local targets = {
+			"?",
+			"all",
+			"statuscolumn",
+			"statusline",
+			"tabline",
+			"winbar",
+		};
+
+		if string.match(before_cursor, "%s$") then
+			if #tokens == 0 then
+				return create_completes(commands);
+			elseif #tokens == 1 then
+				return create_completes(targets);
+			elseif #tokens == 2 and not string.match(current_command, "^[A-Z]") then
+				return create_completes(vim.api.nvim_list_wins());
+			end
+		else
+			if #tokens == 1 then
+				return create_completes(commands);
+			elseif #tokens == 2 then
+				return create_completes(targets);
+			elseif #tokens == 3 and not string.match(current_command, "^[A-Z]") then
+				return create_completes(vim.api.nvim_list_wins());
+			end
+		end
+	end,
+});
+

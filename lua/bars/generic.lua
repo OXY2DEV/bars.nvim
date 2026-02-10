@@ -164,6 +164,44 @@ function generic:disable (win)
 	self:remove(win);
 end
 
+--[[ Toggles a bar of `win`. ]]
+---@param win integer
+function generic:toggle (win)
+	if self.state.window_state[win] then
+		self:disable(win);
+	elseif self.state.window_state[win] == false then
+		self:enable(win);
+	end
+end
+
+--[[ Update a bar style of `win`. ]]
+---@param win integer
+function generic:update (win)
+	self:update_style(win);
+end
+
+function generic:Toggle ()
+	for win, _ in pairs(self.state.window_state) do
+		self:toggle(win);
+	end
+end
+
+function generic:Enable ()
+	for win, state in pairs(self.state.window_state) do
+		if state == false then
+			self:enable(win);
+		end
+	end
+end
+
+function generic:Disable ()
+	for win, state in pairs(self.state.window_state) do
+		if state then
+			self:disable(win);
+		end
+	end
+end
+
 --[[ Handles events that cause a bar to be `attached/detached`. ]]
 ---@param win integer
 function generic:handle_new_window (win)
