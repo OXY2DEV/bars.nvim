@@ -58,10 +58,12 @@ function generic:should_attach (win)
 		elseif not list_contains(self.config.buftypes, bt, true) then
 			return false;
 		end
-	elseif list_contains(self.config.force_attach, current, false) then
+	end
+
+	if list_contains(self.config.force_attach, current, false) then
 		return true;
 	elseif self.config.condition then
-		local could_exec, value = pcall(self.config.condition, win, buffer);
+		local could_exec, value = pcall(self.config.condition, buffer, win);
 		return (could_exec and value) and true or false;
 	end
 
