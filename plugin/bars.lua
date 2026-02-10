@@ -50,6 +50,24 @@ vim.api.nvim_create_autocmd("WinNew", {
 	end
 });
 
+vim.api.nvim_create_autocmd({ "TabNew" }, {
+	callback = function ()
+		local max = vim.g.bars_tabline_visible_tabs or 5;
+		local tabs = #vim.api.nvim_list_tabpages();
+
+		if not package.loaded["bars.tabline"] then
+			return;
+		elseif vim.g.__bars_tabpage_list_locked == true then
+			--- List movement locked.
+			return;
+		elseif tabs <= max then
+			return;
+		end
+
+		vim.g.bars_tablist_start = math.max(1, (tabs + 1) - max);
+	end
+});
+
 vim.api.nvim_create_autocmd("OptionSet", {
 	group = augroup,
 	callback = function (event)
@@ -116,7 +134,7 @@ vim.api.nvim_create_user_command("Bars", function (data)
 
 	local target = data.fargs[2] and { data.fargs[2] } or nil;
 
-	if target[1] == "?" then
+	if target and target[1] == "?" then
 		vim.ui.input({
 			prompt = "Run command on target(s)?",
 			default = "",

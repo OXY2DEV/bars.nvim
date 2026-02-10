@@ -220,7 +220,15 @@ statuscolumn.config = {
 };
 
 function statuscolumn:original ()
-	return vim.g.bars_cache and vim.g.bars_cache.statuscolumn or "";
+	return vim.g.bars_cache and {
+		statuscolumn = vim.g.bars_cache.statuscolumn,
+		number = vim.g.bars_cache.number,
+		relativenumber = vim.g.bars_cache.relativenumber,
+	} or {
+		statuscolumn = "",
+		number = false,
+		relativenumber = false,
+	};
 end
 
 function statuscolumn:current (win) return vim.wo[win].statuscolumn; end
@@ -254,7 +262,12 @@ end
 function statuscolumn:remove (win)
 	vim.api.nvim_win_call(win, function ()
 		vim.schedule(function ()
-			vim.cmd("set statuscolumn=" .. (statuscolumn:original() or ""));
+			local original = statuscolumn:original();
+
+			vim.cmd("set statuscolumn=" .. (original.statuscolumn or ""));
+
+			vim.api.nvim_set_option_value("number", original.number, { scope = "local", win = win });
+			vim.api.nvim_set_option_value("relativenumber", original.relativenumber, { scope = "local", win = win });
 		end)
 	end);
 end

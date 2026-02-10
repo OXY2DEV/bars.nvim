@@ -40,7 +40,7 @@ function generic:current (_) return ""; end
 function generic:should_attach (win)
 	if not self.state.enable then
 		return false
-	elseif self.state.window_state[win] then
+	elseif self.state.window_state[win] ~= nil then
 		return false;
 	end
 
