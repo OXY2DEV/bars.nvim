@@ -22,17 +22,15 @@ end
 vim.api.nvim_create_autocmd("VimEnter", {
 	group = augroup,
 	callback = function ()
-		vim.schedule(function ()
-			vim.g.bars_update_cache();
+		vim.g.bars_update_cache();
 
-			require("bars.global");
-			require("bars.highlights").setup();
+		require("bars.global");
+		require("bars.highlights").setup();
 
-			require("bars.statusline"):start();
-			require("bars.statuscolumn"):start();
-			require("bars.winbar"):start();
-			require("bars.tabline"):start();
-		end)
+		require("bars.statusline"):start();
+		require("bars.statuscolumn"):start();
+		require("bars.winbar"):start();
+		require("bars.tabline"):start();
 	end
 });
 
