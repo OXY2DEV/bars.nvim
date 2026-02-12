@@ -1,9 +1,9 @@
---- Custom tabline module
-local tabline = {}
+---@diagnostic disable: duplicate-set-field
+local tabline = require("bars.generic").new();
+tabline:set_default_state();
 
---- Custom tabline.
----@type string
-local TBL = "%!v:lua.require('bars.tabline').render()";
+tabline.default = "%!v:lua.require('bars.tabline').render()";
+tabline.var_name = "bars_tabline_style";
 
 ---@class tabline.config
 tabline.config = {
@@ -116,220 +116,45 @@ tabline.config = {
 	}
 };
 
----@type tabline.state
-tabline.state = {
-	enable = true,
-	attached = false
-};
-
-tabline.check_condition = function ()
-	if not tabline.config.condition then
-		return true;
-	end
-
-	local can_call, cond = pcall(tabline.config.condition);
-	return can_call and cond;
+function tabline:original ()
+	return vim.g.bars_cache and vim.g.bars_cache.tabline or "";
 end
 
---- Renders the tabline.
----@return string
-tabline.render = function ()
-	---|fS
+function tabline:current (_) return vim.o.tabline; end
 
+function tabline:start ()
+	if not tabline.state.enable then
+		return;
+	end
+
+	vim.api.nvim_set_option_value("tabline", tabline.default, { scope = "global" });
+
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		tabline:handle_new_window(win);
+	end
+end
+
+--------------------------------------------------------------------------------
+
+---@param _ integer
+function tabline:set (_)
+	vim.api.nvim_set_option_value("tabline", tabline.default, {
+		scope = "global",
+	});
+end
+
+---@param _ integer
+function tabline:remove (_)
+	vim.schedule(function ()
+		vim.cmd("set tabline=" .. (tabline:original() or ""));
+	end)
+end
+
+function tabline:render ()
 	local components = require("bars.components.tabline");
+	local win = vim.g.statusline_winid;
 
-	if tabline.check_condition() == false then
-		tabline.detach();
-		return "";
-	end
-
-	tabline.update_style();
-
-	local tlID = vim.g.bars_tabline_style or vim.g._bars_tabline_style or "default";
-	local config = tabline.config[tlID];
-
-	if type(config) ~= "table" then
-		return "";
-	end
-
-	local _o = "";
-
-	for _, component in ipairs(config.components or {}) do
-		_o = _o .. components.get(component.kind, component, _o);
-	end
-
-	return _o;
-
-	---|fE
-end
-
---- Attaches the tabline module.
-tabline.start = function ()
-	---|fS
-
-	if tabline.state.enable == false then
-		return;
-	end
-
-	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
-
-	---|fE
-end
-
-tabline.attach = function ()
-	if tabline.state.enable == true then
-		return;
-	end
-
-	tabline.set();
-	tabline.state.enable = true;
-end
-
-tabline.detach = function ()
-	---|fS
-
-	if tabline.state.enable ~= true then
-		return;
-	end
-
-	tabline.remove();
-	tabline.state.enable = false;
-
-	---|fE
-end
-
---- Updates the configuration style for the tabline.
-tabline.update_style = function ()
-	---|fS
-
-	---@type string[]
-	local keys = vim.tbl_keys(tabline.config);
-	---@type string[]
-	local ignore = { "default" };
-	table.sort(keys);
-
-	local style = "default";
-
-	for _, key in ipairs(keys) do
-		if vim.list_contains(ignore, key) then
-			goto continue;
-		elseif type(tabline.config[key]) ~= "table" then
-			goto continue;
-		end
-
-		---@type tabline.style
-		local tmp = tabline.config[key];
-
-		if tmp.condition == true then
-			style = key;
-		elseif type(tmp.condition) == "function" then
-			---@diagnostic disable-next-line
-			local can_eval, val = pcall(tmp.condition, buffer, window);
-
-			if can_eval and val then
-				style = key;
-			end
-		end
-
-		::continue::
-	end
-
-	vim.g._bars_tabline_style = style;
-	tabline.state.attached = true;
-
-	---|fE
-end
-
---[[ Sets the custom `tabline`. ]]
-tabline.set = function ()
-	vim.api.nvim_set_option_value("tabline", TBL, { scope = "global" })
-end
-
---[[ Removes the custom `tabline`. ]]
-tabline.remove = function ()
-	---|fS
-
-	if vim.o.tabline ~= TBL then
-		return;
-	end
-
-	vim.api.nvim_set_option_value(
-		"tabline",
-		vim.g.__tabline or "",
-		{
-			scope = "global"
-		}
-	);
-
-	---|fE
-end
-
-------------------------------------------------------------------------------
-
-tabline.Start = function ()
-	tabline.attach();
-end
-
-tabline.Stop = function ()
-	tabline.detach();
-end
-
---[[ Toggles tabline. ]]
-tabline.Toggle = function ()
-	---|fS
-
-	if tabline.state.enable == true then
-		tabline.Disable();
-	else
-		tabline.Enable();
-	end
-
-	---|fE
-end
-
---[[ Enables tabline. ]]
-tabline.Enable = function ()
-	tabline.Start();
-end
-
---[[ Disables tabline. ]]
-tabline.Disable = function ()
-	tabline.Stop();
-end
-
---[[ Toggles tabline. ]]
-tabline.toggle = function ()
-	---|fS
-
-	if tabline.state.enable == true then
-		tabline.detach();
-	else
-		tabline.attach();
-	end
-
-	---|fE
-end
-
---[[ Enables tabline. ]]
-tabline.enable = function ()
-	tabline.Start();
-end
-
---[[ Disables tabline. ]]
-tabline.disable = function ()
-	tabline.Stop();
-end
-
-------------------------------------------------------------------------------
-
---- Sets up the tabline module.
----@param config tabline.config | boolean | nil
-tabline.setup = function (config)
-	if type(config) == "table" then
-		tabline.config = vim.tbl_extend("force", tabline.config, config);
-	elseif type(config) == "boolean" then
-		tabline.state.enable = config;
-	end
+	return tabline:get_styled_output(win, components);
 end
 
 return tabline;

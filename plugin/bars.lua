@@ -1,140 +1,53 @@
----@diagnostic disable: undefined-field
+local augroup = vim.api.nvim_create_augroup("bars.nvim", {});
 
----|fS "chore: Cache default values"
+---@class vim.var_accessor
+---@field bars_update_cache function
 
-vim.g.__statusline = vim.api.nvim_get_option_value("statusline", { scope = "global" });
-vim.g.__statuscolumn = vim.o.statuscolumn;
-vim.g.__winbar = vim.api.nvim_get_option_value("winbar", { scope = "global" });
+-- Updates default *bars & lines* value.
+-- > From: `bars.nvim`
+vim.g.bars_update_cache = function()
+	---|fS
 
-vim.g.__tabline = vim.o.tabline;
+	if not vim.g.bars_cached then vim.g.bars_cached = {}; end
 
----|fE
+	vim.g.bars_cached.statusline = vim.api.nvim_get_option_value("statusline", { scope = "global" });
+	vim.g.bars_cached.statuscolumn = vim.api.nvim_get_option_value("statuscolumn", { scope = "global" });
+	vim.g.bars_cached.winbar = vim.api.nvim_get_option_value("winbar", { scope = "global" });
 
---- Update the tab list when opening new windows.
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	vim.g.bars_cached.tabline = vim.api.nvim_get_option_value("tabline", { scope = "global" });
+
+	---|fE
+end
+
+vim.api.nvim_create_autocmd("VimEnter", {
+	group = augroup,
 	callback = function ()
-		require("bars").setup();
+		vim.g.bars_update_cache();
 
 		require("bars.global");
 		require("bars.highlights").setup();
 
-		require("bars.statuscolumn").start();
-		require("bars.statusline").start();
-		require("bars.winbar").start();
-
-		require("bars.tabline").start();
+		require("bars.statusline"):start();
+		require("bars.statuscolumn"):start();
+		require("bars.winbar"):start();
+		require("bars.tabline"):start();
 	end
 });
 
----@type table Timer for the update task.
-local timer = vim.uv.new_timer();
-
----@type table Timer for the update task.
-local update_timer = vim.uv.new_timer();
-
----@type integer Debounce delay.
-local DELAY = 100;
-
-local function task ()
-	---|fS
-
-	local function callback ()
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			require("bars.statusline").attach(win);
-			require("bars.statuscolumn").attach(win);
-			require("bars.winbar").attach(win);
-		end
-
-		--- Unstable API function.
-		--- Use `pcall()`
-		pcall(vim.api.nvim__redraw, {
-			statuscolumn = true,
-		});
-	end
-
-	if vim.in_fast_event() then
-		vim.schedule(callback);
-	else
-		callback();
-	end
-
-	---|fE
-end
-
-local function update_task ()
-	---|fS
-
-	local function callback ()
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			require("bars.statuscolumn").update_style(win);
-			require("bars.statusline").update_style(win);
-			require("bars.winbar").update_style(win);
-		end
-
-		--- Unstable API function.
-		--- Use `pcall()`
-		pcall(vim.api.nvim__redraw, {
-			statuscolumn = true,
-		});
-	end
-
-	if vim.in_fast_event() then
-		vim.schedule(callback);
-	else
-		callback();
-	end
-
-	---|fE
-end
-
---- Attach to new Windows.
----
---- Also rum this when a buffer is displayed
---- in a window as the filetype/buftype may
---- could have changed.
-vim.api.nvim_create_autocmd({
-	"WinNew"
-}, {
+vim.api.nvim_create_autocmd("WinNew", {
+	group = augroup,
 	callback = function ()
-		timer:stop();
-		timer:start(DELAY, 0, vim.schedule_wrap(task));
+		vim.schedule(function ()
+			local new_win = vim.api.nvim_get_current_win();
+
+			require("bars.statusline"):handle_new_window(new_win);
+			require("bars.statuscolumn"):handle_new_window(new_win);
+			require("bars.winbar"):handle_new_window(new_win);
+			require("bars.tabline"):handle_new_window(new_win);
+		end)
 	end
 });
 
-vim.api.nvim_create_autocmd({
-	"OptionSet"
-}, {
-	callback = function (event)
-		local valid = { "statusline", "statuscolumn", "tabline", "winbar" };
-		local update = { "filetype", "buftype" };
-
-		if vim.list_contains(valid, event.match) then
-			timer:stop();
-			timer:start(DELAY, 0, vim.schedule_wrap(task));
-		elseif vim.list_contains(update, event.match) then
-			update_timer:stop();
-			update_timer:start(DELAY, 0, vim.schedule_wrap(update_task));
-		end
-	end
-});
-
-local mode_timer = vim.uv.new_timer();
-
---- Update various bars & lines on Vim mode change.
-vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-	callback = function ()
-		mode_timer:stop();
-		mode_timer:start(DELAY, 0, vim.schedule_wrap(function ()
-			pcall(vim.api.nvim__redraw, {
-				statuscolumn = true,
-				winbar = true,
-				tabline = true
-			});
-		end));
-	end
-});
-
---- Update the tab list when opening new tabs.
 vim.api.nvim_create_autocmd({ "TabNew" }, {
 	callback = function ()
 		local max = vim.g.bars_tabline_visible_tabs or 5;
@@ -153,159 +66,153 @@ vim.api.nvim_create_autocmd({ "TabNew" }, {
 	end
 });
 
---- Update the tab list when opening new windows.
-vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+vim.api.nvim_create_autocmd("OptionSet", {
+	group = augroup,
+	callback = function (event)
+		local style_change = { "statusline", "statuscolumn", "tabline", "winbar" };
+		local state_change = { "filetype", "buftype" };
+
+		vim.schedule(function ()
+			local event_win = vim.api.nvim_get_current_win();
+
+			if vim.list_contains(style_change, event.match) then
+				require("bars.statusline"):update_style(event_win);
+				require("bars.statuscolumn"):update_style(event_win);
+				require("bars.winbar"):update_style(event_win);
+				require("bars.tabline"):update_style(event_win);
+			elseif vim.list_contains(state_change, event.match) then
+				require("bars.statusline"):handle_new_window(event_win);
+				require("bars.statuscolumn"):handle_new_window(event_win);
+				require("bars.winbar"):handle_new_window(event_win);
+				require("bars.tabline"):handle_new_window(event_win);
+			end
+		end)
+	end
+});
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+	group = augroup,
 	callback = function ()
 		require("bars.highlights").setup();
 	end
 });
 
-----------------------------------------------------------------------
+vim.api.nvim_create_autocmd("ModeChanged", {
+	group = augroup,
+	callback = function ()
+		pcall(vim.api.nvim__redraw, {
+			flush = true,
 
---- Custom completion for the `?` operator.
----@param before string
----@return string[]
-_G.__bars_comp = function (before)
-	---|fS
-
-	local tokens = vim.split(before, " ", { trimempty = true });
-	local modules = { "statusline", "statuscolumn", "tabline", "winbar" };
-	local _c = {};
-
-	if #tokens == 0 then
-		return modules;
-	end
-
-	for _, item in ipairs(modules) do
-		if string.match(before, "%s$") and vim.list_contains(tokens, item) == false then
-			if #tokens == 0 then
-				table.insert(_c, table.concat(tokens, " ") .. item);
-			else
-				table.insert(_c, table.concat(tokens, " ") .. " " .. item);
-			end
-		elseif string.match(item, tokens[#tokens]) and vim.list_contains(tokens, item) == false then
-			if #tokens == 1 then
-				table.insert(_c, table.concat(vim.list_slice(tokens, 1, #tokens - 1), " ") .. item);
-			else
-				table.insert(_c, table.concat(vim.list_slice(tokens, 1, #tokens - 1), " ") .. " " .. item);
-			end
-		end
-	end
-
-	table.sort(_c);
-	return _c;
-
-	---|fE
-end
-
---- `:Bars` command implementation.
---- Usage `:Bars <action>? <operator> <window> ...`
-vim.api.nvim_create_user_command("Bars", function (data)
-	---|fS
-
-	local bars = require("bars");
-
-	local command = data.fargs[1];
-	local actions = vim.tbl_keys(bars.actions);
-	local windows = {};
-
-	if #data.fargs > 2 then
-		for w = 3, #data.fargs do
-			local _w = vim.fn.str2nr(data.fargs[w]);
-
-			table.insert(windows, _w ~= 0 and _w or nil);
-		end
-	else
-		table.insert(windows, vim.api.nvim_get_current_win());
-	end
-
-	if vim.list_contains(actions, command) == false then
-		--- Action not found.
-		bars.actions.Toggle();
-	elseif #data.fargs == 1 or data.fargs[2] == "all" then
-		--- Action without arguments or with "all" operator.
-		bars.actions[command](nil, windows);
-	elseif data.fargs[2] == "?" then
-		--- Actions with "?" operator.
-		vim.ui.input({
-			prompt = "Run command on module(s)?",
-			default = "",
-
-			completion = "customlist,v:lua.__bars_comp"
-		}, function (input)
-			local tokens = vim.split(input or "", " ", { trimempty = true });
-
-			if #tokens == 0 then
-				bars.actions[command](nil, windows);
-			else
-				bars.actions[command](tokens, windows);
-			end
-		end);
-	else
-		bars.actions[command]({ data.fargs[2] }, windows);
-	end
-
-	---|fE
-end, {
-	desc = "User command for bars.nvim",
-	nargs = "*",
-
-	complete = function (arg_lead, cmdline, cursor_pos)
-		---|fS
-
-		local bars = require("bars");
-
-		---@type string Text before the cursor.
-		local before = string.sub(cmdline, 0, cursor_pos);
-		---@type string[] Tokenized version of @before.
-		local tokens = vim.split(before, " ", { trimempty = true });
-
-		if #tokens == 1 or (#tokens == 2 and arg_lead ~= "") then
-			--- Sub-command/action.
-
-			local _c = vim.tbl_filter(function (val)
-				return string.match(val, arg_lead) ~= nil;
-			end, vim.tbl_keys(bars.actions));
-
-			table.sort(_c);
-			return _c;
-		elseif (#tokens == 2 and arg_lead == "") or (#tokens == 3 and arg_lead ~= "") then
-			--- Operator.
-
-			local _c = vim.tbl_filter(function (val)
-				return string.match(val, arg_lead) ~= nil;
-			end, { "all", "?", "statuscolumn", "statusline", "tabline", "winbar" });
-
-			table.sort(_c);
-			return _c;
-		elseif (#tokens >= 3 and arg_lead == "") or (#tokens == 4 and arg_lead ~= "") then
-			--- Window(s).
-
-			if vim.list_contains({ "all", "?" }, tokens[3]) then
-				return;
-			end
-
-			local module = package.loaded["bars." .. tokens[3]];
-
-			if module == nil then
-				return;
-			end
-
-			local _c = vim.tbl_filter(function (val)
-				return vim.list_contains(tokens, tostring(val)) == false and string.match(tostring(val), arg_lead) ~= nil;
-			end, vim.tbl_keys(module.state.attached_windows));
-
-			for k, v in pairs(_c) do
-				_c[k] = tostring(v);
-			end
-
-			table.sort(_c);
-			return _c;
-		end
-
-		---|fE
+			statuscolumn = true,
+			winbar = true,
+			tabline = true,
+		});
 	end
 });
 
-----------------------------------------------------------------------
+local commands = {
+	"Disable",
+	"Enable",
+	"Start",
+	"Stop",
+	"Toggle",
+	"disable",
+	"enable",
+	"toggle",
+	"update",
+};
+
+vim.api.nvim_create_user_command("Bars", function (data)
+	local command = data.fargs[1] and data.fargs[1] or "Toggle";
+
+	if not vim.list_contains(commands, command) then
+		vim.print("Not a sub-command: " .. command)
+		return;
+	end
+
+	local target = data.fargs[2] and { data.fargs[2] } or nil;
+
+	if target and target[1] == "?" then
+		vim.ui.input({
+			prompt = "Run command on target(s)?",
+			default = "",
+		}, function (v)
+			if not v then
+				return;
+			end
+
+			target = vim.split(v, " ", { trimempty = true });
+			if #target == 0 then target = nil; end
+		end);
+	end
+
+	local args = {};
+
+	for a, arg in ipairs(data.fargs or {}) do
+		if a > 2 then
+			if pcall(tonumber, arg) then
+				table.insert(args, tonumber(arg));
+			else
+				table.insert(args, arg);
+			end
+		end
+	end
+
+	if #args == 0 and not vim.list_contains({ "update" }, command) then
+		args = { vim.api.nvim_get_current_win() };
+	end
+
+	require("bars").exec(command, target, unpack(args));
+end, {
+	desc = "Command for `bars.nvim`",
+	nargs = "*",
+
+	complete = function (leader, cmdline, cursor_pos)
+		local function create_completes (list)
+			local sorted = {};
+
+			for _, item in ipairs(list or {}) do
+				if leader == "" or string.match(tostring(item), "^".. leader) then
+					table.insert(sorted, tostring(item));
+				end
+			end
+
+			return sorted;
+		end
+
+		local before_cursor = string.sub(cmdline, 0, cursor_pos);
+		local tokens = vim.split(before_cursor, " ", { trimempty = true });
+
+		table.remove(tokens, 1);
+
+		local current_command = tokens[1] or "";
+
+		local targets = {
+			"?",
+			"all",
+			"statuscolumn",
+			"statusline",
+			"tabline",
+			"winbar",
+		};
+
+		if string.match(before_cursor, "%s$") then
+			if #tokens == 0 then
+				return create_completes(commands);
+			elseif #tokens == 1 then
+				return create_completes(targets);
+			elseif #tokens == 2 and not string.match(current_command, "^[A-Z]") then
+				return create_completes(vim.api.nvim_list_wins());
+			end
+		else
+			if #tokens == 1 then
+				return create_completes(commands);
+			elseif #tokens == 2 then
+				return create_completes(targets);
+			elseif #tokens == 3 and not string.match(current_command, "^[A-Z]") then
+				return create_completes(vim.api.nvim_list_wins());
+			end
+		end
+	end,
+});
 

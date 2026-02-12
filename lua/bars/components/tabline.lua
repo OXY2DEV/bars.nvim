@@ -26,7 +26,7 @@ end
 --- Empty section.
 ---@param config tabline.components.empty
 ---@return string
-tlC.empty = function (config)
+tlC.empty = function (_, _, config)
 	---|fS
 
 	return table.concat({
@@ -40,7 +40,7 @@ end
 --- Tab list.
 ---@param config tabline.components.tabs
 ---@return string
-tlC.tabs = function (config)
+tlC.tabs = function (_, _, config)
 	---|fS
 
 	local tabs = vim.api.nvim_list_tabpages();
@@ -226,7 +226,7 @@ end
 --- Buffer list.
 ---@param config tabline.components.bufs
 ---@return string
-tlC.bufs = function (config)
+tlC.bufs = function (_, _, config)
 	---|fS
 
 	local function truncate_fname (fname, name_len)

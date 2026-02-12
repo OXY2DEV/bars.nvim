@@ -1,17 +1,15 @@
---[[
-Custom statuscolumn from `bars.nvim`.
+---@diagnostic disable: duplicate-set-field
+local statuscolumn = require("bars.generic").new();
+statuscolumn:set_default_state();
 
-## Usage
+statuscolumn.default = "%!v:lua.require('bars.statuscolumn').render()";
+statuscolumn.var_name = "bars_statuscolumn_style";
 
-```lua
-require("bars.statuscolumn").Enable();
-```
-]]
-local statuscolumn = {};
-local generic = require("bars.generic");
-
----@type string Expression that creates the statusline when evaluated.
-local STC = "%!v:lua.require('bars.statuscolumn').render()";
+---@class bars.statusline.state
+statuscolumn.state = {
+	enable = true,
+	window_state = {},
+};
 
 local gradient_map = {
 	default = "BarsNormal%d",
@@ -221,347 +219,64 @@ statuscolumn.config = {
 	}
 };
 
----@type bars.mod.state
-statuscolumn.state = {
-	enable = true,
-	attached_windows = {}
-};
-
---- Renders the statuscolumn for a window.
----@return string
-statuscolumn.render = function ()
-	---|fS
-
-	local components = require("bars.components.statuscolumn");
-
-	local window = vim.g.statusline_winid;
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	statuscolumn.update_style(window);
-
-	local style = vim.w[window].bars_statuscolumn_style or vim.w[window]._bars_statuscolumn_style or "default";
-	local config = statuscolumn.config[style];
-
-	if type(config) ~= "table" then
-		return "";
-	end
-
-	local _o = "";
-
-	for _, component in ipairs(config.components or {}) do
-		_o = _o .. components.get(component.kind, buffer, window, component, _o);
-	end
-
-	return _o;
-
-	---|fE
+function statuscolumn:original ()
+	return vim.g.bars_cache and {
+		statuscolumn = vim.g.bars_cache.statuscolumn,
+		number = vim.g.bars_cache.number,
+		relativenumber = vim.g.bars_cache.relativenumber,
+	} or {
+		statuscolumn = "",
+		number = false,
+		relativenumber = false,
+	};
 end
 
---- Attaches the statuscolumn module to the windows
---- of a buffer.
-statuscolumn.start = function ()
-	---|fS
+function statuscolumn:current (win) return vim.wo[win].statuscolumn; end
 
-	if statuscolumn.state.enable == false then
+function statuscolumn:start ()
+	if not statuscolumn.state.enable then
 		return;
 	end
 
-	vim.g.__relativenumber = vim.api.nvim_get_option_value("relativenumber", { scope = "global" });
-	vim.g.__numberwidth = vim.api.nvim_get_option_value("numberwidth", { scope = "global" });
+	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.default, { scope = "global" });
 
-	-- Doesn't work.
-	--- vim.g.__statuscolumn = vim.api.nvim_get_option_value("statuscolumn", { scope = "global" });
-
+	vim.api.nvim_set_option_value("number", true, { scope = "global" });
 	vim.api.nvim_set_option_value("relativenumber", true, { scope = "global" });
-	vim.api.nvim_set_option_value("numberwidth", 1, { scope = "global" });
-	vim.o.statuscolumn = STC;
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		statuscolumn.attach(win);
+		statuscolumn:handle_new_window(win);
 	end
-
-	---|fE
 end
 
---[[
-Attaches the custom `statuscolumn` to **window**.
-]]
----@param window integer
-statuscolumn.attach = function (window)
-	---|fS
+--------------------------------------------------------------------------------
 
-	local current = vim.wo[window].statuscolumn;
-	local should_attach = generic.should_attach(
-		statuscolumn.state,
-		statuscolumn.config,
-		current,
-		STC,
-		window
-	);
-
-	if should_attach then
-		statuscolumn.set(window);
-		generic.set_win_state(statuscolumn.state, window, true);
-	elseif generic.get_win_state(statuscolumn.state, window) and current ~= STC then
-		statuscolumn.detach(window);
-	end
-
-	---|fE
+---@param win integer
+function statuscolumn:set (win)
+	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.default, {
+		scope = "local",
+		win = win
+	});
 end
 
---[[
-Detaches the custom `statuscolumn` from **window**.
+---@param win integer
+function statuscolumn:remove (win)
+	vim.api.nvim_win_call(win, function ()
+		vim.schedule(function ()
+			local original = statuscolumn:original();
 
-NOTE: This will *reset* the statuscolumn for that window.
-]]
----@param window integer
-statuscolumn.detach = function (window)
-	---|fS
+			vim.cmd("set statuscolumn=" .. (original.statuscolumn or ""));
 
-	if generic.get_win_state(statuscolumn.state, window) then
-		statuscolumn.remove(window);
-		generic.set_win_state(statuscolumn.state, window, false);
-	elseif vim.wo[window].statuscolumn == STC then
-		local current = vim.wo[window].statuscolumn;
-		local should_attach = generic.should_attach(
-			statuscolumn.state,
-			statuscolumn.config,
-			current,
-			STC,
-			window
-		);
-
-		if should_attach then
-			statuscolumn.set(window);
-			generic.set_win_state(statuscolumn.state, window, true);
-		else
-			statuscolumn.remove(window);
-		end
-	end
-
-	---|fE
-end
-
---[[ Updates the statusline style for `window`. ]]
----@param window integer
-statuscolumn.update_style = function (window)
-	---|fS
-
-	if type(window) ~= "number" or vim.api.nvim_win_is_valid(window) == false then
-		return;
-	end
-
-	local current = vim.wo[window].statuscolumn;
-	local should_detach = generic.should_detach(
-		statuscolumn.state,
-		statuscolumn.config,
-		current,
-		STC,
-		window
-	);
-
-	if should_detach then
-		statuscolumn.detach(window);
-		return;
-	end
-
-	---@type integer
-	local buffer = vim.api.nvim_win_get_buf(window);
-
-	---@type string[]
-	local keys = vim.tbl_keys(statuscolumn.config);
-	---@type string[]
-	local ignore = { "ignore_filetypes", "ignore_buftypes", "default" };
-	table.sort(keys);
-
-	local style = "default";
-
-	for _, key in ipairs(keys) do
-		if vim.list_contains(ignore, key) then
-			goto continue;
-		elseif type(statuscolumn.config[key]) ~= "table" then
-			goto continue;
-		end
-
-		local tmp = statuscolumn.config[key];
-
-		if tmp.condition == true then
-			style = key;
-		elseif type(tmp.condition) == "function" then
-			---@diagnostic disable-next-line
-			local can_eval, val = pcall(tmp.condition, buffer, window);
-
-			if can_eval and val then
-				style = key;
-			end
-		end
-
-		---@diagnostic enable:undefined-field
-
-		::continue::
-	end
-
-	vim.w[window]._bars_statuscolumn_style = style;
-
-	---|fE
-end
-
---[[
-Sets the custom statuscolumn for `window`.
-]]
----@param window integer
-statuscolumn.set = function (window)
-	---|fS
-
-	vim.api.nvim_set_option_value(
-		"statuscolumn",
-		STC,
-		{
-			scope = "local",
-			win = window
-		}
-	);
-
-	---|fE
-end
-
---[[
-Removes the custom statuscolumn for `window`.
-]]
----@param window integer
-statuscolumn.remove = function (window)
-	---|fS
-
-	if vim.wo[window].statuscolumn ~= STC then
-		return;
-	end
-
-	vim.api.nvim_win_call(window, function ()
-		vim.cmd("set statuscolumn=" .. (vim.g.__statuscolumn or ""));
-
-		-- NOTE(@OXY2DEV): We need a better way to restore `numberwidth` & `relativenumber`.
-		-- vim.wo[window].numberwidth = vim.g.__numberwidth;
-		-- vim.wo[window].relativenumber = vim.g.__relativenumber;
-
-		pcall(vim.api.nvim__redraw, {
-			win = window,
-			flush = true,
-
-			statuscolumn = true,
-		});
+			vim.api.nvim_set_option_value("number", original.number, { scope = "local", win = win });
+			vim.api.nvim_set_option_value("relativenumber", original.relativenumber, { scope = "local", win = win });
+		end)
 	end);
-
-	---|fE
 end
 
-------------------------------------------------------------------------------
+function statuscolumn:render ()
+	local components = require("bars.components.statuscolumn");
+	local win = vim.g.statusline_winid;
 
-statuscolumn.Start = function ()
-	---|fS
-
-	statuscolumn.state.enable = true;
-	statuscolumn.start();
-
-	statuscolumn.Enable();
-
-	---|fE
-end
-
-statuscolumn.Stop = function ()
-	---|fS
-
-	statuscolumn.state.enable = true;
-
-	for win, _ in pairs(statuscolumn.state.attached_windows) do
-		statuscolumn.detach(win);
-	end
-
-	---|fE
-end
-
---[[ Toggles statuscolumn for **all** windows. ]]
-statuscolumn.Toggle = function ()
-	---|fS
-
-	for win, _ in pairs(statuscolumn.state.attached_windows) do
-		statuscolumn.toggle(win);
-	end
-
-	---|fE
-end
-
---[[ Enables statuscolumn for **all** windows. ]]
-statuscolumn.Enable = function ()
-	---|fS
-
-	for win, state in pairs(statuscolumn.state.attached_windows) do
-		if state == false then
-			statuscolumn.enable(win);
-		end
-	end
-
-	---|fE
-end
-
---[[ Disables statuscolumn for **all** windows. ]]
-statuscolumn.Disable = function ()
-	---|fS
-
-	for win, state in pairs(statuscolumn.state.attached_windows) do
-		if state == true then
-			statuscolumn.disable(win);
-		end
-	end
-
-	---|fE
-end
-
---[[ Toggles statuscolumn for `window`. ]]
----@param window integer
-statuscolumn.toggle = function (window)
-	---|fS
-
-	if statuscolumn.state.attached_windows[window] == true then
-		statuscolumn.disable(window);
-	else
-		statuscolumn.enable(window);
-	end
-
-	---|fE
-end
-
---[[ Enables statuscolumn for `window`. ]]
----@param window integer
-statuscolumn.enable = function (window)
-	generic.set_win_state(statuscolumn.state, window, true);
-	statuscolumn.set(window);
-end
-
---[[ Disables statuscolumn for `window`. ]]
----@param window integer
-statuscolumn.disable = function (window)
-	generic.set_win_state(statuscolumn.state, window, false);
-	statuscolumn.remove(window);
-end
-
-------------------------------------------------------------------------------
-
---- Sets up the statuscolumn module.
----@param config statuscolumn.config | boolean | nil
-statuscolumn.setup = function (config)
-	---|fS
-
-	if type(config) == "table" then
-		statuscolumn.config = vim.tbl_extend("force", statuscolumn.config, config);
-	elseif type(config) == "boolean" then
-		statuscolumn.state.enable = config;
-	end
-
-	for window, _ in pairs(statuscolumn.state.attached_windows) do
-		 statuscolumn.update_style(window);
-	end
-
-	---|fE
+	return statuscolumn:get_styled_output(win, components);
 end
 
 return statuscolumn;
