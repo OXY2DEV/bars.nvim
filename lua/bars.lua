@@ -1,5 +1,14 @@
+--[[
+# 🍫 bars.nvim
+
+A *fancy* `bars & lines` plugin for `Neovim`.
+
+[Github](https://github.com/OXY2DEV/bars.nvim)
+[Usage](https://github.com/OXY2DEV/bars.nvim/wiki)
+]]
 local bars = {};
 
+--[[ Executes an `action`. ]]
 ---@param action string
 ---@param on string[]
 ---@param ... any

@@ -1,3 +1,48 @@
+--[[
+# 🧬 Generics
+
+Base class for various bars & lines. All bars/lines extends from it.
+
+## 📦 Variables
+
+| Name     | Kind  | Description         |
+|----------|-------|---------------------|
+| `state`  | table | Bars state.         |
+| `config` | table | Bars configuration. |
+
+## 🚧 Functions
+
+1. `set_default_state`, Sets the config & state for a bar. **MUST BE USED WHEN CREATING A NEW BAR.**
+2. `current`, Gets current bar value. **MUST BE SET AFTER CREATION.**
+3. `should_attach`, Should a bar attach to a `window`?
+4. `should_detach`, Should a bar detach from a `window`?
+5. `set`, Sets bar/line for a `window`. **MUST BE SET AFTER CREATION.**
+6. `set`, Removes bar/line for a `window`. **MUST BE SET AFTER CREATION.**
+7. `attach`, Attaches to a `window`.
+8. `detach`, Detaches from a `window`.
+9. `enable`, Enables bar/line for a `window`.
+10. `disable`, Disables bar/line for a `window`.
+11. `toggle`, Toggles bar/line for a `window`.
+12. `update`, Update bar/line style for a `window`.
+13. `Toggle`, Toggle bar/line `globally`.
+14. `Enable`, Enable bar/line `globally`.
+15. `Disable`, Disable bar/line `globally`.
+16. `handle_new_window`, Handle events that causes a window to be attached/detached. Mainly `WinNew`..
+17. `update_style`, Updates the bar/line style for a `window`.
+18. `styled_component`, Gets output of a styled component of a bar/line.
+19. `get_styled_output`, Gets the styled bar/line for a window from a source.
+
+## 📚 Usage
+
+```lua
+local bar = require("bars.generics").new();
+bar:set_default_state();
+
+bar:attach(0);
+bar:enable(0);
+```
+
+]]
 local generic = {};
 
 ---@class bars.statusline.state
