@@ -4,6 +4,7 @@ statuscolumn:set_default_state();
 
 statuscolumn.default = "%!v:lua.require('bars.statuscolumn').render()";
 statuscolumn.var_name = "bars_statuscolumn_style";
+-- statuscolumn.use_blank_output = true;
 
 ---@class bars.statusline.state
 statuscolumn.state = {
@@ -39,7 +40,7 @@ statuscolumn.config = {
 	force_attach = {},
 
 	ignore_filetypes = { "blink-cmp-menu" },
-	ignore_buftypes = { "help", "quickfix" },
+	ignore_buftypes = { "help", "quickfix", "terminal" },
 
 	condition = function (buffer)
 		local ft, bt = vim.bo[buffer].ft, vim.bo[buffer].bt;
@@ -206,11 +207,19 @@ statuscolumn.config = {
 		---|fE
 	},
 
-	terminal = {
+	disabled = {
 		---|fS
 
 		condition = function (buffer)
-			return vim.bo[buffer].bt == "terminal";
+			local ft, bt = vim.bo[buffer].filetype, vim.bo[buffer].buftype;
+
+			if vim.list_contains(statuscolumn.config.ignore_filetypes, ft) then
+				return true;
+			elseif vim.list_contains(statuscolumn.config.ignore_buftypes, bt) then
+				return true;
+			end
+
+			return false;
 		end,
 
 		components = {}

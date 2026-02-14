@@ -5,10 +5,11 @@ Base class for various bars & lines. All bars/lines extends from it.
 
 ## 📦 Variables
 
-| Name     | Kind  | Description         |
-|----------|-------|---------------------|
-| `state`  | table | Bars state.         |
-| `config` | table | Bars configuration. |
+| Name               | Kind    | Description                                   |
+|--------------------|---------|-----------------------------------------------|
+| `state`            | table   | Bars state.                                   |
+| `config`           | table   | Bars configuration.                           |
+| `use_blank_output` | boolean | Uses blank output for windows without styles. |
 
 ## 🚧 Functions
 
@@ -57,6 +58,7 @@ function generic:set_default_state ()
 	};
 
 	self.config = {};
+	self.use_blank_output = false;
 end
 
 ---@param src any
@@ -356,7 +358,11 @@ function generic:get_styled_output (win, components)
 	end
 
 	if not get_var("_" .. self.var_name) then
-		self:update_style(win);
+		if self.use_blank_output then
+			return "";
+		else
+			self:update_style(win);
+		end
 	end
 
 	local style = get_var(self.var_name) or
