@@ -91,25 +91,6 @@ utils.set_hl = function (hl)
 	end
 end
 
-utils.constant = function (val)
-	return setmetatable({}, {
-		__index = function ()
-			return val;
-		end,
-		__newindex = function () end,
-
-		__metatable = false
-	});
-end
-
-utils.get_const = function (val)
-	if type(val) ~= "table" then
-		return val;
-	else
-		return val.value;
-	end
-end
-
 --- Creates a statusline/statuscolumn/winbar/table segment.
 ---@param text string | nil
 ---@param hl string | nil
