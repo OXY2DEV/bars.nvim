@@ -1,6 +1,5 @@
 ---@diagnostic disable: duplicate-set-field
 local winbar = require("bars.generic").new();
-winbar:set_default_state();
 
 winbar.default = "%!v:lua.require('bars.winbar').render()";
 winbar.var_name = "bars_winbar_style";

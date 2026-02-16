@@ -1,6 +1,5 @@
 ---@diagnostic disable: duplicate-set-field
 local statuscolumn = require("bars.generic").new();
-statuscolumn:set_default_state();
 
 statuscolumn.default = "%!v:lua.require('bars.statuscolumn').render()";
 statuscolumn.var_name = "bars_statuscolumn_style";

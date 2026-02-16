@@ -392,7 +392,10 @@ generic.__index = generic;
 local builder = {};
 
 builder.new = function ()
-	return setmetatable({}, generic);
+	local out = setmetatable({}, generic);
+	out:set_default_state();
+
+	return out;
 end
 
 return builder;

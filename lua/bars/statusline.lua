@@ -1,6 +1,5 @@
 ---@diagnostic disable: duplicate-set-field
 local statusline = require("bars.generic").new();
-statusline:set_default_state();
 
 statusline.default = "%!v:lua.require('bars.statusline').render()";
 statusline.var_name = "bars_statusline_style";
