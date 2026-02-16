@@ -1,55 +1,6 @@
---[[
-# 🧬 Generics
-
-Base class for various bars & lines. All bars/lines extends from it.
-
-## 📦 Variables
-
-| Name               | Kind    | Description                                   |
-|--------------------|---------|-----------------------------------------------|
-| `state`            | table   | Bars state.                                   |
-| `config`           | table   | Bars configuration.                           |
-| `use_blank_output` | boolean | Uses blank output for windows without styles. |
-
-## 🚧 Functions
-
-1. `set_default_state`, Sets the config & state for a bar. **MUST BE USED WHEN CREATING A NEW BAR.**
-2. `current`, Gets current bar value. **MUST BE SET AFTER CREATION.**
-3. `should_attach`, Should a bar attach to a `window`?
-4. `should_detach`, Should a bar detach from a `window`?
-5. `set`, Sets bar/line for a `window`. **MUST BE SET AFTER CREATION.**
-6. `set`, Removes bar/line for a `window`. **MUST BE SET AFTER CREATION.**
-7. `attach`, Attaches to a `window`.
-8. `detach`, Detaches from a `window`.
-9. `enable`, Enables bar/line for a `window`.
-10. `disable`, Disables bar/line for a `window`.
-11. `toggle`, Toggles bar/line for a `window`.
-12. `update`, Update bar/line style for a `window`.
-13. `Toggle`, Toggle bar/line `globally`.
-14. `Enable`, Enable bar/line `globally`.
-15. `Disable`, Disable bar/line `globally`.
-16. `handle_new_window`, Handle events that causes a window to be attached/detached. Mainly `WinNew`..
-17. `update_style`, Updates the bar/line style for a `window`.
-18. `styled_component`, Gets output of a styled component of a bar/line.
-19. `get_styled_output`, Gets the styled bar/line for a window from a source.
-
-## 📚 Usage
-
-```lua
-local bar = require("bars.generics").new();
-bar:set_default_state();
-
-bar:attach(0);
-bar:enable(0);
-```
-
-]]
+---@type bars.generic
+---@diagnostic disable-next-line: missing-fields
 local generic = {};
-
----@class bars.statusline.state
----
----@field enable boolean
----@field window_state table<integer, boolean|nil>
 
 function generic:set_default_state ()
 	self.state = {
@@ -77,13 +28,8 @@ generic.var_name = "bars_style";
 
 --------------------------------------------------------------------------------
 
---- Current value for a `bar`.
----@param _ integer
 function generic:current (_) return ""; end
 
---- Should we attach to `win`?
----@param win integer
----@return boolean
 function generic:should_attach (win)
 	if not self.state.enable then
 		return false
@@ -120,9 +66,6 @@ function generic:should_attach (win)
 	return true;
 end
 
---- Should we detach from `win`?
----@param win integer
----@return boolean
 function generic:should_detach (win)
 	if not self.state.enable then
 		return false
@@ -161,16 +104,9 @@ end
 
 --------------------------------------------------------------------------------
 
---- Sets options for a specific bar.
----@param _ integer
 function generic:set (_) end
-
---- Removes/resets options for a specific bar.
----@param _ integer
 function generic:remove (_) end
 
---[[ Attaches a bar to `win`. ]]
----@param win integer
 function generic:attach (win)
 	if self.state.window_state[win] == true then return; end
 	self.state.window_state[win] = true;
@@ -179,8 +115,6 @@ function generic:attach (win)
 	self:set(win);
 end
 
---[[ Detaches a bar from `win`. ]]
----@param win integer
 function generic:detach (win)
 	if self.state.window_state[win] == false then return; end
 	self.state.window_state[win] = nil;
@@ -188,8 +122,6 @@ function generic:detach (win)
 	self:remove(win);
 end
 
---[[ Enables a bar of `win`. ]]
----@param win integer
 function generic:enable (win)
 	if not self.state.enable then
 		return;
@@ -203,8 +135,6 @@ function generic:enable (win)
 	self:set(win);
 end
 
---[[ Disables a bar of `win`. ]]
----@param win integer
 function generic:disable (win)
 	if not self.state.enable then
 		return;
@@ -216,8 +146,6 @@ function generic:disable (win)
 	self:remove(win);
 end
 
---[[ Toggles a bar of `win`. ]]
----@param win integer
 function generic:toggle (win)
 	if self.state.window_state[win] then
 		self:disable(win);
@@ -226,19 +154,22 @@ function generic:toggle (win)
 	end
 end
 
---[[ Update a bar style of `win`. ]]
----@param win integer
 function generic:update (win)
 	self:update_style(win);
 end
 
 function generic:Toggle ()
-	for win, _ in pairs(self.state.window_state) do
-		self:toggle(win);
-	end
+	self:Enable();
+	self:Disable();
 end
 
 function generic:Enable ()
+	if self.state.enable then
+		return;
+	end
+
+	self.state.enable = true;
+
 	for win, state in pairs(self.state.window_state) do
 		if state == false then
 			self:enable(win);
@@ -247,15 +178,19 @@ function generic:Enable ()
 end
 
 function generic:Disable ()
+	if not self.state.enable then
+		return;
+	end
+
 	for win, state in pairs(self.state.window_state) do
 		if state then
 			self:disable(win);
 		end
 	end
+
+	self.state.enable = false;
 end
 
---[[ Handles events that cause a bar to be `attached/detached`. ]]
----@param win integer
 function generic:handle_new_window (win)
 	if not self.state.enable then
 		return;
@@ -268,7 +203,6 @@ function generic:handle_new_window (win)
 	end
 end
 
----@param win integer
 function generic:update_style(win)
 	local buf = vim.api.nvim_win_get_buf(win);
 
@@ -299,12 +233,6 @@ function generic:update_style(win)
 	vim.api.nvim_win_set_var(win, "_" .. self.var_name, style);
 end
 
----@param win integer
----@param buf integer
----@param components table<string, function>
----@param entry table
----@param last string
----@return string
 function generic:styled_component (win, buf, components, entry, last)
 	if entry.condition then
 		if entry.condition == false then
@@ -346,9 +274,6 @@ function generic:styled_component (win, buf, components, entry, last)
 	end
 end
 
----@param win integer
----@param components table<string, function>
----@return string
 function generic:get_styled_output (win, components)
 	local buf = vim.api.nvim_win_get_buf(win);
 
@@ -391,7 +316,10 @@ generic.__index = generic;
 
 local builder = {};
 
+--[[ Creates a new `bar`. ]]
+---@return bars.generic
 builder.new = function ()
+	---@type bars.generic
 	local out = setmetatable({}, generic);
 	out:set_default_state();
 
