@@ -9,8 +9,8 @@ A *fancy* `bars & lines` plugin for `Neovim`.
 local bars = {};
 
 --[[ Executes an `action`. ]]
----@param action string
----@param on string[]
+---@param action bars.command
+---@param on bars.target[]
 ---@param ... any
 bars.exec = function (action, on, ...)
 	local modules = { "statusline", "statuscolumn", "winbar", "tabline" };
@@ -27,7 +27,9 @@ bars.exec = function (action, on, ...)
 	end
 end
 
+---@param config? bars.config
 bars.setup = function (config)
+	---@diagnostic disable-next-line: param-type-mismatch
 	for k, v in pairs(config) do
 		local could_load, submodule = pcall(require, "bars." .. k);
 
