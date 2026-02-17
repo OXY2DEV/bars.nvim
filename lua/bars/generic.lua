@@ -8,6 +8,7 @@ function generic:set_default_state ()
 		window_state = {},
 	};
 
+	---@diagnostic disable-next-line: missing-fields
 	self.config = {};
 	self.use_blank_output = false;
 end

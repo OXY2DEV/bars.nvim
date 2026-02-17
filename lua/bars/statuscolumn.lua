@@ -34,7 +34,6 @@ local gradient_map = {
 };
 
 
----@type statuscolumn.config
 statuscolumn.config = {
 	force_attach = {},
 

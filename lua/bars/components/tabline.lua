@@ -24,7 +24,7 @@ local function wrapped_index (max, val)
 end
 
 --- Empty section.
----@param config tabline.components.empty
+---@param config bars.tabline.empty
 ---@return string
 tlC.empty = function (_, _, config)
 	---|fS
@@ -38,7 +38,7 @@ tlC.empty = function (_, _, config)
 end
 
 --- Tab list.
----@param config tabline.components.tabs
+---@param config bars.tabline.tabs
 ---@return string
 tlC.tabs = function (_, _, config)
 	---|fS
@@ -224,7 +224,7 @@ tlC.tabs = function (_, _, config)
 end
 
 --- Buffer list.
----@param config tabline.components.bufs
+---@param config bars.tabline.bufs
 ---@return string
 tlC.bufs = function (_, _, config)
 	---|fS
@@ -427,7 +427,7 @@ tlC.bufs = function (_, _, config)
 end
 
 --- Custom section
----@param config tabline.components.custom
+---@param config bars.tabline.custom
 ---@return string
 tlC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];

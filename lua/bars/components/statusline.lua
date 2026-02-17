@@ -57,7 +57,7 @@ local utils = require("bars.utils");
 --- Shows current git branch.
 ---@param buffer integer
 ---@param window integer
----@param main_config statusline.components.branch
+---@param main_config bars.statusline.branch
 ---@return string
 slC.branch = function (buffer, window, main_config)
 	---|fS
@@ -201,7 +201,7 @@ end
 --- Shows the buffer name.
 ---@param buffer integer
 ---@param _ integer
----@param main_config statusline.components.bufname
+---@param main_config bars.statusline.bufname
 slC.bufname = function (buffer, _, main_config)
 	---|fS
 
@@ -301,7 +301,7 @@ end
 --- Diagnostics section
 ---@param buffer integer
 ---@param window integer
----@param config statusline.components.diagnostics
+---@param config bars.statusline.diagnostics
 ---@return string
 slC.diagnostics = function (buffer, window, config)
 	---|fS
@@ -414,14 +414,14 @@ slC.diagnostics = function (buffer, window, config)
 end
 
 --- Empty section.
----@param config statusline.components.empty
+---@param config bars.statusline.empty
 ---@return string
 slC.empty = function (_, _, config)
 	return utils.set_hl(config.hl) .. "%=";
 end
 
 --- Shows current mode.
----@param main_config statusline.components.mode
+---@param main_config bars.statusline.mode
 ---@return string
 slC.mode = function (_, _, main_config)
 	---|fS
@@ -462,7 +462,7 @@ slC.mode = function (_, _, main_config)
 end
 
 --- Custom section.
----@param config statusline.components.section
+---@param config bars.statusline.section
 ---@return string
 slC.section = function (_, _, config, _)
 	---|fS
@@ -489,7 +489,7 @@ end
 --- Ruler.
 ---@param _ integer
 ---@param window integer
----@param main_config statusline.components.ruler
+---@param main_config bars.statusline.ruler
 ---@return string
 slC.ruler = function (_, window, main_config)
 	---|fS
@@ -533,7 +533,7 @@ slC.ruler = function (_, window, main_config)
 end
 
 --- Macro recording & executing.
----@param config statusline.components.macro
+---@param config bars.statusline.macro
 ---@return string
 slC.macro = function (_, _, config)
 	---|fS
@@ -555,7 +555,7 @@ end
 --- Ruler.
 ---@param buffer integer
 ---@param window integer
----@param config statusline.components.progress
+---@param config bars.statusline.progress
 ---@return string?
 slC.progress = function (buffer, window, config)
 	---|fS
@@ -662,7 +662,7 @@ slC.progress = function (buffer, window, config)
 end
 
 --- Custom section.
----@param config statusline.components.custom
+---@param config bars.statusline.custom
 ---@return string
 slC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];

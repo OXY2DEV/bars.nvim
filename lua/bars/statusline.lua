@@ -5,13 +5,13 @@ statusline.default = "%!v:lua.require('bars.statusline').render()";
 statusline.var_name = "bars_statusline_style";
 
 --[[ Reusable configuration templates. ]]
----@type table<string, statusline.component>
+---@type table<string, bars.statusline.component>
 local TEMPLATES;
 
 TEMPLATES = {
 	---|fS
 
-	---@type statusline.components.mode
+	---@type bars.statusline.mode
 	mode = {
 		---|fS "Mode configuration"
 
@@ -125,7 +125,7 @@ TEMPLATES = {
 
 		---|fE
 	},
-	---@type statusline.components.bufname
+	---@type bars.statusline.bufname
 	bufname = {
 		---|fS
 
@@ -163,7 +163,7 @@ TEMPLATES = {
 
 		---|fE
 	},
-	---@type statusline.components.diagnostics
+	---@type bars.statusline.diagnostics
 	diagnostics = {
 		---|fS
 
@@ -191,7 +191,7 @@ TEMPLATES = {
 
 		---|fE
 	},
-	---@type statusline.components.macro
+	---@type bars.statusline.macro
 	macro = {
 		---|fS
 
@@ -231,7 +231,7 @@ TEMPLATES = {
 
 		---|fE
 	},
-	---@type statusline.components.branch
+	---@type bars.statusline.branch
 	git_branch = {
 		---|fS
 
@@ -250,7 +250,7 @@ TEMPLATES = {
 
 		---|fE
 	},
-	---@type statusline.components.custom
+	---@type bars.statusline.custom
 	lsp = {
 		---|fS
 
@@ -303,7 +303,7 @@ TEMPLATES = {
 		---|fE
 	},
 
-	---@type statusline.components.ruler
+	---@type bars.statusline.ruler
 	ruler = {
 		---|fS
 

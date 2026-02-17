@@ -4,7 +4,7 @@ local utils = require("bars.utils");
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.components.node
+---@param main_config bars.winbar.node
 ---@return string
 wbC.node = function (buffer, window, main_config)
 	---|fS
@@ -170,7 +170,7 @@ end
 --- Node under cursor
 ---@param buffer integer
 ---@param window integer
----@param main_config winbar.components.path
+---@param main_config bars.winbar.path
 ---@return string
 wbC.path = function (buffer, window, main_config)
 	---|fS
@@ -247,7 +247,7 @@ wbC.path = function (buffer, window, main_config)
 end
 
 --- Custom section.
----@param config winbar.components.custom
+---@param config bars.winbar.custom
 ---@return string
 wbC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];

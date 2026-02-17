@@ -1,0 +1,182 @@
+---@meta
+
+
+---@alias bars.statuscolumn.component
+---| bars.statuscolumn.lnum
+---| bars.statuscolumn.folds
+---| bars.statuscolumn.signs
+---| bars.statuscolumn.empty
+---| bars.statuscolumn.border
+---| bars.statuscolumn.custom
+
+-----------------------------------------------------------------------------
+
+--- Line number for statuscolumn.
+---@class bars.statuscolumn.lnum
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "lnum"
+---
+---@field click? boolean | fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+---@field mode
+---| 1 Line number.
+---| 2 Relative line number.
+---| 3 Hybrid line number.
+---
+--- Text used for the wrapped lines.
+--- Can be a list to create a *fake* gradient effect.
+---@field wrap_markers string | string[]
+---
+--- Text used for the virtual lines.
+--- Can be a list to create a *fake* gradient effect.
+---@field virt_markers string | string[]
+---
+--- Highlight group for `wrap_markers`.
+--- Can be a list to create a color gradient.
+---@field wrap_hl? string | string[]
+---
+--- Highlight group for `virt_markers`.
+--- Can be a list to create a color gradient.
+---@field virt_hl? string | string[]
+---
+--- Highlight group for the line numbers.
+--- Can be a list to create a color gradient.
+---@field hl? string | string[] | fun(buffer: integer, window: integer): ( string | string[] )
+
+
+--- Empty component.
+---@class bars.statuscolumn.empty
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "empty"
+---
+--- How many columns should this span?
+---@field width integer
+---
+--- Highlight group for this section.
+---@field hl? string
+
+
+--- Border for the statuscolumn.
+---@class bars.statuscolumn.border
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "border"
+---
+--- Text to use for the border.
+--- Can be a list to create a gradient.
+---@field text string | string[]
+---
+--- Highlight group for the border.
+--- Can be a list to create a gradient.
+---@field hl? string | string[]
+
+
+--- Fold column for the statuscolumn.
+---@class bars.statuscolumn.folds
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "folds"
+---
+--- Text to show for closed fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
+---@field close_text string | string[]
+---
+--- Highlight group for the `close_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
+---@field close_hl? string | string[]
+---
+--- Text to show for opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
+---@field open_text string | string[]
+---
+--- Highlight group for the `open_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
+---@field open_hl? string | string[]
+---
+--- Text to show the scope of opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
+---@field scope_text string | string[]
+---
+--- Highlight group for the `scope_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
+---@field scope_hl? string | string[]
+---
+--- Text to show at the end of opened fold.
+--- Can be a list to use a different
+--- text for different levels of folds.
+---@field scope_end_text string | string[]
+---
+--- Highlight group for the `scope_end_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
+---@field scope_end_hl? string | string[]
+---
+--- Text to show where fold level changes.
+--- Can be a list to use a different
+--- text for different levels of folds.
+---@field scope_merge_text string | string[]
+---
+--- Highlight group for the `scope_merge_text`.
+--- Can be a list to assign different
+--- colors to different fold level.
+---@field scope_merge_hl? string | string[]
+---
+--- Text for normal lines.
+---@field fill_text string
+---
+--- Highlight group for `fill_text`.
+---@field fill_hl? string
+
+
+--- Custom signcolumn.
+---@class bars.statuscolumn.signs
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "signs"
+---
+--- Filter for signs.
+---@field filter? fun(buffer: integer, ns_map: table<integer, string>, ns: integer, row: integer, col: integer, extmark: table): boolean
+---
+--- Highlight group for the signs.
+--- NOTE, This will overwrite the
+--- sign's original highlight group.
+---@field hl? string
+
+
+--- Custom component for the statuscolumn.
+---@class bars.statuscolumn.custom
+---
+--- Condition for this component.
+---@field condition? fun(buffer: integer, window: integer, statuscolumn: string): boolean
+---
+--- What kind of component is this?
+---@field kind "custom"
+---
+--- Text to render.
+---@field value string | fun(buffer: integer, window: integer, statuscolumn: string): string
+
+
+

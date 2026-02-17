@@ -22,7 +22,7 @@ ffi.cdef(table.concat(C, "\n"));
 --- Line number.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.components.lnum
+---@param config bars.statuscolumn.lnum
 ---@return string
 scC.lnum = function (buffer, window, config)
 	---|fS
@@ -118,7 +118,7 @@ scC.lnum = function (buffer, window, config)
 end
 
 --- Empty section
----@param config statuscolumn.components.empty
+---@param config bars.statuscolumn.empty
 ---@return string
 scC.empty = function (_, _, config)
 	return table.concat({
@@ -128,7 +128,7 @@ scC.empty = function (_, _, config)
 end
 
 --- Border.
----@param config statuscolumn.components.border
+---@param config bars.statuscolumn.border
 ---@return string
 scC.border = function (_, _, config)
 	---|fS
@@ -156,7 +156,7 @@ end
 --- Fold column.
 ---@param buffer integer
 ---@param window integer
----@param config statuscolumn.components.folds
+---@param config bars.statuscolumn.folds
 ---@return string
 scC.folds = function (buffer, window, config)
 	---|fS
@@ -303,7 +303,7 @@ end
 --- Sign column.
 ---@param buffer integer
 ---@param _ integer
----@param config statuscolumn.components.signs
+---@param config bars.statuscolumn.signs
 ---@return string
 scC.signs = function (buffer, _, config)
 	---|fS
@@ -357,7 +357,7 @@ scC.signs = function (buffer, _, config)
 end
 
 --- Custom column.
----@param config statusline.components.custom
+---@param config bars.statusline.custom
 ---@return string
 scC.custom = function (_, _, config)
 	return config.value --[[ @as string ]];
