@@ -18,7 +18,7 @@ bar:enable(0);
 ---@class bars.generic
 ---
 ---@field config bars.generic.config Bars configuration.
----@field default string Default value for a `bar@` used by the plugin.
+---@field custom string Custom value for a `bar` used by the plugin.
 ---@field state bars.generic.state Bars state.
 ---@field use_blank_output? boolean Uses blank output for windows without styles.
 ---@field var_name string Variable name for storing current style name.
@@ -34,6 +34,7 @@ bar:enable(0);
 ---@field detach fun(self: bars.generic, win: integer): nil Detaches from a `window`.
 ---@field handle_new_window fun(self: bars.generic, win: integer): nil Handle events that causes a window to be attached/detached. Mainly `WinNew`..
 ---@field update_style fun(self: bars.generic, win: integer): nil Updates the bar/line style for a `window`.
+---@field setup fun(config: boolean | bars.generic.config): nil Sets up a `bar`.
 ---
 ---@field start fun(self: bars.generic): nil Starts a bar.
 ---@field enable fun(self: bars.generic, win: integer): nil Enables bar/line for a `window`.

@@ -1,7 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 local winbar = require("bars.generic").new();
 
-winbar.default = "%!v:lua.require('bars.winbar').render()";
+winbar.custom = "%!v:lua.require('bars.winbar').render()";
 winbar.var_name = "bars_winbar_style";
 
 ---@class winbar.config
@@ -600,7 +600,7 @@ function winbar:start ()
 		return;
 	end
 
-	vim.api.nvim_set_option_value("winbar", winbar.default, { scope = "global" });
+	vim.api.nvim_set_option_value("winbar", winbar.custom, { scope = "global" });
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		winbar:handle_new_window(win);
@@ -611,7 +611,7 @@ end
 
 ---@param win integer
 function winbar:set (win)
-	vim.api.nvim_set_option_value("winbar", winbar.default, {
+	vim.api.nvim_set_option_value("winbar", winbar.custom, {
 		scope = "local",
 		win = win
 	});
@@ -631,14 +631,6 @@ function winbar:render ()
 	local win = vim.g.statusline_winid;
 
 	return winbar:get_styled_output(win, components);
-end
-
-function winbar.setup (config)
-	if type(config) == "boolean" then
-		winbar.state.enable = config;
-	elseif type(config) == "table" then
-		winbar.config = vim.tbl_extend("force", winbar.config, config);
-	end
 end
 
 return winbar;

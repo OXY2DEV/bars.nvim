@@ -1,7 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 local statusline = require("bars.generic").new();
 
-statusline.default = "%!v:lua.require('bars.statusline').render()";
+statusline.custom = "%!v:lua.require('bars.statusline').render()";
 statusline.var_name = "bars_statusline_style";
 
 --[[ Reusable configuration templates. ]]
@@ -515,11 +515,11 @@ end
 function statusline:current (win) return vim.wo[win].statusline; end
 
 function statusline:start ()
-	if not statusline.state.enable then
+	if not self.state.enable then
 		return;
 	end
 
-	vim.api.nvim_set_option_value("statusline", statusline.default, { scope = "global" });
+	vim.api.nvim_set_option_value("statusline", statusline.custom, { scope = "global" });
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		statusline:handle_new_window(win);
@@ -530,7 +530,7 @@ end
 
 ---@param win integer
 function statusline:set (win)
-	vim.api.nvim_set_option_value("statusline", statusline.default, {
+	vim.api.nvim_set_option_value("statusline", statusline.custom, {
 		scope = "local",
 		win = win
 	});

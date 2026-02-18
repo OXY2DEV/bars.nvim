@@ -1,15 +1,9 @@
 ---@diagnostic disable: duplicate-set-field
 local statuscolumn = require("bars.generic").new();
 
-statuscolumn.default = "%!v:lua.require('bars.statuscolumn').render()";
+statuscolumn.custom = "%!v:lua.require('bars.statuscolumn').render()";
 statuscolumn.var_name = "bars_statuscolumn_style";
 -- statuscolumn.use_blank_output = true;
-
----@class bars.statusline.state
-statuscolumn.state = {
-	enable = true,
-	window_state = {},
-};
 
 local gradient_map = {
 	default = "BarsNormal%d",
@@ -241,11 +235,11 @@ end
 function statuscolumn:current (win) return vim.wo[win].statuscolumn; end
 
 function statuscolumn:start ()
-	if not statuscolumn.state.enable then
+	if not self.state.enable then
 		return;
 	end
 
-	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.default, { scope = "global" });
+	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.custom, { scope = "global" });
 
 	vim.api.nvim_set_option_value("number", true, { scope = "global" });
 	vim.api.nvim_set_option_value("relativenumber", true, { scope = "global" });
@@ -259,7 +253,7 @@ end
 
 ---@param win integer
 function statuscolumn:set (win)
-	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.default, {
+	vim.api.nvim_set_option_value("statuscolumn", statuscolumn.custom, {
 		scope = "local",
 		win = win
 	});

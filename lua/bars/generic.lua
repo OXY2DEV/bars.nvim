@@ -74,7 +74,7 @@ function generic:should_detach (win)
 
 	local current = self:current(win) or "";
 
-	if current ~= self.default then
+	if current ~= self.custom then
 		return false;
 	end
 
@@ -323,6 +323,14 @@ builder.new = function ()
 	---@type bars.generic
 	local out = setmetatable({}, generic);
 	out:set_default_state();
+
+	out.setup = function (config)
+		if type(config) == "boolean" then
+			out.state.enable = config;
+		elseif type(config) == "table" then
+			out.config = vim.tbl_deep_extend("force", out.config, config);
+		end
+	end
 
 	return out;
 end

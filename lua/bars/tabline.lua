@@ -1,7 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 local tabline = require("bars.generic").new();
 
-tabline.default = "%!v:lua.require('bars.tabline').render()";
+tabline.custom = "%!v:lua.require('bars.tabline').render()";
 tabline.var_name = "bars_tabline_style";
 
 ---@class tabline.config
@@ -126,7 +126,7 @@ function tabline:start ()
 		return;
 	end
 
-	vim.api.nvim_set_option_value("tabline", tabline.default, { scope = "global" });
+	vim.api.nvim_set_option_value("tabline", tabline.custom, { scope = "global" });
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		tabline:handle_new_window(win);
@@ -137,7 +137,7 @@ end
 
 ---@param _ integer
 function tabline:set (_)
-	vim.api.nvim_set_option_value("tabline", tabline.default, {
+	vim.api.nvim_set_option_value("tabline", tabline.custom, {
 		scope = "global",
 	});
 end
